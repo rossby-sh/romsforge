@@ -1,0 +1,9 @@
+{
+  "lowercase_intrinsics": true,
+  "use_signature_help": true,
+  "hover_signature": true,
+  "source_form": "free",
+  "debug_log": true
+}
+
+
