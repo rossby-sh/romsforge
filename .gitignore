@@ -2,7 +2,7 @@
 *.nc
 
 # roms_to_zstd 내부 파일 전체 무시 (하위 디렉토리 포함)
-roms_to_zstd/**
+py/roms_to_zstd/**
 !roms_to_zstd/.gitkeep  # 디렉토리 구조 유지
 
 # dev_individual/libs 내부 파일 무시
