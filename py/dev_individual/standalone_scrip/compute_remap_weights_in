@@ -1,0 +1,18 @@
+&remap_inputs
+    num_maps = 1
+    grid1_file = 'remap_grid_GLBv0.08_Arctic4_t.nc'
+    grid2_file = 'remap_grid_fennel_15km_smooth_v2_rho.nc'
+    interp_file1 = 'weights_HYCOM_to_ROMS_bilinear_temp.nc'
+    interp_file2 = 'weights_ROMS_to_HYCOM_bilinear_temp.nc'
+    map1_name = 'HYCOM to ROMS Bilinear Mapping'
+    map2_name = 'ROMS to HYCOM Bilinear Mapping'
+    map_method = 'bilinear'
+    normalize_opt = 'fracarea'
+    output_opt = 'scrip'
+    restrict_type = 'latitude'
+    num_srch_bins = 90
+    luse_grid1_area = .false.
+    luse_grid2_area = .false.
+    grid1_periodic = .false.
+    grid2_periodic = .false.
+/

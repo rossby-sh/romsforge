@@ -1,0 +1,25 @@
+# NetCDF 파일은 전역에서 무시
+*.nc
+
+# roms_to_zstd 내부 파일 전체 무시 (하위 디렉토리 포함)
+roms_to_zstd/**
+!roms_to_zstd/.gitkeep  # 디렉토리 구조 유지
+
+# dev_individual/libs 내부 파일 무시
+!dev_individual/libs/**
+!dev_individual/libs/.gitkeep
+
+# src_experimental/test 내부 파일 무시
+!src_experimental/test/**
+!src_experimental/test/.gitkeep
+
+# 공통 캐시 및 빌드 무시
+__pycache__/
+*.py[cod]
+*.o
+*.mod
+*.out
+*.exe
+*.log
+*.tmp
+*.bak

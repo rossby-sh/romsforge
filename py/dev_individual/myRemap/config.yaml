@@ -1,0 +1,10 @@
+avg_dir: /home/shjo/ROMS/Applications/test_pys/outs_pys/test
+grid01: /home/shjo/ROMS/Applications/test_pys/inputs/roms_grd_fennel_15km_smooth_v2.nc
+grid02: /home/shjo/ROMS/myRemap/test/grd/roms_grd_fennel_5km_smooth_v2.nc
+weight_rho: /home/shjo/ROMS/myRemap/test/w/weights_rho.nc
+weight_u: /home/shjo/ROMS/myRemap/test/w/weights_u.nc
+weight_v: /home/shjo/ROMS/myRemap/test/w/weights_v.nc
+output_dir: /home/shjo/ROMS/myRemap/test/
+
+
+

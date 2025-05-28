@@ -1,15 +1,64 @@
-# ROMS Initial and Boundary Condition Generator
+# romsforge (Unified Python + Fortran ROMS Preprocessing System)
 
-This code is for generating **initial and boundary conditions** for the ROMS model.  
-It is currently under development and based on HYCOM data aligned with `Domain.nc`.
+> ⚠️ **Experimental Notice**  
+> This project is in an **experimental stage** and intended for research and development purposes only.  
+> Interfaces and functionalities are subject to change. 
 
-## Development Status
+- **Author**: Seonghyun Jo  
+- **Contact**: shjo9536@gmail.com / birostris36@gmail.com
 
-- `mk_bry.py`: Time-related processing is still under consideration.
-- Western boundary logic in `mk_bry.py` has not been validated yet.
-- Currently tailored for a **rotated grid**; support for **general grids** will be added soon.
+---
 
-## Contact
+## Structure
 
-For questions or collaboration:
-- **Email**: birostris36@gmail.com / shjo9536@gmail.com
+### `py/`
+- Python-based preprocessing tools for ROMS (forcing, ini, bry, obs)
+- Real-time development in `dev_individual/`, integrated into `src_stable/`
+
+### `ft/` *(study-only)*
+- Fortran routines for remapping, NetCDF I/O, diagnostics
+
+### `workflows/` *(planned)*
+- Shell-based orchestration of Python and Fortran processes
+
+### `logs/` *(planned)*
+- Development history and debugging records
+
+---
+
+## Build *(planned)*
+
+```bash
+cd ft/
+make
+
+romsforge/
+├── py/                        # Python modules
+│   ├── src_stable/            # Stable pipelines
+│   ├── src_experimental/      # In-progress integrated workflows
+│   ├── dev_individual/        # Prototypes, isolated experiments
+│   ├── roms_to_zstd/          # Postprocessing and analysis tools
+│   └── env_settings/          # Common config and path settings
+
+├── ft/                        # Fortran modules
+│   ├── src_stable/            # Stable remapping, I/O routines
+│   ├── src_experimental/      # Work-in-progress Fortran code
+│   ├── utils/                 # Shared submodules
+│   ├── test/                  # Unit tests
+│   └── Makefile               # Build system
+
+├── workflows/                 # Orchestration scripts
+│   ├── run_preprocess.sh
+│   ├── run_model.sh
+│   └── run_postprocess.sh
+
+├── logs/                      # Development logs
+│   ├── py/
+│   └── ft/
+
+├── docs/                      # Diagrams, explanations
+│   └── structure.md
+
+└── README.md
+
+```
