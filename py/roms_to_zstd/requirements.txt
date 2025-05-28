@@ -1,6 +1,0 @@
-cftime==1.6.4.post1
-joblib==1.4.2
-netCDF4==1.7.2
-numpy==2.2.4
-PyYAML==6.0.2
-scipy==1.15.2
