@@ -10,7 +10,7 @@ import datetime as dt
 import yaml
 from netCDF4 import Dataset, num2date, date2num
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
-import roms_utils as ru  # stretching 함수가 포함된 모듈
+import ROMS_utils01 as ru  # stretching 함수가 포함된 모듈
 
 def create_ini(ininame, mask, topo, MyVar, initime_num, time_ref, Title,
                     ncFormat='NETCDF3_CLASSIC', bio_model=None):
@@ -73,13 +73,19 @@ def create_ini(ininame, mask, topo, MyVar, initime_num, time_ref, Title,
         'Fennel': {
             'NO3':      {'long_name': 'nitrate concentration', 'units': 'millimole nitrogen meter-3'},
             'NH4':      {'long_name': 'ammonium concentration', 'units': 'millimole nitrogen meter-3'},
+            'PO4':      {'long_name': 'ammonium concentration', 'units': 'millimole po4 meter-3'},
+            'chlorophyll': {'long_name': 'chlorophyll concentration', 'units': 'millimole chlorphyll meter-3'},
             'phytoplankton': {'long_name': 'small phytoplankton biomass', 'units': 'millimole nitrogen meter-3'},
             'zooplankton':   {'long_name': 'zooplankton biomass', 'units': 'millimole nitrogen meter-3'},
-            'Ldetritus': {'long_name': 'large detritus nitrogen concentration', 'units': 'millimole nitrogen meter-3'},
-            'Sdetritus': {'long_name': 'small detritus nitrogen concentration', 'units': 'millimole nitrogen meter-3'},
             'oxygen':    {'long_name': 'oxygen concentration', 'units': 'millimole oxygen meter-3'},
             'TIC':       {'long_name': 'total inorganic carbon', 'units': 'millimole carbon meter-3'},
             'alkalinity':{'long_name': 'total alkalinity', 'units': 'milliequivalent meter-3'},
+            'SdetritusC':{'long_name': 'small carbon-detritus concentration', 'units': 'millimole carbon meter-3'},
+            'LdetritusC':{'long_name': 'large carbon-detritus concentration', 'units': 'millimole carbon meter-3'},
+            'RdetritusC':{'long_name': 'river carbon-detritus concentration', 'units': 'millimole carbon meter-3'},
+            'SdetritusN':{'long_name': 'small nitrogen-detritus concentration', 'units': 'millimole nitrogen meter-3'},
+            'LdetritusN':{'long_name': 'large nitrogen-detritus concentration', 'units': 'millimole nitrogen meter-3'},
+            'RdetritusN':{'long_name': 'river nitrogen-detritus concentration', 'units': 'millimole nitrogen meter-3'}
         }
     }
 

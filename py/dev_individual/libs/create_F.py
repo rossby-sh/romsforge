@@ -14,7 +14,106 @@ from netCDF4 import Dataset
 import xarray as xr
 import numpy as np
 
-def createF_ERA5(nc_save_name, LON, LAT, TIME, Ref_time, variables,ncFormat='NETCDF3_CLASSIC'):
+
+def createF_era5(nc_save_name, LON, LAT, TIME, Ref_time, variables, ncFormat='NETCDF3_CLASSIC'):
+    """
+    Create a ROMS-style forcing NetCDF file using ERA5-like variables.
+
+    Parameters:
+    - nc_save_name: output NetCDF file name
+    - LON, LAT: 1D longitude and latitude arrays
+    - TIME: 1D time array (shared by all variables)
+    - Ref_time: time reference string (e.g., 'days since 2000-01-01')
+    - variables: dict of {varname: 3D ndarray (time, lat, lon)}
+    """
+ 
+    lat_len = len(LAT)
+    lon_len = len(LON)
+
+    forcing_variables = {
+        'Uwind':       ('f4', ('wind_time', 'lat', 'lon'), {'long_name': 'Eastward Wind', 'units': 'm/s'}),
+        'Vwind':       ('f4', ('wind_time', 'lat', 'lon'), {'long_name': 'Northward Wind', 'units': 'm/s'}),
+        'Tair':        ('f4', ('tair_time', 'lat', 'lon'), {'long_name': 'Air Temperature', 'units': 'Celsius'}),
+        'Qair':        ('f4', ('qair_time', 'lat', 'lon'), {'long_name': 'Specific Humidity', 'units': 'kg/kg'}),
+        'Cloud':       ('f4', ('cloud_time', 'lat', 'lon'), {'long_name': 'Cloud Fraction', 'units': 'percent'}),
+        'sst':         ('f4', ('sst_time', 'lat', 'lon'), {'long_name': 'Sea Surface Temperature', 'units': 'Celsius'}),
+        'dqdsst':      ('f4', ('dqdsst_time', 'lat', 'lon'), {'long_name': 'dQ/dSST', 'units': 'Watts/m^2/C'}),
+        'srf':         ('f4', ('srf_time', 'lat', 'lon'), {'long_name': 'Net Shortwave Radiation Flux', 'units': 'Watts/m^2'}),
+        'lwrad':       ('f4', ('lwrad_time', 'lat', 'lon'), {'long_name': 'Net Longwave Radiation Flux', 'units': 'Watts/m^2'}),
+        'lwrad_down':  ('f4', ('lrad_down_time', 'lat', 'lon'), {'long_name': 'Downward Longwave Radiation', 'units': 'Watts/m^2'}),
+        'rain':        ('f4', ('rain_time', 'lat', 'lon'), {'long_name': 'Precipitation Rate', 'units': 'kg/m^2/s'}),
+        'Pair':        ('f4', ('pair_time', 'lat', 'lon'), {'long_name': 'Surface Air Pressure', 'units': 'millibars'}),
+    }
+
+    time_metadata = {
+        time_name: {
+            'long_name': f'{time_name.replace("_time", "").capitalize()} forcing time',
+            'units': Ref_time
+        }
+        for _, dims, _ in forcing_variables.values()
+        for time_name in dims if time_name.endswith('_time')
+    }
+
+    ncfile = Dataset(nc_save_name, mode='w', format=ncFormat)
+
+    # Define spatial dimensions
+    ncfile.createDimension('lon', lon_len)
+    ncfile.createDimension('lat', lat_len)
+    for time_name in time_metadata:
+        dim_len = None if ncFormat == 'NETCDF4' else len(TIME)
+        ncfile.createDimension(time_name, dim_len)
+
+    # Coordinate variables
+    lon = ncfile.createVariable('lon', 'f4', ('lon',))
+    lat = ncfile.createVariable('lat', 'f4', ('lat',))
+    lon.long_name = 'Longitude'
+    lon.units = 'degrees_east'
+    lat.long_name = 'Latitude'
+    lat.units = 'degrees_north'
+
+    # Time variables (define only)
+    time_vars = {}
+    for time_name, attrs in time_metadata.items():
+        tvar = ncfile.createVariable(time_name, 'f8', (time_name,))
+        tvar.long_name = attrs['long_name']
+        tvar.units = attrs['units']
+        tvar.field = f"{time_name}, scalar, series"
+        time_vars[time_name] = tvar
+
+    var_objects = {}
+    # Forcing variables
+    for varname, data in variables.items():
+        if varname not in forcing_variables:
+            raise KeyError(f"Unknown variable: {varname}")
+
+        dtype, dims, attrs = forcing_variables[varname]
+        v = ncfile.createVariable(varname, dtype, dims)
+        for attr, val in attrs.items():
+            setattr(v, attr, val)
+        v.coordinates = 'lon lat'
+        v.time = dims[0]  # 첫 번째 차원이 시간
+        v.field = f"{varname}, scalar, series"
+        var_objects[varname] = (v, data)
+    
+    # Now assign time values after all variables are defined
+    for tname in time_vars:
+        time_vars[tname][:] = TIME
+
+    for varname, (v, data) in var_objects.items():
+        v[:,:,:] = data
+
+    lon[:] = LON
+    lat[:] = LAT
+
+    ncfile.title = 'ROMS ERA5-style Forcing'
+    ncfile.history = 'Created using create_forcing_era5'
+
+    ncfile.close()
+    print(f"✅ NetCDF saved: {nc_save_name}")
+
+
+
+def createF_era5_(nc_save_name, LON, LAT, TIME, Ref_time, variables,ncFormat='NETCDF3_CLASSIC'):
     """
     Create a single NetCDF file with multiple forcing variables.
 
@@ -30,7 +129,7 @@ def createF_ERA5(nc_save_name, LON, LAT, TIME, Ref_time, variables,ncFormat='NET
     # Create dimensions
     ncfile.createDimension('lon', len(LON))
     ncfile.createDimension('lat', len(LAT))
-    ncfile.createDimension('time', None)
+    ncfile.createDimension('time', len(TIME))
 
     # Create coordinate variables
     lon = ncfile.createVariable('lon', np.float32, ('lon',))
