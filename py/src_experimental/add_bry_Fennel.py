@@ -17,7 +17,7 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 import xarray as xr
 import os 
-My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_bry_NWP4.nc' # Initial file name (to create)
+My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/nc64/NWP12_bry_NWP4.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
  
 Parallel=False
@@ -27,9 +27,9 @@ Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/Bvar/'
-NO3NC=ncdir+'NUT/CMEMS_data_nut_2023-01.nc'
-phytNC=ncdir+'PFT/CMEMS_data_pft_2023-01.nc'
-o2NC=ncdir+'BIO/CMEMS_data_bio_2023-01.nc'
+NO3NC=ncdir+'NUT/'
+phytNC=ncdir+'PFT/'
+o2NC=ncdir+'BIO/'
 
 
 NSEW=[1,1,1,1]
@@ -136,12 +136,16 @@ if NSEW[0]:
 
         if (i=='NO3') or (i=='PO4'):
             OGCM_npth=NO3NC;
+            print('!!1')
         elif (i=='phytoplankton') or (i=='chlorophyll'):
             OGCM_npth=phytNC;
+            print('!!!2')
         elif i=='oxygen':
             OGCM_npth=o2NC;
+            print('!!!3')
 
        # tmp_data=np.squeeze(MFDataset(OGCM_npth+'*.nc')[OGCMVar[i]][TIMES_co,:,bry_lat_co,bry_lon_co])
+        print(OGCM_npth+'*.nc')
         tmp_data=xr.open_mfdataset(OGCM_npth+'*.nc',parallel=Parallel)[OGCMVar[i]][TIMES_co,:,bry_lat_co,bry_lon_co].squeeze().values
         #tmp_data=MFDataset(OGCM_npth+'*.nc')[OGCMVar[i]][TIMES_co,:,bry_lat_co,bry_lon_co]  
         
