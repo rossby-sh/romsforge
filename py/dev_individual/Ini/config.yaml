@@ -1,0 +1,43 @@
+###
+#
+# INFO
+# This script is for HYCOM data
+###
+
+# === Define file names ===
+ininame: roms_ini.nc
+grdname: roms_grd.nc
+
+ogcm_name: HYCOM_20250301.nc 
+
+ogcm_var_name:
+    longitude       : lon
+    latitude        : lat
+    depth           : depth
+    time            : time
+    temperature     : water_temp
+    salinity        : salinity
+    u               : water_u
+    v               : water_v
+    zeta            : surf_el
+
+initdate            : 2025-03-01
+time_ref            : seconds since 2000-1-1 00:00:00
+
+global_attrs: 
+    title           : test - mk_ini
+    clm_file        : 
+    type            : 
+    history         :
+
+vertical:
+    layer_n         : 20
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+
+
+
