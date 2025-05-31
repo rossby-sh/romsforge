@@ -29,6 +29,7 @@ uNC=ncdir+'HYCOM_'
 vNC=ncdir+'HYCOM_'
 
 NSEW=[True,True,True,True] # N S E W
+#NSEW=[False,False,False,True] # N S E W
 
 Bry_title='NWP12-NWP4 ROMS-Fennel'
 
@@ -94,8 +95,8 @@ atG,onG=lonG.shape
 #cosa=np.tile( np.tile(cosa_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 #sina=np.tile( np.tile(sina_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 
-createB(My_Bry,topo,mask,MyVar,Bry_time_num,My_time_ref,NSEW,'Fennel','NETCDF4')
-
+createB(My_Bry,topo,mask,MyVar,Bry_time_num,My_time_ref,NSEW,'Fennel','NETCDF3_64BIT_OFFSET')
+#print("!!!=== #create ===!!!")
 
 #-- Get OGCM lon lat coordinates for slicing ----------------------------------
 lonO_co01=np.where( (lonO[:]>=np.min(lonG)) & (lonO[:]<=np.max(lonG)) )[0]
@@ -129,6 +130,7 @@ lonO_s=lonO[lonO_co]
 # Northern Boundary
 # =============================================================================
 if NSEW[0]:
+    print('--- Northern boundary ---')
     bry_lat_co=np.where( (latO[:]>=np.min(latG[-2:,:])-latOmax) & (latO[:]<=np.max(latG[-2:,:])+latOmax) )[0]
     bry_lon_co=lonO_co
     lonO_s_m,latO_s_m=np.meshgrid(lonO[bry_lon_co],latO[bry_lat_co])
@@ -343,6 +345,7 @@ def new_func(data, t, tmp_var, d):
     data[t,d]=tmp_var
 
 if NSEW[1]: # Southern bry
+    print('--- Southern boundary ---')
     
     bry_lat_co=np.where( (latO[:]>=np.min(latG[:2,:])-latOmax) & (latO[:]<=np.max(latG[:2,:])+latOmax) )[0]
     bry_lon_co=lonO_co
@@ -552,6 +555,7 @@ if NSEW[1]: # Southern bry
     ncI.close()
 
 if NSEW[2]: # Eastern bry
+    print('--- Eastern boundary ---')
       
     bry_lat_co=latO_co
     bry_lon_co=np.where( (lonO[:]>=np.min(lonG[:,-2:])-lonOmax) & (lonO[:]<=np.max(lonG[:,-2:])+lonOmax) )[0]
@@ -764,6 +768,7 @@ if NSEW[2]: # Eastern bry
     ncI.close()
 
 if NSEW[3]: # Western bry
+    print('--- Western boundary ---')
 
     # West (gridbuilder version)
     bry_lat_co=latO_co
@@ -896,7 +901,7 @@ if NSEW[3]: # Western bry
     sina=np.tile( np.tile(sina_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 
     ubar_west= OGCM_Data['ubar'][:,:,:]*cosa[:,0,:,:]+OGCM_Data['vbar'][:,:,:]*sina[:,0,:,:]
-    ubar_west=(ubar_west[:,:,:,0]+ubar_west[:,:,:,-1])/2
+    ubar_west=(ubar_west[:,:,0]+ubar_west[:,:,-1])/2
     vbar_west=ru2.rho2u_2d(OGCM_Data['vbar'][:,:,0]*cosa[:,0,:,0]-OGCM_Data['ubar'][:,:,0]*sina[:,0,:,0])
     u=OGCM_Data['u'][:,:,:,:]*cosa[:,:,:,:]+OGCM_Data['v'][:,:,:,:]*sina[:,:,:,:]
     u=(u[:,:,:,0]+u[:,:,:,-1])/2
