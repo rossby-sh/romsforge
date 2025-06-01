@@ -39,7 +39,6 @@ def parse_config(path="config.yaml") -> ConfigObject:
         raw = yaml.safe_load(f)
     return ConfigObject(**raw)
 
-
 def compute_relative_time(time, input_unit, ref_unit):
     """
     시간 데이터를 ref_unit 기준 상대 시간으로 변환
@@ -55,23 +54,29 @@ def compute_relative_time(time, input_unit, ref_unit):
     anchor = dt.datetime(2025, 1, 1)
 
     # 기준 시간 계산
-    t_in = date2num(anchor, input_unit)   # OGCM 기준
-    t_ref = date2num(anchor, ref_unit)    # ROMS 기준
+    t_in  = date2num(anchor, input_unit)
+    t_ref = date2num(anchor, ref_unit)
 
-    # 입력 시간 → days 변환
-    if "seconds" in input_unit:
-        time_in_days = time / 86400.0
-    elif "hours" in input_unit:
-        time_in_days = time / 24.0
-    elif "days" in input_unit:
-        time_in_days = time
-    else:
-        raise ValueError(f"Unknown input_unit: {input_unit}")
+    # 둘 다 days 기준으로 변환
+    def to_days(value, unit):
+        if "seconds" in unit:
+            return value / 86400.0
+        elif "hours" in unit:
+            return value / 24.0
+        elif "days" in unit:
+            return value
+        else:
+            raise ValueError(f"Unknown time unit: {unit}")
 
-    offset = t_in - t_ref
+    t_in_days = to_days(t_in, input_unit)
+    t_ref_days = to_days(t_ref, ref_unit)
+    offset = t_in_days - t_ref_days
+
+    # time도 days로 변환
+    time_in_days = to_days(time, input_unit)
     total_days = time_in_days + offset
 
-    # 출력 단위 결정
+    # 출력 단위 맞추기
     if "seconds" in ref_unit:
         return total_days * 86400.0
     elif "hours" in ref_unit:
@@ -160,13 +165,13 @@ def load_roms_grid(grdname):
         angle = nc["angle"][:]
         h = nc["h"][:]
         mask = nc["mask_rho"][:]
-    return {
-        "lon": lon,
-        "lat": lat,
-        "angle": angle,
-        "h": h,
-        "mask": mask
-    }
+    return ConfigObject(
+        lon     = lon,
+        lat     = lat,
+        angle   = angle,
+        topo    = h,
+        mask    = mask
+    )
 
 def load_ogcm_metadata(ogcm_name,ogcm_var_name):
     """
@@ -183,13 +188,15 @@ def load_ogcm_metadata(ogcm_name,ogcm_var_name):
         lon = nc[ogcm_var_name["longitude"]][:]
         lat = nc[ogcm_var_name["latitude"]][:]
         depth = nc[ogcm_var_name["depth"]][:]
-        time = nc[ogcm_var_name["time"]]
-    return {
-        "lon": lon,
-        "lat": lat,
-        "depth": depth,
-        "time": time
-    }
+        time = nc[ogcm_var_name["time"]][:]
+        time_unit = nc[ogcm_var_name["time"]].units
+    return ConfigObject(
+        lon       = lon,
+        lat       = lat,
+        depth     = depth,
+        time      = time,
+        time_unit = time_unit
+    )
 
 
 

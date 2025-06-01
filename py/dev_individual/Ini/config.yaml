@@ -5,10 +5,10 @@
 ###
 
 # === Define file names ===
-ininame: roms_ini.nc
-grdname: roms_grd.nc
+ininame: /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
+grdname: /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
 
-ogcm_name: HYCOM_20250301.nc 
+ogcm_name: /mnt/c/Users/shjo9/Bridge/DATA/HYCOM_20230101_00UTC.nc 
 
 ogcm_var_name:
     longitude       : lon
@@ -21,14 +21,14 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-initdate            : 2025-03-01
+initdate            : 2023-01-01
 time_ref            : seconds since 2000-1-1 00:00:00
 
 global_attrs: 
     title           : test - mk_ini
-    clm_file        : 
-    type            : 
-    history         :
+    clm_file        : test
+    type            : test
+    history         : test
 
 vertical:
     layer_n         : 20
