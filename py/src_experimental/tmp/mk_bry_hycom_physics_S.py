@@ -16,10 +16,10 @@ import datetime as dt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_bry_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP4_bry_3_10m_LP.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP4_grd_3_10m_LP.nc' # Grd name
 
-Parallel=True
+Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/00utc/'
 sshNC=ncdir+'HYCOM_'
@@ -28,7 +28,7 @@ saltNC=ncdir+'HYCOM_'
 uNC=ncdir+'HYCOM_'
 vNC=ncdir+'HYCOM_'
 
-NSEW=[True,True,True,True] # N S E W
+NSEW=[False,True,False,False] # N S E W
 #NSEW=[False,False,False,True] # N S E W
 
 Bry_title='NWP12-NWP4 ROMS-Fennel'
@@ -48,7 +48,7 @@ lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
 
 # My Variables
-MyVar={'Layer_N':36,'Vtransform':2,\
+MyVar={'Layer_N':20,'Vtransform':2,\
        'Vstretching':2,'Theta_s':7,\
            'Theta_b':0.1,'Tcline':200,'hmin':10}
 ncG.close()
@@ -95,7 +95,7 @@ atG,onG=lonG.shape
 #cosa=np.tile( np.tile(cosa_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 #sina=np.tile( np.tile(sina_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 
-createB(My_Bry,topo,mask,MyVar,Bry_time_num,My_time_ref,NSEW,'Fennel','NETCDF3_64BIT_OFFSET')
+#createB(My_Bry,topo,mask,MyVar,Bry_time_num,My_time_ref,NSEW,'Fennel','NETCDF3_64BIT_OFFSET')
 #print("!!!=== #create ===!!!")
 
 #-- Get OGCM lon lat coordinates for slicing ----------------------------------

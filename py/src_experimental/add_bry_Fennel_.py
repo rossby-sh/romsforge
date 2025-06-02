@@ -17,8 +17,8 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 import xarray as xr
 import os 
-My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/nc64/NWP12_bry_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP4_bry_3_10m_LP.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP4_grd_3_10m_LP.nc' # Grd name
  
 Parallel=False
 
@@ -47,7 +47,7 @@ ncG=Dataset(My_Grd)
 lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
 
-MyVar={'Layer_N':36,'Vtransform':2,\
+MyVar={'Layer_N':20,'Vtransform':2,\
        'Vstretching':2,'Theta_s':7,\
            'Theta_b':0.1,'Tcline':200,'hmin':10}
 ncG.close()

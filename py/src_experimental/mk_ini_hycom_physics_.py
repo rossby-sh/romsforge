@@ -19,8 +19,8 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_ini_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Ini='/data/share/DATA/ROMS_INPUTS/tmp/NWP4_ini_3_10m_LP.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP4_grd_3_10m_LP.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/00utc/'
@@ -31,7 +31,7 @@ uNC=ncdir+'HYCOM_20230101_00UTC.nc'
 vNC=ncdir+'HYCOM_20230101_00UTC.nc'
 
 #-- Define Parameters ---------------------------------------------------------
-Ini_title='NWP12 - NWP4' # title for NC description
+Ini_title='NWP4 - 3 10m LP' # title for NC description
 
 conserv=1
 # OGCM Variables name
@@ -52,7 +52,7 @@ print(ncG)
 
 lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
-MyVar={'Layer_N':36,'Vtransform':2,\
+MyVar={'Layer_N':20,'Vtransform':2,\
        'Vstretching':2,'Theta_s':7,\
            'Theta_b':0.1,'Tcline':200,'hmin':10}
 ncG.close()
