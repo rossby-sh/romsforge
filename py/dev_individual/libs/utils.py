@@ -3,7 +3,6 @@ import datetime as dt
 from netCDF4 import Dataset, date2num
 import yaml
 
-
 class ConfigObject:
     def __init__(self, **entries):
         for key, value in entries.items():
@@ -87,16 +86,15 @@ def compute_relative_time(time, input_unit, ref_unit):
         raise ValueError(f"Unknown ref_unit: {ref_unit}")
 
 
-
 def crop_to_model_domain(lat_src, lon_src, lat_dst, lon_dst):
     """
     lat/lon이 1D (rectilinear) 또는 2D (curvilinear, WRF)인 경우 모두 지원.
 
     Returns:
         idx, idy: x, y 방향 인덱스 범위
+        lon_crop, lat_crop: 잘린 source grid (1D 또는 2D 형태 그대로 유지)
     """
 
-    # 1D version
     if lat_src.ndim == 1 and lon_src.ndim == 1:
         lon_coarse = np.where((lon_src >= np.min(lon_dst)) & (lon_src <= np.max(lon_dst)))[0]
         lat_coarse = np.where((lat_src >= np.min(lat_dst)) & (lat_src <= np.max(lat_dst)))[0]
@@ -121,17 +119,20 @@ def crop_to_model_domain(lat_src, lon_src, lat_dst, lon_dst):
         idx = np.where((lon_src >= lon_min) & (lon_src <= lon_max))[0]
         idy = np.where((lat_src >= lat_min) & (lat_src <= lat_max))[0]
 
-        return idx, idy
+        lon_crop = lon_src[idx]
+        lat_crop = lat_src[idy]
+
+        lon_crop, lat_crop = np.meshgrid(lon_crop, lat_crop)
+
+        return  lon_crop, lat_crop, idx, idy
 
     elif lat_src.ndim == 2 and lon_src.ndim == 2:
         lat_min, lat_max = lat_dst.min(), lat_dst.max()
         lon_min, lon_max = lon_dst.min(), lon_dst.max()
 
-        # 해상도 계산 (방향 유의)
         lat_res = np.max(np.abs(np.diff(lat_src[:, 0])))
         lon_res = np.max(np.abs(np.diff(lon_src[0, :])))
 
-        # 확장 경계 계산
         lat_min -= lat_res
         lat_max += lat_res
         lon_min -= lon_res
@@ -149,7 +150,10 @@ def crop_to_model_domain(lat_src, lon_src, lat_dst, lon_dst):
         idy = np.arange(j_min, j_max)
         idx = np.arange(i_min, i_max)
 
-        return idx, idy
+        lon_crop = lon_src[np.ix_(idy, idx)]
+        lat_crop = lat_src[np.ix_(idy, idx)]
+
+        return lon_crop, lat_crop, idx, idy
 
 
 def load_roms_grid(grdname):
@@ -198,11 +202,27 @@ def load_ogcm_metadata(ogcm_name,ogcm_var_name):
         time_unit = time_unit
     )
 
+def build_bilinear_regridder(lon_src, lat_src, lon_dst, lat_dst, wghtname, reuse=False):
+    """XESMF 래퍼 함수: 감정 없는 weight 생성기"""
+    import xarray as xr
+    import xesmf as xe
+    try:
+        ds_src = xr.Dataset({
+            "lon": (["y", "x"], lon_src),
+            "lat": (["y", "x"], lat_src)
+        })
+        ds_dst = xr.Dataset({
+            "lon": (["y", "x"], lon_dst),
+            "lat": (["y", "x"], lat_dst)
+        })
 
+        xe.Regridder(ds_src, ds_dst, method="bilinear", filename=wghtname, reuse_weights=reuse)
+        print(f"[✓] Weight file created: {wghtname}")
+        return 1
 
-
-
-
+    except Exception as e:
+        print(f"[✗] Failed to create weight file: {e}")
+        return 0
 
 
 

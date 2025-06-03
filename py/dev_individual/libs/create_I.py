@@ -21,7 +21,9 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
 
     hmin_ = np.min(grd.topo[grd.mask == 1])
     if vtransform == 1 and tcline > hmin_:
-        raise ValueError("Tcline must be <= hmin when Vtransform == 1")
+        print(f"[ERROR](Tcline must be <= hmin when Vtransform == 1")
+        return 0 
+
 
     Mp, Lp = grd.topo.shape
     L, M, N, Np = Lp - 1, Mp - 1, layer_n, layer_n + 1
@@ -102,7 +104,14 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
 
 
     # NetCDF 생성
-    ncfile = Dataset(cfg.ininame, mode='w', format=ncFormat)
+    mode = 'w' if cfg.force_write else 'x'
+    try:
+        ncfile = Dataset(cfg.ininame, mode=mode, format=ncFormat)
+    except FileExistsError:
+        print(f"[✗] {cfg.ininame} already exists and force_write=False")
+        return 0
+    
+
     for dim_name, dim_size in dimensions.items():
         ncfile.createDimension(dim_name, dim_size)
 
@@ -139,39 +148,7 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
 
     ncfile.close()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return 1
 
 
 
