@@ -27,7 +27,7 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-initdate            : 2023-01-01
+initdate            : 2023-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 time_ref            : seconds since 2000-1-1 00:00:00
 
 global_attrs: 
