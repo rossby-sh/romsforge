@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_bry_NWP4.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
 
-Parallel=True
+Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/00utc/'
 sshNC=ncdir+'HYCOM_'

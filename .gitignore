@@ -5,6 +5,8 @@
 py/roms_to_zstd/**
 !roms_to_zstd/.gitkeep  # 디렉토리 구조 유지
 
+py/matlab_codes/**
+
 # dev_individual/libs 내부 파일 무시
 !dev_individual/libs/**
 !dev_individual/libs/.gitkeep
@@ -23,3 +25,5 @@ __pycache__/
 *.log
 *.tmp
 *.bak
+*.m
+*.mat
