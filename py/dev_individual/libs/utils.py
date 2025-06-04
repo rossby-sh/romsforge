@@ -33,6 +33,28 @@ class ConfigObject:
                 out[key] = value
         return out
 
+class MaskedNetCDF:
+    def __init__(self, nc, atol=1e-6):
+        self.nc = nc
+        self.atol = atol
+
+    def get(self, name, *slices):
+        var = self.nc[name][*slices]
+        var = var.astype(float, copy=False)
+
+        # MaskedArray 처리
+        if isinstance(var, np.ma.MaskedArray) and np.any(var.mask):
+            var = var.filled(np.nan)
+
+        # _FillValue 처리
+        if hasattr(self.nc[name], '_FillValue'):
+            fv = self.nc[name]._FillValue
+            mask = np.isclose(var, fv, atol=self.atol)
+            var[mask] = np.nan
+
+        return var
+
+
 def parse_config(path="config.yaml") -> ConfigObject:
     with open(path) as f:
         raw = yaml.safe_load(f)
@@ -218,18 +240,93 @@ def build_bilinear_regridder(lon_src, lat_src, lon_dst, lat_dst, wghtname, reuse
 
         xe.Regridder(ds_src, ds_dst, method="bilinear", filename=wghtname, reuse_weights=reuse)
         print(f"[✓] Weight file created: {wghtname}")
-        return 1
+        return 0
 
     except Exception as e:
         print(f"[✗] Failed to create weight file: {e}")
-        return 0
+        return 1
 
 
+def depth_average(var3d, depth, mask_nan=True):
+    """
+    depth 방향으로 평균 내는 함수
+
+    Parameters
+    ----------
+    var3d : ndarray
+        (z, y, x) 형식의 3D 변수 (ex: u, v)
+    depth : 1D array
+        depthO 또는 z-level (길이 z)
+    mask_nan : bool
+        NaN 값 제외할지 여부
+
+    Returns
+    -------
+    avg2d : ndarray
+        depth-averaged 2D 필드 (y, x)
+    """
+    dz = np.gradient(-depth)
+    du = np.zeros_like(var3d[0])
+    zu = np.zeros_like(var3d[0])
+
+    for n in range(len(depth)):
+        layer = var3d[n]
+        valid = ~np.isnan(layer) if mask_nan else np.ones_like(layer)
+        du += dz[n] * np.where(np.isnan(layer), 0, layer)
+        zu += dz[n] * valid
+
+    avg = du / zu
+    avg[zu == 0] = np.nan
+    return avg
 
 
+def remap_variable(var_src, row, col, S, dst_shape, method="coo"):
+    """
+    SCRIP 가중치를 사용한 2D 또는 3D 변수 리매핑 (기본: COO 방식)
 
+    Parameters
+    ----------
+    var_src : ndarray
+        2D 또는 3D 원본 변수 (e.g., zeta, temp 등)
+    row, col, S : ndarray
+        SCRIP weight 정보
+    dst_shape : tuple
+        출력할 데이터 lon_rho shape ( (y, x))
+    method : str
+        리매핑 방식 (기본: "coo", 추후 "crs" 등 추가 가능)
 
+    Returns
+    -------
+    var_dst : ndarray
+        리매핑된 출력 변수
+    """
+    if method != "coo":
+        raise NotImplementedError(f"remap method '{method}' is not implemented yet.")
 
+    if var_src.ndim == 2:
+        ny_src, nx_src = var_src.shape
+        ydim, xdim = dst_shape
+        src_flat = var_src.flatten()
+        dst_flat = np.zeros(row.max() + 1)
+
+        np.add.at(dst_flat, row, S * src_flat[col])
+        var_dst = dst_flat.reshape((ydim, xdim))
+
+    elif var_src.ndim == 3:
+        nz, ny_src, nx_src = var_src.shape
+        ydim, xdim = dst_shape
+        src_flat = var_src.reshape(nz, ny_src * nx_src)
+        var_dst = np.zeros((nz, ydim, xdim))
+
+        for k in range(nz):
+            dst_flat = np.zeros(row.max() + 1)
+            np.add.at(dst_flat, row, S * src_flat[k, col])
+            var_dst[k] = dst_flat.reshape((ydim, xdim))
+
+    else:
+        raise ValueError("Only 2D or 3D input arrays are supported.")
+
+    return var_dst
 
 
 
