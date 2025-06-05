@@ -329,5 +329,69 @@ def remap_variable(var_src, row, col, S, dst_shape, method="coo"):
     return var_dst
 
 
+def rotate_vector_euler(u, v, angle):
+    is2d = (u.ndim == 2)
+
+    if is2d:
+        u = u[np.newaxis, ...]
+        v = v[np.newaxis, ...]
+
+    nz, ny, nx = u.shape
+    angle3d = np.broadcast_to(angle, (nz, ny, nx))
+
+    uv_complex = u + 1j * v
+    uv_rotated = uv_complex * np.exp(1j * angle3d)
+
+    return np.squeeze(uv_rotated.real), np.squeeze(uv_rotated.imag)
+
+
+def rho2uv(field, pos='u'):
+    """
+    Convert rho-point data to u-point or v-point.
+
+    Parameters:
+        field: np.ndarray (2D or 3D) — shape (ny, nx) or (nz, ny, nx)
+        pos: 'u' or 'v' — direction to convert
+
+    Returns:
+        np.ndarray of shape [..., ny, nx-1] or [..., ny-1, nx]
+    """
+    # Ensure at least 3D shape: (nz, ny, nx)
+    if field.ndim == 2:
+        field = field[np.newaxis, ...]
+
+    if pos == 'u':
+        result = 0.5 * (field[..., :, :-1] + field[..., :, 1:])
+    elif pos == 'v':
+        result = 0.5 * (field[..., :-1, :] + field[..., 1:, :])
+    else:
+        raise ValueError("pos must be 'u' or 'v'")
+
+    return np.squeeze(result)
+
+
+def conserve_and_recompute_barotropic(u, v, ubar, vbar, dzu, dzv):
+    """Apply volume conservation correction and recompute barotropic velocities."""
+    u_corr = u - np.sum(u * dzu, axis=0) / np.sum(dzu, axis=0) + ubar
+    v_corr = v - np.sum(v * dzv, axis=0) / np.sum(dzv, axis=0) + vbar
+
+    ubar_new = np.sum(u_corr * dzu, axis=0) / np.sum(dzu, axis=0)
+    vbar_new = np.sum(v_corr * dzv, axis=0) / np.sum(dzv, axis=0)
+
+    return u_corr, v_corr, ubar_new, vbar_new
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
