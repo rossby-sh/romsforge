@@ -9,7 +9,7 @@ ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
 grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
 
 weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
-calc_weight: True
+calc_weight: False
 
 ncformat: NETCDF3_64BIT
 force_write: True

@@ -21,7 +21,7 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
 
     hmin_ = np.min(grd.topo[grd.mask == 1])
     if vtransform == 1 and tcline > hmin_:
-        print(f"[ERROR](Tcline must be <= hmin when Vtransform == 1")
+        print(f"--- [!ERROR](Tcline must be <= hmin when Vtransform == 1 ---")
         return 1 
 
 
@@ -99,8 +99,9 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
     if bio_model in bio_tracers:
         for name, attrs in bio_tracers.get(bio_model, {}).items():
             base_variables[name] = ('f4', ('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), attrs)
+        print(f"--- [NOTE] Initiating biological variables: {bio_model} type ---")
     else:
-        print("=== Deactivate bio variables ===")
+        print("--- [NOTE] Deactivate initiating biological variables ---")
 
 
     # NetCDF 생성
@@ -108,7 +109,7 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
     try:
         ncfile = Dataset(cfg.ininame, mode=mode, format=ncFormat)
     except FileExistsError:
-        print(f"[✗] {cfg.ininame} already exists and force_write=False")
+        print(f"--- [!ERROR] {cfg.ininame} already exists and force_write=False ---")
         return 1
     
 

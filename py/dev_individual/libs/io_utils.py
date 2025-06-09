@@ -25,11 +25,12 @@ def parse_time_range(date_input):
     else:
         raise ValueError("Invalid date input")
 
-def collect_time_info(input_files, time_var, date_input, units):
+def collect_time_info(input_files, time_var, date_input):
     if isinstance(input_files, str):
         # initial: 단일 파일
         with Dataset(input_files) as nc:
             times = nc.variables[time_var][:]
+            units = nc.variables[time_var].units
             tdates = num2date(times, units)
             target_date = datetime.fromisoformat(date_input)
             for i, t in enumerate(tdates):

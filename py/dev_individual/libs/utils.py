@@ -239,11 +239,11 @@ def build_bilinear_regridder(lon_src, lat_src, lon_dst, lat_dst, wghtname, reuse
         })
 
         xe.Regridder(ds_src, ds_dst, method="bilinear", filename=wghtname, reuse_weights=reuse)
-        print(f"[✓] Weight file created: {wghtname}")
+        print(f"--- Weight file created: {wghtname} ---")
         return 0
 
     except Exception as e:
-        print(f"[✗] Failed to create weight file: {e}")
+        print(f"--- [!ERROR] Failed to create weight file: {e} ---")
         return 1
 
 
@@ -274,7 +274,6 @@ def depth_average(var3d, depth, mask_nan=True):
         valid = ~np.isnan(layer) if mask_nan else np.ones_like(layer)
         du += dz[n] * np.where(np.isnan(layer), 0, layer)
         zu += dz[n] * valid
-
     avg = du / zu
     avg[zu == 0] = np.nan
     return avg
@@ -328,8 +327,7 @@ def remap_variable(var_src, row, col, S, dst_shape, method="coo"):
 
     return var_dst
 
-
-def rotate_vector_euler(u, v, angle):
+def rotate_vector_euler(u, v, angle, to_geo=True):
     is2d = (u.ndim == 2)
 
     if is2d:
@@ -340,10 +338,13 @@ def rotate_vector_euler(u, v, angle):
     angle3d = np.broadcast_to(angle, (nz, ny, nx))
 
     uv_complex = u + 1j * v
-    uv_rotated = uv_complex * np.exp(1j * angle3d)
+
+    if to_geo:
+        uv_rotated = uv_complex * np.exp(-1j * angle3d)
+    else:
+        uv_rotated = uv_complex * np.exp(+1j * angle3d)
 
     return np.squeeze(uv_rotated.real), np.squeeze(uv_rotated.imag)
-
 
 def rho2uv(field, pos='u'):
     """
@@ -381,13 +382,280 @@ def conserve_and_recompute_barotropic(u, v, ubar, vbar, dzu, dzv):
     return u_corr, v_corr, ubar_new, vbar_new
 
 
+def stretching(Vstretching,theta_s,theta_b,Layer_N,kgrid=1):
+    
+    # Vstretching=MyVar['Vstretching']
+    # theta_s=MyVar['Theta_s']
+    # theta_b=MyVar['Theta_b']
+    # N=MyVar['Layer_N']    
+    Np=Layer_N+1
+    if Vstretching==1:
+        ds=1/Layer_N
+        if kgrid==1:
+            nlev=Np
+            lev=np.arange(Layer_N+1)
+            s=(lev-Layer_N)*ds
+        else:
+            Nlev=Layer_N
+            lev=np.arange(1,Layer_N+1)-.5
+            s=(lev-Layer_N)*ds
+        
+        if theta_s>0:
+            Ptheta=np.sinh(theta_s*s)/np.sinh(theta_s)
+            Rtheta=np.tanh(theta_s*(s+0.5))/(2.0*np.tanh(0.5*theta_s))-0.5
+            C=(1.0-theta_b)*Ptheta+theta_b*Rtheta
+        else:
+            C=s 
+        
+    elif Vstretching==2:
+        
+        alfa=1.0
+        beta=1.0
+        ds=1.0/Layer_N
+        if kgrid==1:
+            Nlev=Np
+            lev=np.arange(Layer_N+1)
+            s=(lev-Layer_N)*ds
+        else:
+            Nlev=Layer_N
+            lev=np.arange(1,Layer_N+1)-.5
+            s=(lev-Layer_N)*ds
+        
+        if theta_s>0:
+            Csur=(1.0-np.cosh(theta_s*s))/(np.cosh(theta_s)-1.0)
+            if theta_b>0:
+                Cbot=-1.0+np.sinh(theta_b*(s+1.0))/np.sinh(theta_b)
+                weigth=(s+1.0)**alfa*(1.0+(alfa/beta)*(1.0-(s+1)**beta))
+                C=weigth*Csur+(1.0-weigth)*Cbot
+            else:
+                C=Csur
+    elif Vstretching==4:
+        ds=1.0/Layer_N
+        if kgrid==1:
+            Nlev=Np
+            lev=np.arange(Layer_N+1)
+            s=(lev-Layer_N)*ds
+        else:
+            nlev=Layer_N
+            lev=np.arange(1,Layer_N+1)-0.5
+            s=(lev-Layer_N)*ds
+        if theta_s>0:
+            Csur=(1.0-np.cosh(theta_s*s))/(np.cosh(theta_s)-1.0)
+        else:
+            Csur=-s**2
+        
+        if theta_b>0:
+            Cbot=(np.exp(theta_b*Csur)-1.0)/(1.0-np.exp(-theta_b))
+            C=Cbot
+        else:
+            C=Csur
+        
+        
+    elif Vstretching==5:
+        if kgrid==1:
+            nlev=Np
+            lev=np.arange(Layer_N+1)
+            s=-(lev*lev-2.0*lev*Layer_N+lev+Layer_N*Layer_N-Layer_N)/(Layer_N*Layer_N-Layer_N)-\
+                0.01*(lev*lev-lev*Layer_N)/(1.0-Layer_N)
+            s[0]=-1.0
+        else:
+            Nlev=Layer_N
+            lev=np.arange(1,Layer_N+1)-0.5
+            s=-(lev*lev-2.0*lev*Layer_N+lev+Layer_N*Layer_N-Layer_N)/(Layer_N*Layer_N-Layer_N)-\
+                0.01*(lev*lev-lev*Layer_N)/(1.0-Layer_N)
+        if theta_s>0:
+            Csur=(1.0-np.cosh(theta_s*s))/(np.cosh(theta_s)-1.0)
+        else:
+            Csur=-s**2
+        if theta_b>0:
+            Cbot=(np.exp(theta_b*Csur)-1.0)/(1.0-np.exp(-theta_b))
+            C=Cbot
+        else:
+            C=Csur
+    return s,C
+    
+            
+def ztosigma(var,z,depth):
+    Ns,Mp,Lp=z.shape
+    Nz=len(depth)
+    vnew=np.zeros([Ns,Mp,Lp])
+    for ks in range(Ns):
+        sigmalev=np.squeeze(z[ks,:,:])
+        thezlevs=0*sigmalev
+        for kz in range(Nz):
+            thezlevs[sigmalev>depth[kz]]=thezlevs[sigmalev>depth[kz]]+1
+        if np.max(thezlevs)>=Nz or np.min(thezlevs)<=0:
+            print("min sigma level = "+str(np.min(z))+' - min z level = '+\
+                  str(np.min(depth)))
+            print("max sigma level = "+str(np.max(z))+' - max z level = '+\
+                  str(np.max(depth)))            
+        thezlevs=thezlevs.astype('int32')
+        imat,jmat=np.meshgrid(np.arange(1,Lp+1),np.arange(1,Mp+1))
+        pos=Nz*Mp*(imat-1)+Nz*(jmat-1)+thezlevs
+        z1,z2=depth[thezlevs-1],depth[thezlevs]
+        tmp_var=var.transpose().flatten()
+        v1=tmp_var[pos-1].reshape(Mp,Lp)
+        v2=tmp_var[pos].reshape(Mp,Lp)
+        vnew[ks,:,:]=(((v1-v2)*sigmalev+v2*z1-v1*z2)/(z1-z2))
+    return vnew
+
+def ztosigma_1d(var,z,depth):
+    Ns,Lp=z.shape
+    Nz=len(depth)
+    vnew=np.zeros([Ns,Lp])
+    for ks in range(Ns):
+        sigmalev=np.squeeze(z[ks,:])
+        thezlevs=0*sigmalev
+        for kz in range(Nz):
+            thezlevs[sigmalev>depth[kz]]=thezlevs[sigmalev>depth[kz]]+1
+        if np.max(thezlevs)>=Nz or np.min(thezlevs)<=0:
+            print("min sigma level = "+str(np.min(z))+' - min z level = '+\
+                  str(np.min(depth)))
+            print("max sigma level = "+str(np.max(z))+' - max z level = '+\
+                  str(np.max(depth))) 
+                
+        thezlevs=thezlevs.astype('int32')
+        
+        jmat= np.arange(1,Lp+1)
+        pos=Nz*(jmat-1)+thezlevs
+        
+        z1,z2=depth[thezlevs-1],depth[thezlevs]
+        tmp_var=var.transpose().flatten()
+        v1=tmp_var[pos-1].reshape(Lp)
+        v2=tmp_var[pos].reshape(Lp)
+        vnew[ks,:]=(((v1-v2)*sigmalev+v2*z1-v1*z2)/(z1-z2))
+    return vnew
+
+        
+def zlevs(Vtransform, Vstretching,theta_s, theta_b, hc, N,igrid, h, zeta):
+    from copy import deepcopy
+    
+    # for get section
+    if len(h.shape)!=2:
+        h=h.reshape([1,len(h)])
+        zeta=zeta.reshape([1,len(zeta)])
+    Np=N+1;
+    Lp,Mp=h.shape
+    L=Lp-1;
+    M=Mp-1;
+    
+    hmin=np.min(h);
+    hmax=np.max(h);
+
+    # Compute vertical stretching function, C(k):
+
+    if igrid==5:
+        kgrid=1
+        s,C=stretching(Vstretching, theta_s, theta_b, N, kgrid)
+    else:
+        kgrid=0
+        s,C=stretching(Vstretching, theta_s, theta_b, N, kgrid)
+
+    #  Average bathymetry and free-surface at requested C-grid type.
+
+    if igrid==1:
+        hr=deepcopy(h)
+        zetar=deepcopy(zeta)
+    elif igrid==2:
+        hp=0.25*(h[:L,:M]+h[1:Lp,:M]+h[:L,1:Mp]+h[1:Lp,1:Mp])
+        zetap=0.25*(zeta[:L,:M]+zeta[1:Lp,:M]+zeta[:L,1:Mp]+zeta[1:Lp,1:Mp])
+    elif igrid==3:
+        hu=0.5*(h[:L,:Mp]+h[1:Lp,:Mp])
+        zetau=0.5*(zeta[:L,:Mp]+zeta[1:Lp,:Mp])
+    elif igrid==4:
+        hv=0.5*(hp[:Lp,:M]+h[:Lp,1:Mp])
+        zetav=0.5*(zeta[:Lp,:M]+zeta[:Lp,1:Mp])        
+    elif igrid==5:
+        hr=deepcopy(h)
+        zetar=deepcopy(zeta)
 
 
+    # Compute depths (m) at requested C-grid location.
+    if Vtransform==1:
+        if igrid==1:
+            z=np.zeros([zetar.shape[0],zetar.shape[-1],N])
+            for k in range(N):
+                z0=(s[k]-C[k])*hc+C[k]*hr
+                z[:,:,k]=z0+zetar*(1+z0/hr)
+        elif igrid==2:
+            z=np.zeros([zetap.shape[0],zetap.shape[-1],N])
+            for k in range(N):
+                z0=(s[k]-C[k])*hc+C[k]*hp
+                z[:,:,k]=z0+zetap*(1+z0/hp)
+        elif igrid==3:
+            z=np.zeros([zetau.shape[0],zetau.shape[-1],N])
+            for k in range(N):
+                z0=(s[k]-C[k])*hc+C[k]*hu
+                z[:,:,k]=z0+zetau*(1+z0/hu)
+        elif igrid==4:
+            z=np.zeros([zetav.shape[0],zetav.shape[-1],N])
+            for k in range(N):
+                z0=(s[k]-C[k])*hc+C[k]*hv
+                z[:,:,k]=z0+zetav*(1+z0/hv)
+        elif igrid==5:
+            z=np.zeros([zetar.shape[0],zetar.shape[-1],Np])
+            z[:,:,0]=-hr
+            for k in range(1,Np):
+                z0=(s[k]-C[k])*hc+C[k]*hr
+                z[:,:,k]=z0+zetar*(1+z0/hr)
+    
+    elif Vtransform==2:
+        if igrid==1:
+            z=np.zeros([zetar.shape[0],zetar.shape[-1],N])
+            for k in range(N):
+                z0=(hc*s[k]+C[k]*hr)/(hc+hr)
+                z[:,:,k]=zetar+(zeta+hr)*z0
+        elif igrid==2:
+            z=np.zeros([zetap.shape[0],zetap.shape[-1],N])
+            for k in range(N):
+                z0=(hc*s[k]+C[k]*hp)/(hc+hp)
+                z[:,:,k]=zetap+(zetap+hp)*z0
+        elif igrid==3:
+            z=np.zeros([zetau.shape[0],zetau.shape[-1],N])
+            for k in range(N):
+                z0=(hc*s[k]+C[k]*hu)/(hc+hu)
+                z[:,:,k]=zetau+(zetau+hu)*z0
+        elif igrid==4:
+            z=np.zeros([zetav.shape[0],zetav.shape[-1],N])
+            for k in range(N):
+                z0=(hc*s[k]+C[k]*hv)/(hc+hv)
+                z[:,:,k]=zetav+(zetav+hv)*z0
+        elif igrid==5:
+            z=np.zeros([zetar.shape[0],zetar.shape[-1],Np])
+            for k in range(0,Np):
+               z0=(hc*s[k]+C[k]*hr)/(hc+hr)
+               z[:,:,k]=zetar+(zetar+hr)*z0
+    z=np.squeeze(np.transpose(z,[2,0,1]))
+    
+    return z
 
 
+from scipy.ndimage import distance_transform_edt
 
+def fast_flood_2d(var2d: np.ndarray) -> np.ndarray:
+    """
+    Fill NaNs in a 2D array using nearest-neighbor extrapolation.
+    Uses Euclidean distance to find nearest valid value.
+    """
+    nan_mask = np.isnan(var2d)
+    if not np.any(nan_mask):
+        return var2d
 
+    _, indices = distance_transform_edt(nan_mask, return_indices=True)
+    filled = var2d[tuple(indices)]
+    return filled
 
+def fast_flood_3d(var3d: np.ndarray) -> np.ndarray:
+    """
+    Apply fast_flood_2d to each vertical level of a 3D field.
+    """
+    Nz, Ny, Nx = var3d.shape
+    filled = np.empty_like(var3d)
+
+    for k in range(Nz):
+        filled[k] = fast_flood_2d(var3d[k])
+
+    return filled
 
 
 
