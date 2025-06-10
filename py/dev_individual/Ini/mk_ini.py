@@ -42,11 +42,11 @@ if cfg.calc_weight:
         raise  
 else: 
     print(f"--- [04] Use existing wght file {cfg.weight_file} ---")
-
-
+import time
+start = time.time()
 # --- [05] Load OGCM raw fields (zeta, temp, salt, u, v) ---
 print("--- [05] Loading OGCM data ---")
-with Dataset(cfg.ogcm_name, maskandscale=False) as nc_raw:
+with Dataset(cfg.ogcm_name, maskandscale=True) as nc_raw:
     nc = tl.MaskedNetCDF(nc_raw)
 
     zeta = nc.get(cfg.ogcm_var_name['zeta'], idt, idy, idx)
@@ -66,7 +66,8 @@ field = tl.ConfigObject(
     u    = u,
     v    = v
 )
-
+end = time.time()
+print(f"걸린 시간: {end - start:.3f}초")
 
 # --- [06] Load and apply remap weights to all fields ---
 print("--- [06] Remapping ---")
@@ -81,46 +82,33 @@ for varname in vars(field) :
     #remapped = np.nan_to_num(remapped, nan=0.0)
     setattr(field, varname, remapped)
 
-# Debugging
-print("[dbg] Check coastal NaN values")
-import matplotlib
-import matplotlib.pyplot as plt
-matplotlib.use("Agg")
+import time
+start=time.time()
+print("--- [07] Apply horizonatal flood ---")
+for var in ['temp', 'salt', 'u', 'v','zeta','ubar','vbar']:
+    val = getattr(field, var)
+    val_flooded = tl.flood_horizontal(val, grd.lon, grd.lat, method=cfg.flood_method_for_ini)  # or 'edt'
+    setattr(field, var, val_flooded)
 
-dbg_val=field.temp[0,...]
+end=time.time()
+print("Time elapsed : ")
+print(f"걸린 시간: {end - start:.3f}초")
 
-filled_dbg = tl.fast_flood_2d(dbg_val)
-filled_dbg = tl.fast_flood_3d(field.temp)
+print("--- [08] Apply vertical flood ---")
+print("---[!CAUTION] Currently no vertical flood apply ---")
 
-tmp=np.ones_like(dbg_val)
-tmp[grd.mask==0]=np.nan
-tmp[dbg_val==dbg_val]=np.nan
+print("--- [09] Masking land to 0 ---")
+for varname in ['zeta', 'ubar', 'vbar']:
+    var = getattr(field, varname)
+    var[grd.mask == 0] = 0.0
+    setattr(field, varname, var)
 
-plt.figure()
-plt.pcolor(grd.lon,grd.lat,field.temp[-2])
-plt.clim([1.2,1.7])
-plt.colorbar()
-plt.savefig("/mnt/c/Users/shjo9/Bridge/temp_bottom.png")
-plt.close
-
-plt.figure()
-plt.pcolor(grd.lon,grd.lat,filled_dbg[-2])
-plt.clim([1.2,1.7])
-plt.colorbar()
-plt.savefig("/mnt/c/Users/shjo9/Bridge/temp__filled_bottom.png")
-plt.close
-
-
-
-raise
-
-
-
-
-
-
+for varname in ['temp', 'salt', 'u', 'v']:
+    var = getattr(field, varname)
+    var[:, grd.mask == 0] = 0.0  # broadcast over vertical dim
+    setattr(field, varname, var)
 # --- [07] Rotate vectors to model grid and convert to u/v points ---
-print("--- [07] Rotate vectors ---")
+print("--- [10] Rotate vectors ---")
 u_rot, v_rot       = tl.rotate_vector_euler(field.u,    field.v,    grd.angle, to_geo=False)
 ubar_rot, vbar_rot = tl.rotate_vector_euler(field.ubar, field.vbar, grd.angle, to_geo=False)
 
@@ -130,7 +118,7 @@ setattr(field, 'ubar', tl.rho2uv(ubar_rot,'u'))
 setattr(field, 'vbar', tl.rho2uv(vbar_rot,'v'))
 
 # --- [08] Vertical interpolation from z-level to sigma-level ---
-print("--- [08] Vertical interpolation from z-level to sigma-level ---")
+print("--- [11] Vertical interpolation from z-level to sigma-level ---")
 zlevs_args = (
     cfg.vertical.vtransform,
     cfg.vertical.vstretching,
@@ -155,7 +143,7 @@ for var, zgrid in zip(['temp', 'salt', 'u', 'v'], [zr, zr, zu, zv]):
 
 
 # --- [09] Volume conservation and barotropic velocity correction ---
-print(" --- [09] Volume conservation and barotropic velocity correction ---")
+print("--- [12] Volume conservation and barotropic velocity correction ---")
 zw = tl.zlevs(*zlevs_args, 5, grd.topo, field.zeta)
 dzr = zw[1:, :, :] - zw[:-1, :, :]
 dzu, dzv = tl.rho2uv(dzr,'u'), tl.rho2uv(dzr,'v')
@@ -173,7 +161,7 @@ setattr(field, 'ubar', ubar_new)
 setattr(field, 'vbar', vbar_new)
 
 # --- [10] Write all remapped variables to ini.nc ---
-print(f"--- [10] Write all remapped variables to {cfg.ininame} ---")
+print(f"--- [13] Write all remapped variables to {cfg.ininame} ---")
 with Dataset(cfg.ininame, mode='a') as nc:
     for var in ['zeta', 'temp', 'salt', 'u', 'v', 'ubar', 'vbar']:
         nc[var][0] = getattr(field, var)

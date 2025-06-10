@@ -5,16 +5,21 @@
 ###
 
 # === Define file names ===
-ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
-grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
+#ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
+#grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
+ininame : /data/share/DATA/ROMS_INPUTS/tmp/roms_ini.nc
+grdname : /data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc
 
-weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
+#weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
+weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP12_weight_NWP4.nc
 calc_weight: False
 
 ncformat: NETCDF3_64BIT
 force_write: True
 
-ogcm_name: /mnt/c/Users/shjo9/Bridge/DATA/HYCOM_20230101_00UTC.nc 
+flood_method_for_ini: edt #griddata
+
+ogcm_name: /data/share/DATA/RAW/00utc/HYCOM_20230101_00UTC.nc 
 
 ogcm_var_name:
     longitude       : lon
@@ -37,12 +42,12 @@ global_attrs:
     history         : test
 
 vertical:
-    layer_n         : 20
+    layer_n         : 36
     vtransform      : 2
-    vstretching     : 4
-    theta_s         : 6.5
-    theta_b         : 1
-    tcline          : 400
+    vstretching     : 2
+    theta_s         : 7.
+    theta_b         : 0.1
+    tcline          : 200
 
 
 

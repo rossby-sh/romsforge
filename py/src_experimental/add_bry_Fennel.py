@@ -17,7 +17,7 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 import xarray as xr
 import os 
-My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/nc64/NWP12_bry_NWP4.nc' # Initial file name (to create)
+My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_bry_NWP4.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
  
 Parallel=False

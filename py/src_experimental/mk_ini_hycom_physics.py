@@ -10,7 +10,7 @@ import sys
 sys.path.append(PKG_path)
 import libs.ROMS_utils01 as ru
 import libs.ROMS_utils02 as ru2
-from libs.create_I import create_ini
+from libs.create_I import create_ini_tmp
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
@@ -19,19 +19,20 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_ini_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_fennel_15km_smooth_v2.nc' # Initial file name (to create)
+#My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP4_grd_3_10m_LP.nc' # Grd name
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/00utc/'
-sshNC=ncdir+'HYCOM_20230101_00UTC.nc'
-tempNC=ncdir+'HYCOM_20230101_00UTC.nc'
-saltNC=ncdir+'HYCOM_20230101_00UTC.nc'
-uNC=ncdir+'HYCOM_20230101_00UTC.nc'
-vNC=ncdir+'HYCOM_20230101_00UTC.nc'
+sshNC=ncdir+'HYCOM_20250501_00UTC.nc'
+tempNC=ncdir+'HYCOM_20250501_00UTC.nc'
+saltNC=ncdir+'HYCOM_20250501_00UTC.nc'
+uNC=ncdir+'HYCOM_20250501_00UTC.nc'
+vNC=ncdir+'HYCOM_20250501_00UTC.nc'
 
 #-- Define Parameters ---------------------------------------------------------
-Ini_title='NWP12 - NWP4' # title for NC description
+Ini_title='NWP 15km' # title for NC description
 
 conserv=1
 # OGCM Variables name
@@ -40,7 +41,7 @@ OGCMVar={'lon_rho':'lon','lat_rho':'lat','depth':'depth','time':'time',\
          'temp':'water_temp','salt':'salinity','u':'water_u','v':'water_v','zeta':'surf_el'}
 
 # Define time info
-t_rng=['2023-01-01','2023-01-01'] # Inital time 
+t_rng=['2025-05-01','2025-05-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================
@@ -53,8 +54,8 @@ print(ncG)
 lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
 MyVar={'Layer_N':36,'Vtransform':2,\
-       'Vstretching':2,'Theta_s':7,\
-           'Theta_b':0.1,'Tcline':200,'hmin':10}
+       'Vstretching':4,'Theta_s':6.5,\
+           'Theta_b':1,'Tcline':400,'hmin':10}
 ncG.close()
 
 atG,onG=lonG.shape
@@ -108,7 +109,7 @@ Ini_time_num=((date2num(dt.datetime(tmp_y,tmp_m,1),TIME_UNIT)-tmp_dif))
 # print('!!! Ini_time + 16d !!!')
 
 #-- Create a dump ncfile ------------------------------------------------------
-create_ini(My_Ini,mask,topo,MyVar,Ini_time_num,My_time_ref,Ini_title,bio_model='Fennel')
+create_ini_tmp(My_Ini,mask,topo,MyVar,Ini_time_num,My_time_ref,bio_model='Fennel')
 
 #-- Get OGCM data for initial -------------------------------------------------
 OGCM_Data={}#,OGCM_Mask={}

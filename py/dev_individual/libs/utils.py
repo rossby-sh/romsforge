@@ -95,7 +95,7 @@ def compute_relative_time(time, input_unit, ref_unit):
 
     # time도 days로 변환
     time_in_days = to_days(time, input_unit)
-    total_days = time_in_days + offset
+    total_days = time_in_days - offset
 
     # 출력 단위 맞추기
     if "seconds" in ref_unit:
@@ -631,35 +631,63 @@ def zlevs(Vtransform, Vstretching,theta_s, theta_b, hc, N,igrid, h, zeta):
 
 
 from scipy.ndimage import distance_transform_edt
+from scipy.interpolate import LinearNDInterpolator, griddata
 
-def fast_flood_2d(var2d: np.ndarray) -> np.ndarray:
+def flood_horizontal(var: np.ndarray, lon2d: np.ndarray, lat2d: np.ndarray, method: str = 'edt') -> np.ndarray:
     """
-    Fill NaNs in a 2D array using nearest-neighbor extrapolation.
-    Uses Euclidean distance to find nearest valid value.
+    Flood missing (NaN) values in 2D or 3D field using specified horizontal method.
+    
+    Parameters:
+    - var: 2D or 3D ndarray (e.g., temp, salt, u, v)
+    - lon2d, lat2d: 2D horizontal grid
+    - method: 'edt' or 'linearND'
+    
+    Returns:
+    - var_filled: array with NaNs filled
     """
+    if var.ndim == 2:
+        return _flood_2d(var, lon2d, lat2d, method)
+
+    elif var.ndim == 3:
+        Nz = var.shape[0]
+        filled = np.empty_like(var)
+        for k in range(Nz):
+            filled[k] = _flood_2d(var[k], lon2d, lat2d, method)
+        return filled
+
+    else:
+        raise ValueError(f"Unsupported dimension: {var.ndim}")
+
+
+def _flood_2d(var2d: np.ndarray, lon2d: np.ndarray, lat2d: np.ndarray, method: str) -> np.ndarray:
     nan_mask = np.isnan(var2d)
     if not np.any(nan_mask):
         return var2d
 
-    _, indices = distance_transform_edt(nan_mask, return_indices=True)
-    filled = var2d[tuple(indices)]
-    return filled
+    var_filled = var2d.copy()
+    valid = ~nan_mask
 
-def fast_flood_3d(var3d: np.ndarray) -> np.ndarray:
-    """
-    Apply fast_flood_2d to each vertical level of a 3D field.
-    """
-    Nz, Ny, Nx = var3d.shape
-    filled = np.empty_like(var3d)
+    if method == 'edt':
+        _, indices = distance_transform_edt(nan_mask, return_indices=True)
+        var_filled[nan_mask] = var2d[tuple(indices)][nan_mask]
 
-    for k in range(Nz):
-        filled[k] = fast_flood_2d(var3d[k])
+    elif method == 'linearND':
+        interp = LinearNDInterpolator(
+            (lon2d[valid], lat2d[valid]),
+            var2d[valid],
+            fill_value=0.0  # fallback
+        )
+        var_filled[nan_mask] = interp(lon2d[nan_mask], lat2d[nan_mask])
 
-    return filled
+    elif method == 'griddata':
+        points = np.column_stack((lon2d[valid], lat2d[valid]))
+        values = var2d[valid].flatten()
+        all_points = np.column_stack((lon2d.ravel(), lat2d.ravel()))
+        interpolated = griddata(points, values, all_points, method='nearest', fill_value=0.0)
+        interpolated_2d = interpolated.reshape(var2d.shape)
+        var_filled[nan_mask] = interpolated_2d[nan_mask]
 
+    else:
+        raise ValueError(f"Unknown method: {method}")
 
-
-
-
-
-
+    return var_filled

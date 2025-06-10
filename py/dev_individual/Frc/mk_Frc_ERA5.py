@@ -16,7 +16,7 @@ import yaml
 from netCDF4 import Dataset, num2date, date2num
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
 import create_F as cn
-from tools import convert_time_to_ref
+from utils import compute_relative_time
 
 # Load config
 with open('config_era5.yml', 'r') as f:
@@ -71,7 +71,7 @@ dqdsst_values = cn.get_dqdsst(
 )
 MY_TIME_REF = config['ref_time']
 # Convert time
-TIME_CONVERTED_NUM = convert_time_to_ref(TIMES, TIMES.units, MY_TIME_REF)
+TIME_CONVERTED_NUM = compute_relative_time(TIMES[:], TIMES.units, MY_TIME_REF)
 
 print("=== Convert time ===")
 print(num2date(TIME_CONVERTED_NUM[:5],MY_TIME_REF))
