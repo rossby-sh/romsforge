@@ -19,13 +19,13 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_npzd_15km_v2_feb.nc' # Initial file name (to create)
+My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_npzd_15km_v2_may.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 #-- Define OGCM path ----------------------------------------------------------
 
 ncdir='/data/share/DATA/RAW/Bvar/'
-NO3NC=ncdir+'NUT/CMEMS_data_nut_2025-02.nc'
-phytNC=ncdir+'PFT/CMEMS_data_pft_2025-02.nc'
+NO3NC=ncdir+'NUT/CMEMS_data_nut_2025-05.nc'
+phytNC=ncdir+'PFT/CMEMS_data_pft_2025-05.nc'
 #o2NC=ncdir+'BIO/CMEMS_data_bio_2025-02.nc'
 
 
@@ -40,7 +40,7 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
          'NO3':'no3','phyt':'phyc','zoop':'zooc','detr':'???'}
 
 # Define time info
-t_rng=['2025-02-01','2025-02-01'] # Inital time 
+t_rng=['2025-05-01','2025-05-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================

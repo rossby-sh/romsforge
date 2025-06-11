@@ -473,8 +473,79 @@ def stretching(Vstretching,theta_s,theta_b,Layer_N,kgrid=1):
         else:
             C=Csur
     return s,C
-    
-            
+
+from numba import jit 
+@jit(nopython=True,cache=True) 
+def ztosigma_numba(var, z, depth):
+    Ns, Mp, Lp = z.shape
+    Nz = len(depth)
+    vnew = np.zeros((Ns, Mp, Lp))
+
+    for ks in range(Ns):
+        sigmalev = z[ks]
+        thezlevs = np.zeros((Mp, Lp), dtype=np.int32)
+
+        # depth indexing loop (boolean mask 대체)
+        for j in range(Mp):
+            for i in range(Lp):
+                for kz in range(Nz):
+                    if sigmalev[j, i] > depth[kz]:
+                        thezlevs[j, i] += 1
+
+        # check invalid index
+        min_lev = thezlevs.min()
+        max_lev = thezlevs.max()
+        if max_lev >= Nz or min_lev <= 0:
+            break
+
+        # 위치 계산
+        vflat = np.zeros(Nz * Mp * Lp)
+        count = 0
+        for k in range(Nz):
+            for j in range(Mp):
+                for i in range(Lp):
+                    vflat[count] = var[k, j, i]
+                    count += 1
+
+        for j in range(Mp):
+            for i in range(Lp):
+                kz = thezlevs[j, i]
+                pos = Nz * Mp * i + Nz * j + kz
+                z1 = depth[kz - 1]
+                z2 = depth[kz]
+                v1 = vflat[pos - 1]
+                v2 = vflat[pos]
+                sigma_z = sigmalev[j, i]
+                vnew[ks, j, i] = ((v1 - v2) * sigma_z + v2 * z1 - v1 * z2) / (z1 - z2)
+
+    return vnew
+
+@jit(nopython=True)
+def ztosigma_1d_numba(var, z, depth):
+    Ns, Lp = z.shape
+    Nz = len(depth)
+    vnew = np.zeros((Ns, Lp))
+    for ks in range(Ns):
+        sigmalev = z[ks, :]
+        thezlevs = np.zeros(Lp, dtype=np.int32)
+        for kz in range(Nz):
+            for j in range(Lp):
+                if sigmalev[j] > depth[kz]:
+                    thezlevs[j] += 1
+        for j in range(Lp):
+            if thezlevs[j] >= Nz or thezlevs[j] <= 0:
+                continue
+            k1 = thezlevs[j] - 1
+            k2 = thezlevs[j]
+            z1 = depth[k1]
+            z2 = depth[k2]
+            tmp_var = var[:, j]
+            v1 = tmp_var[k1]
+            v2 = tmp_var[k2]
+            vnew[ks, j] = ((v1 - v2) * sigmalev[j] + v2 * z1 - v1 * z2) / (z1 - z2)
+    return vnew
+
+
 def ztosigma(var,z,depth):
     Ns,Mp,Lp=z.shape
     Nz=len(depth)
@@ -691,3 +762,30 @@ def _flood_2d(var2d: np.ndarray, lon2d: np.ndarray, lat2d: np.ndarray, method: s
         raise ValueError(f"Unknown method: {method}")
 
     return var_filled
+
+
+
+def extract_bry(var, direction):
+    if direction == 'west':
+        return var[..., :, 0]
+    elif direction == 'east':
+        return var[..., :, -1]
+    elif direction == 'south':
+        return var[..., 0, :]
+    elif direction == 'north':
+        return var[..., -1, :]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

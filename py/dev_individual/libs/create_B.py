@@ -12,6 +12,159 @@ from netCDF4 import Dataset, num2date, date2num
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
 import ROMS_utils01 as ru  # stretching 함수가 포함된 모듈
 
+
+def create_bry(cfg, grd, bry_time, bio_model=None, ncFormat='NETCDF3_CLASSIC'):
+    vstretching, vtransform = cfg.vertical.vstretching, cfg.vertical.vtransform
+    theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b
+    tcline, layer_n = cfg.vertical.tcline, cfg.vertical.layer_n
+
+    hmin_ = np.min(grd.topo[grd.mask == 1])
+    if vtransform == 1 and tcline > hmin_:
+        print("--- [!ERROR] Tcline must be <= hmin when Vtransform == 1 ---")
+        return 1
+
+    Mp, Lp = grd.topo.shape
+    L, M, N, Np = Lp - 1, Mp - 1, layer_n, layer_n + 1
+
+    directions = ['north', 'south', 'east', 'west']
+    grids = {
+        'north': 'xi', 'south': 'xi',
+        'east': 'eta', 'west': 'eta'
+    }
+
+    # Dimensions
+    dimensions = {
+        'xi_u': L,
+        'xi_v': Lp,
+        'xi_rho': Lp,
+        'eta_u': Mp,
+        'eta_v': M,
+        'eta_rho': Mp,
+        's_rho': N,
+        's_w': Np,
+        'one': 1,
+        'bry_time': len(bry_time),
+        'zeta_time': len(bry_time),
+        'temp_time': len(bry_time),
+        'salt_time': len(bry_time),
+        'v2d_time': len(bry_time),
+        'v3d_time': len(bry_time)
+    }
+
+    # Base variables (1D control variables)
+    base_variables = {
+        'spherical':    ('S1',   ('one',),   {}, 'T'),
+        'Vtransform':   ('f4',   ('one',),   {'long_name': 'vertical terrain-following transformation equation'}, vtransform),
+        'Vstretching':  ('f4',   ('one',),   {'long_name': 'vertical terrain-following stretching function'}, vstretching),
+        'theta_s':      ('f4',   ('one',),   {'long_name': 'S-coordinate surface control parameter', 'units': 'nondimensional'}, theta_s),
+        'theta_b':      ('f4',   ('one',),   {'long_name': 'S-coordinate bottom control parameter', 'units': 'nondimensional'}, theta_b),
+        'Tcline':       ('f4',   ('one',),   {'long_name': 'S-coordinate surface/bottom layer width', 'units': 'meter'}, tcline),
+        'hc':           ('f4',   ('one',),   {'long_name': 'S-coordinate parameter, critical depth', 'units': 'meter'}, tcline),
+    }
+
+    # Stretching
+    sc_r, Cs_r = ru.stretching(vstretching, theta_s, theta_b, layer_n, 0)
+    sc_w, Cs_w = ru.stretching(vstretching, theta_s, theta_b, layer_n, 1)
+
+    # Stretching variables
+    base_variables.update({
+        'sc_r': ('f4', ('s_rho',), {'long_name': 'S-coordinate at RHO-points', 'units': 'nondimensional'}, sc_r),
+        'Cs_r': ('f4', ('s_rho',), {'long_name': 'S-coordinate stretching curves at RHO-points', 'units': 'nondimensional'}, Cs_r),
+        'sc_w': ('f4', ('s_w',),   {'long_name': 'S-coordinate at W-points', 'units': 'nondimensional'}, sc_w),
+        'Cs_w': ('f4', ('s_w',),   {'long_name': 'S-coordinate stretching curves at W-points', 'units': 'nondimensional'}, Cs_w),
+    })
+
+    time_dims = ['bry_time', 'zeta_time', 'temp_time', 'salt_time', 'v2d_time', 'v3d_time']
+
+    bry_variables = {}
+    for d in directions:
+        g = grids[d]
+        bry_variables.update({
+            f'zeta_{d}': ('zeta_time', f'{g}_rho'),
+            f'ubar_{d}': ('v2d_time', f'{g}_u'),
+            f'vbar_{d}': ('v2d_time', f'{g}_v'),
+            f'temp_{d}': ('temp_time', 's_rho', f'{g}_rho'),
+            f'salt_{d}': ('salt_time', 's_rho', f'{g}_rho'),
+            f'u_{d}':    ('v3d_time', 's_rho', f'{g}_u'),
+            f'v_{d}':    ('v3d_time', 's_rho', f'{g}_v')
+        })
+
+    # Biological variables
+    bio_tracers = {
+        'npzd': {
+            'NO3': 'nitrate concentration',
+            'phyt': 'phytoplankton biomass',
+            'zoop': 'zooplankton biomass',
+            'detritus': 'detritus concentration'
+        },
+        'fennel': {
+            'NO3': 'nitrate concentration',
+            'NH4': 'ammonium concentration',
+            'PO4': 'phosphate concentration',
+            'chlo': 'chlorophyll concentration',
+            'phyt': 'small phytoplankton biomass',
+            'zoop': 'zooplankton biomass',
+            'oxygen': 'oxygen concentration',
+            'TIC': 'total inorganic carbon',
+            'alkalinity': 'total alkalinity',
+            'SdeC': 'small carbon-detritus concentration',
+            'LdeC': 'large carbon-detritus concentration',
+            'RdeC': 'river carbon-detritus concentration',
+            'SdeN': 'small nitrogen-detritus concentration',
+            'LdeN': 'large nitrogen-detritus concentration',
+            'RdeN': 'river nitrogen-detritus concentration'
+        }
+    }
+
+    if bio_model in bio_tracers:
+        for tracer, desc in bio_tracers[bio_model].items():
+            for d in directions:
+                g = grids[d]
+                bry_variables[f'{tracer}_{d}'] = ('bry_time', 's_rho', f'{g}_rho')
+
+    # Create NetCDF
+    mode = 'w' if cfg.force_write else 'x'
+    try:
+        ncfile = Dataset(cfg.bryname, mode=mode, format=ncFormat)
+    except FileExistsError:
+        print(f"--- [!ERROR] {cfg.bryname} already exists and force_write=False ---")
+        return 1
+
+    for name, size in dimensions.items():
+        ncfile.createDimension(name, size)
+
+    for name, (dtype, dims, attrs, value) in base_variables.items():
+        var = ncfile.createVariable(name, dtype, dims)
+        for attr_name, attr_val in attrs.items():
+            setattr(var, attr_name, attr_val)
+        var[:] = value
+
+    # Time variables
+    for name in time_dims:
+        v = ncfile.createVariable(name, 'f4', (name,))
+        v.units = cfg.time_ref
+        v.long_name = f"time for {name.replace('_time','')} condition"
+        v[:] = bry_time
+
+    # Boundary variables
+    for name, dims in bry_variables.items():
+        var = ncfile.createVariable(name, 'f4', dims)
+        var.long_name = name.replace('_', ' ')
+        var.units = 'unknown'
+        var[:] = 0.0
+
+    # Global attrs
+    ncfile.title = cfg.global_attrs.title
+    ncfile.clim_file = cfg.bryname
+    ncfile.grd_file = cfg.grdname
+    ncfile.type = cfg.global_attrs.type
+    ncfile.history = cfg.global_attrs.history
+
+    ncfile.close()
+    print(f"✅ Boundary file created: {cfg.bryname}")
+    return 0
+
+
 def createB(
     filename,
     topo,
