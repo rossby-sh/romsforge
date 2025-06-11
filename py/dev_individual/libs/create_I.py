@@ -69,14 +69,14 @@ def create_ini(cfg, grd, initime_num, ncFormat='NETCDF3_CLASSIC', bio_model=None
 
     # 추가 tracer 변수 정의
     bio_tracers = {
-        'NPZD': {
+        'npzd': {
             'NO3':           {'long_name': 'nitrate concentration', 'units': 'millimole nitrogen meter-3'},
             'phytoplankton': {'long_name': 'phytoplankton biomass',  'units': 'millimole nitrogen meter-3'},
             'zooplankton':   {'long_name': 'zooplankton biomass',    'units': 'millimole nitrogen meter-3'},
             'detritus':      {'long_name': 'mole_concentration_of_detritus_expressed_as_nitrogen_in_sea_water',
                               'units': 'millimole nitrogen meter-3'},
         },
-        'Fennel': {
+        'fennel': {
             'NO3':      {'long_name': 'nitrate concentration', 'units': 'millimole nitrogen meter-3'},
             'NH4':      {'long_name': 'ammonium concentration', 'units': 'millimole nitrogen meter-3'},
             'PO4':      {'long_name': 'ammonium concentration', 'units': 'millimole po4 meter-3'},

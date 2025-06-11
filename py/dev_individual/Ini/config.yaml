@@ -7,19 +7,21 @@
 # === Define file names ===
 #ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
 #grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
-ininame : /data/share/DATA/ROMS_INPUTS/tmp/roms_ini.nc
-grdname : /data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc
+ininame : /data/share/DATA/ROMS_INPUTS/ini/roms_ini_fennel_15km_v2_feb.nc
+grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
-weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP12_weight_NWP4.nc
-calc_weight: False
+weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight_NWP4.nc
+calc_weight: True
 
 ncformat: NETCDF3_64BIT
 force_write: True
 
-flood_method_for_ini: edt #griddata
+bio_model_type: fennel
 
-ogcm_name: /data/share/DATA/RAW/00utc/HYCOM_20230101_00UTC.nc 
+flood_method_for_ini: griddata #griddata / edt / linearND
+
+ogcm_name: /data/share/DATA/RAW/00utc/HYCOM_20250201_00UTC.nc 
 
 ogcm_var_name:
     longitude       : lon
@@ -32,22 +34,22 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-initdate            : 2023-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+initdate            : 2025-02-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 time_ref            : seconds since 2000-1-1 00:00:00
 
 global_attrs: 
-    title           : test - mk_ini
-    clm_file        : test
-    type            : test
-    history         : test
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
 
 vertical:
     layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7.
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 
 

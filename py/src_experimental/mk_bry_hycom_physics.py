@@ -16,7 +16,7 @@ import datetime as dt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-My_Bry='/data/share/DATA/ROMS_INPUTS/bry/roms_bry_fennel_15km_smooth_v2.nc' # Initial file name (to create)
+My_Bry='/data/share/DATA/ROMS_INPUTS/bry/roms_bry_npzd_15km_v2_241231_250601.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 
 Parallel=False
@@ -31,7 +31,7 @@ vNC=ncdir+'HYCOM_'
 NSEW=[True,True,True,False] # N S E W
 #NSEW=[False,False,False,True] # N S E W
 
-Bry_title='ROMS-Fennel'
+Bry_title='ROMS-npzd'
 
 # OGCM Variables name
 OGCMVar={'lon_rho':'lon','lat_rho':'lat','depth':'depth','time':'time',\
@@ -66,7 +66,7 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2024-12-30 00:00', '2025-06-01 23:00']
+t_rng = ['2024-12-31 00:00', '2025-06-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units
 
@@ -95,7 +95,8 @@ atG,onG=lonG.shape
 #cosa=np.tile( np.tile(cosa_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 #sina=np.tile( np.tile(sina_,(thO,1,1)), (len(Bry_time_num),1,1,1) )
 
-createB(My_Bry,topo,mask,MyVar,Bry_time_num,My_time_ref,NSEW,'Fennel','NETCDF3_64BIT_OFFSET')
+#createB(My_Bry,topo,mask,MyVar,Bry_time_num,My_time_ref,NSEW,'NPZD','NETCDF3_64BIT_OFFSET')
+createB_NPZD(My_Bry,mask,topo,MyVar,NSEW,Bry_time_num,My_time_ref,'NPZD','NETCDF3_64BIT_OFFSET')
 #print("!!!=== #create ===!!!")
 
 #-- Get OGCM lon lat coordinates for slicing ----------------------------------

@@ -17,8 +17,8 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 import xarray as xr
 import os 
-My_Bry='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_bry_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Bry='/data/share/DATA/ROMS_INPUTS/bry/roms_bry_fennel_15km_v2_241231_250601.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
  
 Parallel=False
 
@@ -48,8 +48,8 @@ lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
 
 MyVar={'Layer_N':36,'Vtransform':2,\
-       'Vstretching':2,'Theta_s':7,\
-           'Theta_b':0.1,'Tcline':200,'hmin':10}
+       'Vstretching':4,'Theta_s':6.5,\
+           'Theta_b':1,'Tcline':400,'hmin':10}
 ncG.close()
 
 
@@ -66,7 +66,7 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2022-12-31 00:00', '2025-01-01 23:00']
+t_rng = ['2024-12-30 00:00', '2025-06-01 23:00']
 # t_rng = ['2024-12-31 00:00', '2025-04-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units

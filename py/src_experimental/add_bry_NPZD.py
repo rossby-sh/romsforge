@@ -16,16 +16,15 @@ import datetime as dt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-My_Bry='D:/shjo/ROMS_inputs/NWP15km/N36/ROMS_bry_15km_241231_250501_N36.nc' # Initial file name (to create)
-My_Grd='D:/shjo/ROMS_inputs/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
+My_Bry='/data/share/DATA/ROMS_INPUTS/bry/roms_bry_npzd_15km_v2_241231_250601.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
  
 Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='D:/shjo/GLORYS/'
-NO3NC=ncdir+'nut/mercatorbiomer4v2r1_global_mean_nut_'
-phytNC=ncdir+'chl/mercatorbiomer4v2r1_global_mean_pft_'
-zoopNC=ncdir+'zoo/mercatorbiomer4v2r1_global_mean_plankton_'
-detrNC=ncdir+'HYCOM_'
+ncdir='/data/share/DATA/RAW/Bvar/'
+NO3NC=ncdir+'NUT/'
+phytNC=ncdir+'PFT/'
+
 
 NSEW=[True,True,True,False] # N S E W
 
@@ -37,8 +36,8 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
 
 conserv=1
 
-OGCMS=[ncdir+'nut/'+i for i in os.listdir(ncdir+'nut/') if (i.endswith('.nc') & i.startswith('mercatorbiomer4v2r1_global_mean_nut_') ) ]
 
+OGCMS=[ncdir+'NUT/'+i for i in os.listdir(ncdir+'NUT/') if (i.endswith('.nc') & i.startswith('CMEMS_') ) ]
 # Get My Grid info
 ncG=Dataset(My_Grd)
 lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
@@ -63,7 +62,7 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2024-12-31 00:00', '2025-05-01 23:00']
+t_rng = ['2024-12-31 00:00', '2025-06-01 23:00']
 # t_rng = ['2024-12-31 00:00', '2025-04-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units
@@ -132,7 +131,7 @@ if NSEW[0]:
 
     OGCM_Data={}#,OGCM_Mask={}
 
-    for i in ['NO3','phyt','zoop']:
+    for i in ['NO3','phyt']:
     #for i in ['temp']:
         print('!!! Data processing : '+i+' !!!')
  
@@ -179,6 +178,7 @@ if NSEW[0]:
         OGCM_Data[i]=data
         
     OGCM_Data['detr']=OGCM_Data['phyt']*0.1
+    OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 
     # Process ROMS Vertical grid
     Z=np.zeros(len(depthO)+2)
@@ -243,7 +243,7 @@ if NSEW[1]:
 
     OGCM_Data={}#,OGCM_Mask={}
 
-    for i in ['NO3','phyt','zoop']:
+    for i in ['NO3','phyt']:
     #for i in ['temp']:
         print('!!! Data processing : '+i+' !!!')
  
@@ -290,6 +290,7 @@ if NSEW[1]:
         OGCM_Data[i]=data
         
     OGCM_Data['detr']=OGCM_Data['phyt']*0.1
+    OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 
     # Process ROMS Vertical grid
     Z=np.zeros(len(depthO)+2)
@@ -354,7 +355,7 @@ if NSEW[2]:
 
     OGCM_Data={}#,OGCM_Mask={}
 
-    for i in ['NO3','phyt','zoop']:
+    for i in ['NO3','phyt']:
     #for i in ['temp']:
         print('!!! Data processing : '+i+' !!!')
  
@@ -401,6 +402,7 @@ if NSEW[2]:
         OGCM_Data[i]=data
         
     OGCM_Data['detr']=OGCM_Data['phyt']*0.1
+    OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 
     # Process ROMS Vertical grid
     Z=np.zeros(len(depthO)+2)

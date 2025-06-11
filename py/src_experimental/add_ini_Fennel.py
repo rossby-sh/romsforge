@@ -17,14 +17,14 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_ini_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_fennel_15km_v2_feb.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/Bvar/'
-NO3NC=ncdir+'NUT/CMEMS_data_nut_2023-01.nc'
-phytNC=ncdir+'PFT/CMEMS_data_pft_2023-01.nc'
-o2NC=ncdir+'BIO/CMEMS_data_bio_2023-01.nc'
+NO3NC=ncdir+'NUT/CMEMS_data_nut_2025-02.nc'
+phytNC=ncdir+'PFT/CMEMS_data_pft_2025-02.nc'
+o2NC=ncdir+'BIO/CMEMS_data_bio_2025-02.nc'
 
 #-- Define Parameters ---------------------------------------------------------
 
@@ -33,7 +33,7 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
         'NO3':'no3','PO4':'po4','chlorophyll':'chl','oxygen':'o2','phytoplankton':'phyc'}
 
 # Define time info
-t_rng=['2023-01-01','2023-01-01'] # Inital time 
+t_rng=['2025-02-01','2025-02-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================
@@ -46,8 +46,8 @@ print(ncG)
 lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
 MyVar={'Layer_N':36,'Vtransform':2,\
-       'Vstretching':2,'Theta_s':7,\
-           'Theta_b':0.1,'Tcline':200,'hmin':10}
+       'Vstretching':4,'Theta_s':6.5,\
+       'Theta_b':1,'Tcline':400,'hmin':10}
 ncG.close()
 
 atG,onG=lonG.shape

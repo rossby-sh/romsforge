@@ -24,7 +24,7 @@ relative_time = tl.compute_relative_time(ogcm.time[idt], ogcm.time_unit, cfg.tim
 
 # --- [03] Create initial NetCDF file ---
 print(f"--- [03] Creating initial NetCDF file: {cfg.ininame} ---")
-status = cn.create_ini(cfg, grd, relative_time, ncFormat=cfg.ncformat, bio_model="Fennel")
+status = cn.create_ini(cfg, grd, relative_time, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
 if status:
     print(f"--- [!ERROR] Failed to creating file {cfg.ininame} ---")
     raise

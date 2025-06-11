@@ -19,15 +19,17 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='D:/shjo/ROMS_inputs/NWP15km/ROMS_ini_15km_250301_N36.nc' # Initial file name (to create)
-My_Grd='D:/shjo/ROMS_inputs/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
-
+My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_npzd_15km_v2_feb.nc' # Initial file name (to create)
+My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='D:/shjo/GLORYS/'
-NO3NC=ncdir+'nut/mercatorbiomer4v2r1_global_mean_nut_20250301.nc'
-phytNC=ncdir+'chl/mercatorbiomer4v2r1_global_mean_pft_20250301.nc'
-zoopNC=ncdir+'zoo/mercatorbiomer4v2r1_global_mean_plankton_20250301.nc'
-detrNC=ncdir+'HYCOM_'
+
+ncdir='/data/share/DATA/RAW/Bvar/'
+NO3NC=ncdir+'NUT/CMEMS_data_nut_2025-02.nc'
+phytNC=ncdir+'PFT/CMEMS_data_pft_2025-02.nc'
+#o2NC=ncdir+'BIO/CMEMS_data_bio_2025-02.nc'
+
+
+
 
 #-- Define Parameters ---------------------------------------------------------
 Ini_title='my Test ROMS' # title for NC description
@@ -38,7 +40,7 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
          'NO3':'no3','phyt':'phyc','zoop':'zooc','detr':'???'}
 
 # Define time info
-t_rng=['2025-03-01','2025-03-01'] # Inital time 
+t_rng=['2025-02-01','2025-02-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================
@@ -110,7 +112,7 @@ Ini_time_num=((date2num(dt.datetime(tmp_y,tmp_m,1),TIME_UNIT)-tmp_dif))*86400
 
 #-- Get OGCM data for initial -------------------------------------------------
 OGCM_Data={}#,OGCM_Mask={}
-for i in ['NO3','phyt','zoop']:
+for i in ['NO3','phyt']:
 #for i in ['temp']:
 
     print('!!! Data processing : '+i+' !!!')
@@ -152,6 +154,7 @@ for i in ['NO3','phyt','zoop']:
     OGCM_Data[i]=data
     
 OGCM_Data['detr']=OGCM_Data['phyt']*0.1
+OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 
     
 #-- Process vector elements ---------------------------------------------------
