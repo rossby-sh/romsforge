@@ -108,36 +108,37 @@ for f, entries in grouped.items():
 
             # [06] Remap
             print("--- [06] Remapping ---")
-            for varname in vars(field):
-                var_src = getattr(field, varname)
+            for var in vars(field):
+                var_src = getattr(field, var)
                 remapped = tl.remap_variable(var_src, row, col, S, grd.lon.shape, method="coo")
-                setattr(field, varname, remapped)
+                setattr(field, var, remapped)
 
             # [07] Horizontal Flood
             print("--- [07] Apply horizontal flood ---")
-            for var in ['temp', 'salt', 'u', 'v', 'zeta', 'ubar', 'vbar']:
+            for var in vars(field):
                 val = getattr(field, var)
                 val_flooded = tl.flood_horizontal(val, grd.lon, grd.lat, method=cfg.flood_method_for_bry)
                 setattr(field, var, val_flooded)
 
             print("--- [08] No vertical flood ---")
-            for var in ['temp', 'salt', 'u', 'v']:
+            for var in vars(field):
                 val = getattr(field, var)
+                if var.ndim == 2:
+                    continue
                 #val_flooded = tl.flood_vertical_vectorized(val, grd.mask, spval=-1e10)
                 val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
                 setattr(field, var, val_flooded)
 
             # [09] Mask land
             print("--- [09] Masking land to 0 ---")
-            for var in ['zeta', 'ubar', 'vbar']:
+            for var in vars(field):
                 arr = getattr(field, var)
-                arr[grd.mask == 0] = 0.0
+                if arr.ndim==2:
+                    arr[grd.mask == 0] = 0.0
+                else:
+                    arr[...,grd.mask == 0] = 0.0
                 setattr(field, var, arr)
 
-            for var in ['temp', 'salt', 'u', 'v']:
-                arr = getattr(field, var)
-                arr[:, grd.mask == 0] = 0.0
-                setattr(field, var, arr)
 
             # [10] Rotate
             print("--- [10] Rotate vectors ---")

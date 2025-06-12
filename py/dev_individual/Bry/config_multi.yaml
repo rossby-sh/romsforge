@@ -21,8 +21,13 @@ bio_model_type: npzd
 
 flood_method_for_bry: edt #griddata / edt / linearND
 
-ogcm_path: /data/share/DATA/RAW/00utc/
-#ogcm_path: /data/share/DATA/RAW/Bvar/NUT/
+ogcm_path: 
+    zeta        : /data/share/DATA/RAW/00UTC/
+    temperature : /data/share/DATA/RAW/00UTC/
+    salinity    : /data/share/DATA/RAW/00UTC/
+    u           : /data/share/DATA/RAW/00UTC/
+    v           : /data/share/DATA/RAW/00UTC/
+
 
 ogcm_var_name:
     longitude       : lon
@@ -44,7 +49,6 @@ global_attrs:
     title           : ROMS bry
     clm_file        : ROMS bry
     type            : ROMS bry
-    history         : history
 
 vertical:
     layer_n         : 36
