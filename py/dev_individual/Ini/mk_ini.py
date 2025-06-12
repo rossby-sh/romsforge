@@ -19,7 +19,7 @@ ogcm = tl.load_ogcm_metadata(cfg.ogcm_name, cfg.ogcm_var_name)
 
 # --- [02] Time index matching and relative time calculation ---
 tinfo = collect_time_info(cfg.ogcm_name, cfg.ogcm_var_name['time'], str(cfg.initdate))
-_, idt, _ = tinfo[0]
+_, idt, _, _ = tinfo[0]
 relative_time = tl.compute_relative_time(ogcm.time[idt], ogcm.time_unit, cfg.time_ref)
 
 # --- [03] Create initial NetCDF file ---
@@ -95,7 +95,13 @@ print("Time elapsed : ")
 print(f"걸린 시간: {end - start:.3f}초")
 
 print("--- [08] Apply vertical flood ---")
-print("---[!CAUTION] Currently no vertical flood apply ---")
+for var in ['temp', 'salt', 'u', 'v']:
+    val = getattr(field, var)
+    val_flooded = tl.flood_vertical_vectorized(val, grd.mask, spval=-1e10)
+    #val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
+    setattr(field, var, val_flooded)
+
+print(f"걸린 시간: {time.time() - end:.3f}초")
 
 print("--- [09] Masking land to 0 ---")
 for varname in ['zeta', 'ubar', 'vbar']:
@@ -138,7 +144,7 @@ for var, zgrid in zip(['temp', 'salt', 'u', 'v'], [zr, zr, zu, zv]):
     val = getattr(field, var)
     padded = np.vstack((val[0:1], val, val[-1:]))
     flipped = np.flip(padded, axis=0)
-    remapped = tl.ztosigma(flipped, zgrid, np.flipud(Z))
+    remapped = tl.ztosigma_numba(flipped, zgrid, np.flipud(Z))
     setattr(field, var, remapped)
 
 

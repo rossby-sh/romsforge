@@ -15,7 +15,7 @@ from collections import defaultdict
 import time 
 
 # --- [01] Load configuration and input metadata ---
-cfg  = tl.parse_config("./config.yaml")
+cfg  = tl.parse_config("./config_single.yaml")
 grd  = tl.load_roms_grid(cfg.grdname)
 filelist = sorted(glob.glob(os.path.join(cfg.ogcm_path, "*.nc")))
 
@@ -25,7 +25,7 @@ ogcm = tl.load_ogcm_metadata(filelist[0], cfg.ogcm_var_name)
 
 start1=time.time()
 # --- [02] Time index matching and relative time calculation ---
-tinfo = collect_time_info(filelist, cfg.ogcm_var_name['time'],\
+tinfo = collect_time_info(filelist, cfg.ogcm_var_name.time,\
         (str(cfg.bry_start_date), str(cfg.bry_end_date)) )
 print(f'--- Time elapsed: {time.time()-start1:.3f}s ---')
 
@@ -87,9 +87,10 @@ import time
 
 # --- 파일 단위 루프 ---
 for f, entries in grouped.items():
+    print("--- [05] Loading OGCM data ---")
     with Dataset(f, maskandscale=True) as nc:
         nc_wrap = tl.MaskedNetCDF(nc)
-        start=time.time()
+        start2=time.time()
         for i, t, tval in entries:
             # [05] OGCM 필드 로딩
             zeta = nc_wrap.get(cfg.ogcm_var_name['zeta'], i, idy, idx)
@@ -102,6 +103,8 @@ for f, entries in grouped.items():
 
             field = tl.ConfigObject(zeta=zeta, ubar=ubar, vbar=vbar,
                                     temp=temp, salt=salt, u=u, v=v)
+            print(f'--- Time elapsed: {time.time()-start2:.3f}s ---')
+            start=time.time()
 
             # [06] Remap
             print("--- [06] Remapping ---")
@@ -110,15 +113,27 @@ for f, entries in grouped.items():
                 remapped = tl.remap_variable(var_src, row, col, S, grd.lon.shape, method="coo")
                 setattr(field, varname, remapped)
 
+            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
+            start=time.time()
+            
             # [07] Horizontal Flood
             print("--- [07] Apply horizontal flood ---")
             for var in ['temp', 'salt', 'u', 'v', 'zeta', 'ubar', 'vbar']:
                 val = getattr(field, var)
                 val_flooded = tl.flood_horizontal(val, grd.lon, grd.lat, method=cfg.flood_method_for_bry)
                 setattr(field, var, val_flooded)
+            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
+            start=time.time()
 
-            print("--- [08] No vertical flood ---")
+            print("--- [08] Apply vertical flood ---")
 
+            for var in ['temp', 'salt', 'u', 'v']:
+                val = getattr(field, var)
+                #val_flooded = tl.flood_vertical_vectorized(val, grd.mask, spval=-1e10)
+                val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
+                setattr(field, var, val_flooded)
+            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
+            start=time.time()
             # [09] Mask land
             print("--- [09] Masking land to 0 ---")
             for var in ['zeta', 'ubar', 'vbar']:
@@ -139,9 +154,23 @@ for f, entries in grouped.items():
             setattr(field, 'v',    tl.rho2uv(v_rot, 'v'))
             setattr(field, 'ubar', tl.rho2uv(ubar_rot, 'u'))
             setattr(field, 'vbar', tl.rho2uv(vbar_rot, 'v'))
+            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
+            start=time.time()
 
             # [11] Vertical interpolation
             print("--- [11] Vertical interpolation from z to sigma ---")
+
+            # --- [11~13] 방향별 수직 보간 및 저장 ---
+            directions = ['north', 'south', 'east', 'west']
+
+            # HYCOM depth padding
+            Z = np.zeros(len(ogcm.depth) + 2)
+            Z[0] = 100
+            Z[1:-1] = -ogcm.depth
+            Z[-1] = -100000
+            Z_flipped = np.flipud(Z)
+
+            # sigma 관련 파라미터
             zargs = (
                 cfg.vertical.vtransform,
                 cfg.vertical.vstretching,
@@ -151,47 +180,64 @@ for f, entries in grouped.items():
                 cfg.vertical.layer_n,
             )
 
-            zr = tl.zlevs(*zargs, 1, grd.topo, field.zeta)
-            zu, zv = tl.rho2uv(zr, 'u'), tl.rho2uv(zr, 'v')
+            zr_3d = tl.zlevs(*zargs, 1, grd.topo, field.zeta)    # (Ns, Mp, Lp)
+            zw_3d = tl.zlevs(*zargs, 5, grd.topo, field.zeta)    # (Ns+1, Mp, Lp)
+            dz_3d = zw_3d[1:, :, :] - zw_3d[:-1, :, :]
 
-            Z = np.zeros(len(ogcm.depth) + 2)
-            Z[0] = 100; Z[1:-1] = -ogcm.depth; Z[-1] = -100000
+            zu_3d = tl.rho2uv(zr_3d,"u")
+            zv_3d = tl.rho2uv(zr_3d,"v")
+            dz_u3d = tl.rho2uv(dz_3d,"u")
+            dz_v3d = tl.rho2uv(dz_3d,"v")
 
-            for var, zgrid in zip(['temp', 'salt', 'u', 'v'], [zr, zr, zu, zv]):
-                val = getattr(field, var)
-                padded = np.vstack((val[0:1], val, val[-1:]))
-                flipped = np.flip(padded, axis=0)
-                sigma = tl.ztosigma_numba(flipped, zgrid, np.flipud(Z))
-                setattr(field, var, sigma)
+            for direction in directions:
+                zr = tl.extract_bry(zr_3d, direction)
+                zu = tl.extract_bry(zu_3d, direction)
+                zv = tl.extract_bry(zv_3d, direction)
+                dzr = tl.extract_bry(dz_3d, direction)
+                dzu = tl.extract_bry(dz_u3d, direction)
+                dzv = tl.extract_bry(dz_v3d, direction)
 
-            # [12] Volume conservation
-            print("--- [12] Volume conservation and barotropic correction ---")
-            zw = tl.zlevs(*zargs, 5, grd.topo, field.zeta)
-            dzr = zw[1:, :, :] - zw[:-1, :, :]
-            dzu, dzv = tl.rho2uv(dzr, 'u'), tl.rho2uv(dzr, 'v')
+    # 이후 loop에서 var에 따라 zr/zu/zv 선택해서 사용
 
-            u_new, v_new, ubar_new, vbar_new = tl.conserve_and_recompute_barotropic(
-                field.u, field.v, field.ubar, field.vbar, dzu, dzv
-            )
 
-            setattr(field, 'u', u_new)
-            setattr(field, 'v', v_new)
-            setattr(field, 'ubar', ubar_new)
-            setattr(field, 'vbar', vbar_new)
+                for var, zgrid in zip(['temp', 'salt', 'u', 'v'],[zr,zr,zu,zv]):
+                    val = tl.extract_bry(getattr(field, var), direction)        # (Nz, Lp)
+                    val_pad = np.vstack((val[0:1], val, val[-1:]))              # (Nz+2, Lp)
+                    val_flip = np.flip(val_pad, axis=0)                         # (Nz+2 → 위에서 아래로)
+                    sigma_interped = tl.ztosigma_1d_numba(val_flip, zgrid, Z_flipped)             # (Ns, Lp)
+                    
+                    if var == 'u':
+                        barotropic = tl.extract_bry(field.ubar, direction)
+                        dz_bar = dzu
+                    elif var == 'v':
+                        barotropic = tl.extract_bry(field.vbar, direction)
+                        dz_bar = dzv
+                    else:
+                        barotropic = None
 
-            # [13] slicing to NSEW
-            for varname in bry_data:
-                var = getattr(field, varname)
-                for direction in ['west', 'east', 'south', 'north']:
-                    sliced = tl.extract_bry(var, direction)
-                    bry_data[varname][direction].append(sliced)
+                    if barotropic is not None:
+                        sigma_interped, _, barotropic_corrected, _ = tl.conserve_and_recompute_barotropic(
+                                sigma_interped, sigma_interped, barotropic, barotropic, dz_bar, dz_bar)
+                        setattr(field, f"{'ubar' if var == 'u' else 'vbar'}_{direction}", barotropic_corrected)
 
-            # 상대 시간도 저장
-            time_converted = tl.compute_relative_time(tval, ogcm.time_unit, cfg.time_ref)
-            bry_time.append(time_converted)
-            print(num2date(time_converted,cfg.time_ref))
-            end=time.time()
-            print(f'--- Time elapsed: {end-start:.3f}s ---')
+                    setattr(field, f"{var}_{direction}", sigma_interped)
+
+                # zeta만 따로 저장 (ubar/vbar는 위에서 이미 저장됨)
+                val = tl.extract_bry(field.zeta, direction)
+                setattr(field, f"zeta_{direction}", val)
+
+                # 저장
+                for varname in bry_data:
+                    val_d = getattr(field, f"{varname}_{direction}")
+                    bry_data[varname][direction].append(val_d)
+
+                # 시간 저장
+                time_converted = tl.compute_relative_time(tval, ogcm.time_unit, cfg.time_ref)
+                bry_time.append(time_converted)
+            print(num2date(time_converted,cfg.time_ref)) 
+        print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
+        print(f'--- Time elapsed: {time.time()-start2:.3f}s ---')
+
 # --- 모든 시간 처리 후 최종 정리 ---
 for varname in bry_data:
     for direction in bry_data[varname]:

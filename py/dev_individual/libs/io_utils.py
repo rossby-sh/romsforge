@@ -2,6 +2,8 @@
 
 from netCDF4 import Dataset, MFDataset, num2date, date2num
 from datetime import datetime
+from typing import Union
+from dataclasses import dataclass
 
 def is_netcdf4(file_path):
     with open(file_path, 'rb') as f:
@@ -31,6 +33,44 @@ def parse_time_range(date_input):
         return (t_start, t_end)
     else:
         raise ValueError("Invalid date input")
+
+@dataclass
+class TimeIndex:
+    filename: str
+    index: int
+    datetime: datetime
+    raw_value: float
+
+def collect_time_info_2(input_files, time_var, date_input):
+    if isinstance(input_files, str):
+        # initial file
+        target_date = date_input
+        with Dataset(input_files) as nc:
+            times = nc.variables[time_var][:]
+            units = nc.variables[time_var].units
+            tdates = num2date(times, units)
+            for i, t in enumerate(tdates):
+                if t == target_date:
+                    return [TimeIndex(input_files, i, t, times[i])]
+        raise ValueError("Target date not found in file.")
+
+    else:
+        # boundary files
+        t_start, t_end = parse_time_range(date_input)
+        time_info = []
+        for f in input_files:
+            with Dataset(f) as nc:
+                times = nc.variables[time_var][:]
+                units = nc.variables[time_var].units
+                tdates = num2date(times, units)
+                for i, t in enumerate(tdates):
+                    if t_start <= t <= t_end:
+                        time_info.append(TimeIndex(f, i, t, times[i]))
+        if not time_info:
+            raise ValueError("No valid time steps found in given range.")
+        return time_info
+
+
 
 def collect_time_info(input_files, time_var, date_input):
     if isinstance(input_files, str):

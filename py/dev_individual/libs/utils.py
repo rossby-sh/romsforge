@@ -485,36 +485,59 @@ def ztosigma_numba(var, z, depth):
         sigmalev = z[ks]
         thezlevs = np.zeros((Mp, Lp), dtype=np.int32)
 
-        # depth indexing loop (boolean mask 대체)
         for j in range(Mp):
             for i in range(Lp):
                 for kz in range(Nz):
                     if sigmalev[j, i] > depth[kz]:
                         thezlevs[j, i] += 1
 
-        # check invalid index
         min_lev = thezlevs.min()
         max_lev = thezlevs.max()
         if max_lev >= Nz or min_lev <= 0:
             break
 
-        # 위치 계산
-        vflat = np.zeros(Nz * Mp * Lp)
-        count = 0
-        for k in range(Nz):
-            for j in range(Mp):
-                for i in range(Lp):
-                    vflat[count] = var[k, j, i]
-                    count += 1
+        for j in range(Mp):
+            for i in range(Lp):
+                kz = thezlevs[j, i]
+                z1 = depth[kz - 1]
+                z2 = depth[kz]
+                v1 = var[kz - 1, j, i]
+                v2 = var[kz, j, i]
+                sigma_z = sigmalev[j, i]
+                vnew[ks, j, i] = ((v1 - v2) * sigma_z + v2 * z1 - v1 * z2) / (z1 - z2)
+
+    return vnew
+
+from numba import njit, prange
+
+@njit(parallel=True)
+def ztosigma_numba_parallel(var, z, depth):
+    Ns, Mp, Lp = z.shape
+    Nz = len(depth)
+    vnew = np.zeros((Ns, Mp, Lp))
+
+    for ks in range(Ns):
+        sigmalev = z[ks]
+        thezlevs = np.zeros((Mp, Lp), dtype=np.int32)
+
+        for j in range(Mp):
+            for i in range(Lp):
+                for kz in range(Nz):
+                    if sigmalev[j, i] > depth[kz]:
+                        thezlevs[j, i] += 1
+
+        min_lev = thezlevs.min()
+        max_lev = thezlevs.max()
+        if max_lev >= Nz or min_lev <= 0:
+            break
 
         for j in range(Mp):
             for i in range(Lp):
                 kz = thezlevs[j, i]
-                pos = Nz * Mp * i + Nz * j + kz
                 z1 = depth[kz - 1]
                 z2 = depth[kz]
-                v1 = vflat[pos - 1]
-                v2 = vflat[pos]
+                v1 = var[kz - 1, j, i]
+                v2 = var[kz, j, i]
                 sigma_z = sigmalev[j, i]
                 vnew[ks, j, i] = ((v1 - v2) * sigma_z + v2 * z1 - v1 * z2) / (z1 - z2)
 
@@ -573,6 +596,7 @@ def ztosigma(var,z,depth):
 def ztosigma_1d(var,z,depth):
     Ns,Lp=z.shape
     Nz=len(depth)
+    Nz=var.shape[0]
     vnew=np.zeros([Ns,Lp])
     for ks in range(Ns):
         sigmalev=np.squeeze(z[ks,:])
@@ -590,8 +614,10 @@ def ztosigma_1d(var,z,depth):
         jmat= np.arange(1,Lp+1)
         pos=Nz*(jmat-1)+thezlevs
         
+
         z1,z2=depth[thezlevs-1],depth[thezlevs]
         tmp_var=var.transpose().flatten()
+
         v1=tmp_var[pos-1].reshape(Lp)
         v2=tmp_var[pos].reshape(Lp)
         vnew[ks,:]=(((v1-v2)*sigmalev+v2*z1-v1*z2)/(z1-z2))
@@ -764,7 +790,6 @@ def _flood_2d(var2d: np.ndarray, lon2d: np.ndarray, lat2d: np.ndarray, method: s
     return var_filled
 
 
-
 def extract_bry(var, direction):
     if direction == 'west':
         return var[..., :, 0]
@@ -777,11 +802,115 @@ def extract_bry(var, direction):
 
 
 
+def get_bottom(var3d, mask, spval=-1e10):
+    """
+    각 (j, i) column에 대해 bottom-most valid layer index를 반환
+    - var3d: shape = (Nz, Ny, Nx)
+    - mask:  shape = (Ny, Nx)
+    """
+    Nz, Ny, Nx = var3d.shape
+    bottom = np.zeros((Ny, Nx), dtype=np.int32)
+
+    for j in range(Ny):
+        for i in range(Nx):
+            if mask[j, i] == 0:
+                bottom[j, i] = 0
+                continue
+            for k in range(Nz - 1, -1, -1):  # 아래부터 위로
+                v = var3d[k, j, i]
+                if not np.isnan(v) and abs((v - spval)/spval) > 1e-5:
+                    bottom[j, i] = k
+                    break
+            else:
+                bottom[j, i] = 0
+    return bottom
+
+def get_bottom_vectorized(var3d, mask, spval=-1e10):
+    Nz, Ny, Nx = var3d.shape
+    valid_mask = (np.abs((var3d - spval) / spval) > 1e-5) & (~np.isnan(var3d))
+
+    bottom = np.zeros((Ny, Nx), dtype=np.int32)
+    idx = np.where(mask == 1)
+
+    for j, i in zip(*idx):
+        valid_k = np.where(valid_mask[:, j, i])[0]
+        if valid_k.size > 0:
+            bottom[j, i] = valid_k[-1]
+    return bottom
+
+def flood_vertical(varz, mask, spval=-1e10):
+    """
+    가장 아래 valid 값으로 NaN을 아래쪽에서 채워주는 수직 flood
+    - varz: shape = (Nz, Ny, Nx)
+    - mask: shape = (Ny, Nx)
+    """
+    varz = varz.copy()
+    Nz, Ny, Nx = varz.shape
+    varz[np.isnan(varz)] = spval
+
+    bottom = get_bottom(varz, mask, spval)  
+    for j in range(Ny):
+        for i in range(Nx):
+            if mask[j, i] == 1:
+                kbot = bottom[j, i]
+                varz[kbot:, j, i] = varz[kbot, j, i]
+    return varz
+def flood_vertical_vectorized(varz, mask, spval=-1e10):
+    varz = varz.copy()
+    Nz, Ny, Nx = varz.shape
+    varz[np.isnan(varz)] = spval
+
+    bottom = get_bottom_vectorized(varz, mask, spval)
+
+    jj, ii = np.where(mask == 1)
+    for j, i in zip(jj, ii):
+        k = bottom[j, i]
+        if k < Nz:
+            varz[k:, j, i] = varz[k, j, i]
+    return varz
+
+@jit(nopython=True)
+def get_bottom_numba(var3d, mask, spval=-1e10):
+    Nz, Ny, Nx = var3d.shape
+    bottom = np.zeros((Ny, Nx), dtype=np.int32)
+
+    for j in range(Ny):
+        for i in range(Nx):
+            if mask[j, i] == 0:
+                bottom[j, i] = 0
+                continue
+            for k in range(Nz - 1, -1, -1):
+                v = var3d[k, j, i]
+                if v == v and abs((v - spval) / spval) > 1e-5:
+                    bottom[j, i] = k
+                    break
+            else:
+                bottom[j, i] = 0
+    return bottom
 
 
+@jit(nopython=True)
+def flood_vertical_numba(varz, mask, spval=-1e10):
+    Nz, Ny, Nx = varz.shape
+    varout = np.copy(varz)
 
+    for k in range(Nz):
+        for j in range(Ny):
+            for i in range(Nx):
+                if varout[k, j, i] != varout[k, j, i]:
+                    varout[k, j, i] = spval
 
+    bottom = get_bottom_numba(varout, mask, spval)
 
+    for j in range(Ny):
+        for i in range(Nx):
+            if mask[j, i] == 1:
+                kbot = bottom[j, i]
+                val = varout[kbot, j, i]
+                for k in range(kbot, Nz):
+                    varout[k, j, i] = val
+
+    return varout
 
 
 
