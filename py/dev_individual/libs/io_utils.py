@@ -41,7 +41,7 @@ class TimeIndex:
     datetime: datetime
     raw_value: float
 
-def collect_time_info_2(input_files, time_var, date_input):
+def collect_time_info(input_files, time_var, date_input):
     if isinstance(input_files, str):
         # initial file
         target_date = date_input
@@ -72,7 +72,7 @@ def collect_time_info_2(input_files, time_var, date_input):
 
 
 
-def collect_time_info(input_files, time_var, date_input):
+def collect_time_info_legacy(input_files, time_var, date_input):
     if isinstance(input_files, str):
         # initial: 단일 파일
         with Dataset(input_files) as nc:

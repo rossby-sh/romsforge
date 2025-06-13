@@ -17,28 +17,39 @@ import time
 # --- [01] Load configuration and input metadata ---
 cfg  = tl.parse_config("./config_multi.yaml")
 grd  = tl.load_roms_grid(cfg.grdname)
+time_var = cfg.time_reference_var
+filelist = sorted(glob.glob(os.path.join(cfg.ogcm_inputs[time_var]["path"], "*.nc")))
 
-cfg.ogcm_scalar_path = {
-    k: v for k, v in cfg.ogcm_path.items() if k not in ['u', 'v']
-}
+ogcm = tl.load_ogcm_metadata(filelist[0], cfg.ogcm_var_name)
 
-"""
-status = cn.create_bry(cfg, grd, relative_time,  bio_model=cfg.bio_model_type, ncFormat=cfg.ncformat)
+tinfo = collect_time_info(filelist, cfg.ogcm_var_name.time,\
+        (str(cfg.bry_start_date), str(cfg.bry_end_date)))
+datenums = np.array([tval for _, _, _, tval in tinfo])
+relative_time = tl.compute_relative_time(datenums, ogcm.time_unit, cfg.time_ref)
+
+status = cn.create_bry(cfg, grd, relative_time,  bio_model=None, ncFormat=cfg.ncformat)
 if status:
     print(f"--- [!ERROR] Failed to creating file {cfg.bryname} ---")
     raise
 print(f"--- Created file: {cfg.bryname} ---")
-"""
 
-for varname, path in cfg.ogcm_path.items():
+for varname, meta in cfg.ogcm_inputs.to_dict().items():
+    if varname in ['u','v']:
+        print('--- [NOTE] Skip vectors ---')
+        continue
+
+    path = meta["path"]
+    ogcm_varname = meta["varname"]
     print(f"--- [VAR] {varname} from {path}")
 
-    filelist = sorted(glob.glob(os.path.join(cfg.ogcm_path, "*.nc")))
+    filelist = sorted(glob.glob(os.path.join(path, "*.nc")))
 
     ogcm = tl.load_ogcm_metadata(filelist[0], cfg.ogcm_var_name)
 
     tinfo = collect_time_info(filelist, cfg.ogcm_var_name.time,\
             (str(cfg.bry_start_date), str(cfg.bry_end_date)) )
+
+    time_index_map = {t: n for n, (_, _, t, _) in enumerate(tinfo)}
 
     datenums = np.array([tval for _, _, _, tval in tinfo])
 
@@ -63,17 +74,10 @@ for varname, path in cfg.ogcm_path.items():
         S   = nc.variables["S"][:]
 
 
-    bry_data = tl.make_bry_data_shape(varname, num_steps, grd, Ns)
-    """
-        bry_data[varname] = {
-        'west':  np.zeros((num_steps, Mp), dtype=np.float32),
-        'east':  np.zeros((num_steps, Mp), dtype=np.float32),
-        'south': np.zeros((num_steps, Lp), dtype=np.float32),
-        'north': np.zeros((num_steps, Lp), dtype=np.float32),
-    }
-    이런 배열을 만들어 줌. single ,multi file 둘다 대응하게 만들기
-    """
     
+    bry_data = tl.make_bry_data_shape(varname, len(tinfo), grd, cfg.vertical.layer_n)
+   
+
     bry_time = []
 
     grouped = defaultdict(list)
@@ -83,26 +87,23 @@ for varname, path in cfg.ogcm_path.items():
     for f in grouped:
         grouped[f].sort(key=lambda x: x[1])  # datetime 기준 정렬
 
-
     # --- 파일 단위 루프 ---
     for f, entries in grouped.items():
         
         with Dataset(f, maskandscale=True) as nc:
             nc_wrap = tl.MaskedNetCDF(nc)
             for i, t, tval in entries:
-                
-                var_nc = nc.variables[cfg.ogcm_var_name[varname]]
+                n = time_index_map[t]
+                var_nc = nc.variables[ogcm_varname]
                 ndim = var_nc.ndim
-
-                if ndim == 3:
-                    data = nc_wrap.get(cfg.ogcm_var_name[varname], i, slice(None), idy, idx)  # 3D
-                elif ndim == 2:
-                    data = nc_wrap.get(cfg.ogcm_var_name[varname], i, idy, idx)               # 2D
+                if ((ndim == 3) and (var_nc.shape[0] != 1)) or ((ndim == 4) and (var_nc.shape[0] == 1)) :
+                    data = nc_wrap.get(ogcm_varname, i, slice(None), idy, idx)  # 3D
+                elif (ndim == 2) or ((ndim == 3) and (var_nc.shape[0] == 1 )) :
+                    data = nc_wrap.get(ogcm_varname, i, idy, idx)               # 2D
                 else:
                     raise ValueError(f"Unsupported ndim={ndim} for variable '{varname}'")
                 
                 field = tl.ConfigObject(**{varname: data})
-
                 print("--- Remapping ---")
                 for varname in vars(field):
                     var_src = getattr(field, varname)
@@ -156,70 +157,38 @@ for varname, path in cfg.ogcm_path.items():
                     cfg.vertical.layer_n,
                 )
 
-                zr_3d = tl.zlevs(*zargs, 1, grd.topo, field.zeta)    # (Ns, Mp, Lp)
-                zw_3d = tl.zlevs(*zargs, 5, grd.topo, field.zeta)    # (Ns+1, Mp, Lp)
+                zr_3d = tl.zlevs(*zargs, 1, grd.topo, np.zeros_like(grd.topo))    # (Ns, Mp, Lp)
+                zw_3d = tl.zlevs(*zargs, 5, grd.topo, np.zeros_like(grd.topo))    # (Ns+1, Mp, Lp)
 
-                for direction in directions:
-                    zr = tl.extract_bry(zr_3d, direction)
+                for var in list(vars(field)):
+                    arr = getattr(field, var)
 
-                    for var in vars(field):
-                        val = tl.extract_bry(getattr(field, var), direction)
-                        val_pad = np.vstack((val[0:1], val, val[-1:]))
-                        val_flip = np.flip(val_pad, axis=0)
-                        sigma_interped = tl.ztosigma_1d_numba(val_flip, zr, Z_flipped)
-                        setattr(field, f"{var}_{direction}", sigma_interped)
+                    for direction in directions:
+                    
+                        if arr.ndim == 2:
+                            val = tl.extract_bry(arr, direction)
+                            #setattr(field, f"{direction}", val)
+                        else :
 
+                            zr = tl.extract_bry(zr_3d, direction)
+                            val = tl.extract_bry(arr, direction)
+                            val_pad = np.vstack((val[0:1], val, val[-1:]))
+                            val_flip = np.flip(val_pad, axis=0)
+                            val = tl.ztosigma_1d_numba(val_flip, zr, Z_flipped)
+                            #setattr(field, f"{direction}", sigma_interped)
+            
+                        #if hasattr(field, direction):
+                        print(f"[WRITE] var={varname}, direction={direction}, time index n={n}")
+                        bry_data[direction][n, ...] = val
 
+            print(f"---------------- test {varname} ------------------------")
 
-
-
-
-                    # zeta만 따로 저장 (ubar/vbar는 위에서 이미 저장됨)
-                    val = tl.extract_bry(field.zeta, direction)
-                    setattr(field, f"zeta_{direction}", val)
-
-                    # 저장
-                    for varname in bry_data:
-                        val_d = getattr(field, f"{varname}_{direction}")
-                        bry_data[varname][direction].append(val_d)
-
-                    # 시간 저장
-                    time_converted = tl.compute_relative_time(tval, ogcm.time_unit, cfg.time_ref)
-                    bry_time.append(time_converted)
-
-
-
-    # --- 모든 시간 처리 후 최종 정리 ---
-    for varname in bry_data:
-        for direction in bry_data[varname]:
-            bry_data[varname][direction] = np.stack(bry_data[varname][direction], axis=0)
-
-    bry_time = np.array(bry_time)
-
-
-    # --- [10] Write all remapped variables to ini.nc ---
-    print(f"--- [13] Write all remapped variables to {cfg.bryname} ---")
 
     with Dataset(cfg.bryname, 'a') as nc:
-        # 시간 변수들
-    #    for tname in ['bry_time', 'zeta_time', 'temp_time', 'salt_time', 'v2d_time', 'v3d_time']:
-    #        nc[tname][:] = bry_time
-
-        # 필드 저장
-        for varname in bry_data:
-            for direction in bry_data[varname]:
-                var_fullname = f"{varname}_{direction}"
-                nc[var_fullname][:] = bry_data[varname][direction]
-    print("--- [DONE] ---")
-
-
-    print(f'--- Time elapsed: {time.time()-start1:.3f}s ---')
-
-
-
-
-
-
+        for direction, values in bry_data.items():
+            nc_var = f"{varname}_{direction}"  # varname은 루프 바깥에서 정의되어 있음
+            print(f"[WRITE] {nc_var} shape={values.shape}")
+            nc.variables[nc_var][:] = values
 
 
 

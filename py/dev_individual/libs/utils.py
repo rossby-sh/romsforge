@@ -912,6 +912,95 @@ def flood_vertical_numba(varz, mask, spval=-1e10):
 
     return varout
 
+def make_all_bry_data_shapes(varnames: list[str], num_steps: int, grd, Ns: int) -> dict[str, dict[str, np.ndarray]]:
+    """
+    여러 변수에 대해 make_bry_data_shape 호출해서 전체 bry_data 구조 생성
+    """
+    return {var: make_bry_data_shape(var, num_steps, grd, Ns) for var in varnames}
+
+
+def make_bry_data_shape(varname: str, num_steps: int, grd, Ns: int):
+    """
+    벡터/스칼라 변수 구분해서 방향별 bry_data shape 생성기
+    병렬 처리 및 staggered grid 고려
+
+    Parameters
+    ----------
+    varname : str
+        변수명 ('temp', 'salt', 'zeta', 'u', 'v', ...)
+    num_steps : int
+        시간 스텝 수
+    grd : ConfigObject
+        ROMS 그리드 정보 (lat, lon, mask 포함)
+    Ns : int
+        수직 레벨 수 (layer_n)
+
+    Returns
+    -------
+    dict[str, np.ndarray]
+        {'west': ..., 'east': ..., 'south': ..., 'north': ...}
+    """
+    Mp, Lp = grd.lat.shape
+    dtype = np.float32
+
+    if varname in ['zeta']:
+        shape_map = {
+            'west':  (num_steps, Mp),
+            'east':  (num_steps, Mp),
+            'south': (num_steps, Lp),
+            'north': (num_steps, Lp),
+        }
+
+    elif varname in ['ubar']:
+        shape_map = {
+            'west':  (num_steps, Mp),
+            'east':  (num_steps, Mp),
+            'south': (num_steps, Lp - 1),
+            'north': (num_steps, Lp - 1),
+        }
+
+    elif varname in ['vbar']:
+        shape_map = {
+            'west':  (num_steps, Mp - 1),
+            'east':  (num_steps, Mp - 1),
+            'south': (num_steps, Lp),
+            'north': (num_steps, Lp),
+        }
+
+    elif varname in ['u']:
+        shape_map = {
+            'west':  (num_steps, Ns, Mp),
+            'east':  (num_steps, Ns, Mp),
+            'south': (num_steps, Ns, Lp - 1),
+            'north': (num_steps, Ns, Lp - 1),
+        }
+
+    elif varname in ['v']:
+        shape_map = {
+            'west':  (num_steps, Ns, Mp - 1),
+            'east':  (num_steps, Ns, Mp - 1),
+            'south': (num_steps, Ns, Lp),
+            'north': (num_steps, Ns, Lp),
+        }
+
+    else:  # 일반 스칼라 변수
+        shape_map = {
+            'west':  (num_steps, Ns, Mp),
+            'east':  (num_steps, Ns, Mp),
+            'south': (num_steps, Ns, Lp),
+            'north': (num_steps, Ns, Lp),
+        }
+
+    return {k: np.zeros(v, dtype=dtype) for k, v in shape_map.items()}
+
+
+
+
+
+
+
+
+
 
 
 

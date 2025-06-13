@@ -44,7 +44,6 @@ global_attrs:
     title           : ROMS bry
     clm_file        : ROMS bry
     type            : ROMS bry
-    history         : history
 
 vertical:
     layer_n         : 36

@@ -29,7 +29,8 @@ tinfo = collect_time_info(filelist, cfg.ogcm_var_name.time,\
         (str(cfg.bry_start_date), str(cfg.bry_end_date)) )
 print(f'--- Time elapsed: {time.time()-start1:.3f}s ---')
 
-datenums = np.array([ti.raw_value for ti in tinfo])
+datenums = np.array([tval for _, _, _, tval in tinfo])
+
 relative_time = tl.compute_relative_time(datenums, ogcm.time_unit, cfg.time_ref)
 
 # --- [03] Create initial NetCDF file ---
@@ -60,37 +61,37 @@ with Dataset(cfg.weight_file) as nc:
     col = nc.variables["col"][:] - 1
     S   = nc.variables["S"][:]
 
-
-bry_data = tl.make_all_bry_data_shapes(['zeta','ubar','temp','salt','u','v'], len(tinfo), grd, cfg.vertical.layer_n)
+bry_data = {
+    'zeta': {d: [] for d in ['west', 'east', 'south', 'north']},
+    'temp': {d: [] for d in ['west', 'east', 'south', 'north']},
+    'salt': {d: [] for d in ['west', 'east', 'south', 'north']},
+    'u':    {d: [] for d in ['west', 'east', 'south', 'north']},
+    'v':    {d: [] for d in ['west', 'east', 'south', 'north']},
+    'ubar': {d: [] for d in ['west', 'east', 'south', 'north']},
+    'vbar': {d: [] for d in ['west', 'east', 'south', 'north']}
+}
 
 bry_time = []
 
 # --- [05] Load OGCM raw fields (zeta, temp, salt, u, v) ---
 print("--- [05] Loading OGCM data ---")
 grouped = defaultdict(list)
-for entry in tinfo:
-    grouped[entry.filename].append(entry)
+for f, i, t, tval in tinfo:
+    grouped[f].append((i, t, tval))
 
 # --- 정렬 추가 ---
-for entries in grouped.values():
-    entries.sort(key=lambda x: x.datetime)
-
-time_index_map = {entry.datetime: n for n, entry in enumerate(tinfo)}
+for f in grouped:
+    grouped[f].sort(key=lambda x: x[1])  # datetime 기준 정렬
 
 import time
 
 # --- 파일 단위 루프 ---
-for filename, entries in grouped.items():
+for f, entries in grouped.items():
     print("--- [05] Loading OGCM data ---")
-    with Dataset(filename, maskandscale=True) as nc:
+    with Dataset(f, maskandscale=True) as nc:
         nc_wrap = tl.MaskedNetCDF(nc)
-        
-        for entry in entries:
-            i = entry.index
-            t = entry.datetime
-            tval = entry.raw_value
-            n = time_index_map[t]
-            
+        start2=time.time()
+        for i, t, tval in entries:
             # [05] OGCM 필드 로딩
             zeta = nc_wrap.get(cfg.ogcm_var_name['zeta'], i, idy, idx)
             temp = nc_wrap.get(cfg.ogcm_var_name['temperature'], i, slice(None), idy, idx)
@@ -102,7 +103,9 @@ for filename, entries in grouped.items():
 
             field = tl.ConfigObject(zeta=zeta, ubar=ubar, vbar=vbar,
                                     temp=temp, salt=salt, u=u, v=v)
+            print(f'--- Time elapsed: {time.time()-start2:.3f}s ---')
             start=time.time()
+
             # [06] Remap
             print("--- [06] Remapping ---")
             for var in vars(field):
@@ -223,15 +226,22 @@ for filename, entries in grouped.items():
                 val = tl.extract_bry(field.zeta, direction)
                 setattr(field, f"zeta_{direction}", val)
 
-                #Save to data
+                # 저장
                 for varname in bry_data:
                     val_d = getattr(field, f"{varname}_{direction}")
-                    bry_data[varname][direction][n, ...] = val_d
+                    bry_data[varname][direction].append(val_d)
 
                 # 시간 저장
                 time_converted = tl.compute_relative_time(tval, ogcm.time_unit, cfg.time_ref)
                 bry_time.append(time_converted)
             print(num2date(time_converted,cfg.time_ref)) 
+        print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
+        print(f'--- Time elapsed: {time.time()-start2:.3f}s ---')
+
+# --- 모든 시간 처리 후 최종 정리 ---
+for varname in bry_data:
+    for direction in bry_data[varname]:
+        bry_data[varname][direction] = np.stack(bry_data[varname][direction], axis=0)
 
 bry_time = np.array(bry_time)
 

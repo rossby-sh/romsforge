@@ -5,41 +5,45 @@
 ###
 
 # === Define file names ===
-#ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
-#grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
-bryname : /data/share/DATA/ROMS_INPUTS/bry/test_bry.nc
+bryname : /data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc
 grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
 
-#weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
 weight_file: /data/share/DATA/ROMS_INPUTS/wght/test_weight.nc
-calc_weight: True
+calc_weight: False
 
 ncformat: NETCDF4 # NETCDF3_64BIT
 force_write: True
 
-bio_model_type: npzd
-
 flood_method_for_bry: edt #griddata / edt / linearND
 
-ogcm_path: 
-    zeta        : /data/share/DATA/RAW/00UTC/
-    temperature : /data/share/DATA/RAW/00UTC/
-    salinity    : /data/share/DATA/RAW/00UTC/
-    u           : /data/share/DATA/RAW/00UTC/
-    v           : /data/share/DATA/RAW/00UTC/
+ogcm_inputs:
+  zeta:
+    path: /data/share/DATA/RAW/00utc/
+    varname: surf_el
 
+  temp:
+    path: /data/share/DATA/RAW/00utc/
+    varname: water_temp
+
+  salt:
+    path: /data/share/DATA/RAW/00utc/
+    varname: salinity
+
+  u:
+    path: /data/share/DATA/RAW/00utc/
+    varname: water_u
+
+  v:
+    path: /data/share/DATA/RAW/00utc/
+    varname: water_v
 
 ogcm_var_name:
     longitude       : lon
     latitude        : lat
     depth           : depth
     time            : time
-    temperature     : water_temp
-    salinity        : salinity
-    u               : water_u
-    v               : water_v
-    zeta            : surf_el
 
+reference_var  : zeta
 bry_start_date      : 2022-12-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 bry_end_date        : 2023-01-02 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
