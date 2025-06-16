@@ -2,15 +2,19 @@ import numpy as np
 from netCDF4 import Dataset
 from scipy.interpolate import griddata
 from matplotlib.path import Path
+from scipy.interpolate import griddata
+from scipy.spatial import Delaunay
+import numpy as np
+
 
 def obs_ijpos(grdname, obs_lon, obs_lat, Correction=True, obc_edge=False, strict_griddata=True):
-    
+    """ debg    
     grdname='D:/shjo/ROMS_inputs/NWP4_grd_3_10m_LP.nc'
     nc=Dataset('D:/shjo/ROMS_inputs/obs/roms_obs_phyt_30km_N36_250501_250531_.nc')
     obs_lon = nc['obs_lon'][:]
     obs_lat = nc['obs_lat'][:]
     obc_edge=False; strict_griddata=True
-    
+    """ 
     # --- Input shape check (transpose to column vectors) ---
     obs_lon = np.atleast_1d(obs_lon).ravel()
     obs_lat = np.atleast_1d(obs_lat).ravel()
@@ -92,10 +96,7 @@ def obs_ijpos(grdname, obs_lon, obs_lat, Correction=True, obc_edge=False, strict
         Xgrid[bounded] = griddata(points, values_I, xi, method='linear',fill_value=np.nan)
         Ygrid[bounded] = griddata(points, values_J, xi, method='linear',fill_value=np.nan)
     else:
-
-        from scipy.interpolate import griddata
-        from scipy.spatial import Delaunay
-        
+       
         # --- 보간에 사용할 좌표 평탄화 (Fortran-order로 flatten) ---
         points = np.column_stack((rlon.T.ravel(), rlat.T.ravel()))
         values_I = Igrid.T.ravel()  # 예: I index 값 (또는 X index)
@@ -129,37 +130,19 @@ def obs_ijpos(grdname, obs_lon, obs_lat, Correction=True, obc_edge=False, strict
     # --- Optional correction ---
     if Correction:
         # TODO: implement curvilinear correction here if needed
-        data_dict = {
-            'rlon': rlon,
-            'rlat': rlat,
-            'angle': angle,
-            'obs_lon': obs_lon,
-            'obs_lat': obs_lat,
-            'bounded': bounded,
-            'Xgrid': Xgrid,
-            'Ygrid': Ygrid
-        }
-        
-        np.save('D:/shjo/ROMS_inputs/obs/correction_inputs.npy', data_dict)
 
-        Xgrid1, Ygrid1 = correct_fractional_coordinates1(rlon.T, rlat.T, angle.T, obs_lon, obs_lat, bounded, Xgrid, Ygrid)
-        Xgrid2, Ygrid2 = correct_fractional_coordinates2(rlon, rlat, angle, obs_lon, obs_lat, bounded, Xgrid, Ygrid)
+        #  Xgrid1, Ygrid1 = correct_fractional_coordinates_f(rlon.T, rlat.T, angle.T, obs_lon, obs_lat, bounded, Xgrid, Ygrid)
+        Xgrid2, Ygrid2 = correct_fractional_coordinates(rlon, rlat, angle, obs_lon, obs_lat, bounded, Xgrid, Ygrid)
 
         pass
 
     return Xgrid, Ygrid
 
 
-def correct_fractional_coordinates1(rlon, rlat, angle, obs_lon, obs_lat, bounded, X, Y, debug=True):
+def correct_fractional_coordinates_f(rlon, rlat, angle, obs_lon, obs_lat, bounded, X, Y, debug=True):
     """
     Apply curvilinear coordinate correction to fractional X, Y locations.
     """
-    import numpy as np
-    from netCDF4 import Dataset
-    from scipy.interpolate import griddata
-    from matplotlib.path import Path
-    from scipy  import io
-
     
     Nobs = len(obs_lon)               # number of observations
     
@@ -299,8 +282,7 @@ def correct_fractional_coordinates1(rlon, rlat, angle, obs_lon, obs_lat, bounded
 
 
 
-def correct_fractional_coordinates2(rlon, rlat, angle, obs_lon, obs_lat, bounded, X, Y, debug=True):
-    import numpy as np
+def correct_fractional_coordinates(rlon, rlat, angle, obs_lon, obs_lat, bounded, X, Y, debug=True):
 
     debugging = debug
 
