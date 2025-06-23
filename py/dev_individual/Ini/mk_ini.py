@@ -9,7 +9,7 @@ from netCDF4 import Dataset, num2date, date2num
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
 import create_I as cn
 import utils as tl
-from io_utils import collect_time_info
+from io_utils import collect_time_info_legacy
 print("[💣] STARTING FULL EXECUTION...")
 # --- [01] Load configuration and input metadata ---
 cfg  = tl.parse_config("./config.yaml")
@@ -18,13 +18,13 @@ ogcm = tl.load_ogcm_metadata(cfg.ogcm_name, cfg.ogcm_var_name)
 
 
 # --- [02] Time index matching and relative time calculation ---
-tinfo = collect_time_info(cfg.ogcm_name, cfg.ogcm_var_name['time'], str(cfg.initdate))
+tinfo = collect_time_info_legacy(cfg.ogcm_name, cfg.ogcm_var_name['time'], str(cfg.initdate))
 _, idt, _, _ = tinfo[0]
 relative_time = tl.compute_relative_time(ogcm.time[idt], ogcm.time_unit, cfg.time_ref)
 
 # --- [03] Create initial NetCDF file ---
 print(f"--- [03] Creating initial NetCDF file: {cfg.ininame} ---")
-status = cn.create_ini(cfg, grd, relative_time, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
+status = cn.create_ini__(cfg, grd, relative_time, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
 if status:
     print(f"--- [!ERROR] Failed to creating file {cfg.ininame} ---")
     raise

@@ -19,7 +19,7 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_npzd_15km_v2_may.nc' # Initial file name (to create)
+My_Ini='/data/share/DATA/ROMS_INPUTS/ini/test_ini.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 #-- Define OGCM path ----------------------------------------------------------
 
