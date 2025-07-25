@@ -7,18 +7,18 @@
 # === Define file names ===
 #ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
 #grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
-bryname : /data/share/DATA/ROMS_INPUTS/bry/roms_bry_npzd_15km_v2_250531_250701.nc
+bryname : /data/share/DATA/ROMS_INPUTS/bry/yes2k_bry_241231_230202.nc
 #bryname : /data/share/DATA/ROMS_INPUTS/bry/test_250531_250603.nc
-grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
+grdname : /data/share/DATA/ROMS_INPUTS/grd/yes2k_grd.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
-weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight.nc
+weight_file: /data/share/DATA/ROMS_INPUTS/wght/yes2k_weight.nc
 calc_weight: True
 
-ncformat: NETCDF4 # NETCDF3_64BIT
+ncformat: NETCDF3_64BIT # NETCDF4 # NETCDF3_64BIT
 force_write: True
 
-bio_model_type: npzd
+bio_model_type: none
 
 flood_method_for_bry: edt #griddata / edt / linearND
 
@@ -36,8 +36,8 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2025-05-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2022-12-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2023-02-02 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 
@@ -47,12 +47,12 @@ global_attrs:
     type            : ROMS bry
 
 vertical:
-    layer_n         : 36
+    layer_n         : 30
     vtransform      : 2
     vstretching     : 4
-    theta_s         : 6.5
-    theta_b         : 1
-    tcline          : 400
+    theta_s         : 7
+    theta_b         : 2
+    tcline          : 100
 
 
 

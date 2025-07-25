@@ -61,7 +61,7 @@ with Dataset(cfg.weight_file) as nc:
     S   = nc.variables["S"][:]
 
 
-bry_data = tl.make_all_bry_data_shapes(['zeta','ubar','temp','salt','u','v'], len(tinfo), grd, cfg.vertical.layer_n)
+bry_data = tl.make_all_bry_data_shapes(['zeta','ubar','vbar','temp','salt','u','v'], len(tinfo), grd, cfg.vertical.layer_n)
 
 bry_time = []
 
