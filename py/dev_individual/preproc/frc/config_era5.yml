@@ -1,0 +1,11 @@
+
+
+#input_file: /data/share/DATA/PROC/ERA5/ERA5_3hourly_230101-250430.nc
+input_file: /data/share/DATA/PROC/ERA5/ERA5_hourly_2506.nc
+output_file: test_grib.nc
+ref_time: days since 2000-1-1 00:00:00
+
+
+dt: hourly
+
+

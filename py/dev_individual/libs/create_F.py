@@ -39,8 +39,8 @@ def createF_era5(nc_save_name, LON, LAT, TIME, Ref_time, variables, ncFormat='NE
         'sst':         ('f4', ('sst_time', 'lat', 'lon'), {'long_name': 'Sea Surface Temperature', 'units': 'Celsius'}),
         'dqdsst':      ('f4', ('dqdsst_time', 'lat', 'lon'), {'long_name': 'dQ/dSST', 'units': 'Watts/m^2/C'}),
         'srf':         ('f4', ('srf_time', 'lat', 'lon'), {'long_name': 'Net Shortwave Radiation Flux', 'units': 'Watts/m^2'}),
-        'lwrad':       ('f4', ('lwrad_time', 'lat', 'lon'), {'long_name': 'Net Longwave Radiation Flux', 'units': 'Watts/m^2'}),
-        'lwrad_down':  ('f4', ('lrad_down_time', 'lat', 'lon'), {'long_name': 'Downward Longwave Radiation', 'units': 'Watts/m^2'}),
+        'lwrad':       ('f4', ('lrf_time', 'lat', 'lon'), {'long_name': 'Net Longwave Radiation Flux', 'units': 'Watts/m^2'}),
+        'lwrad_down':  ('f4', ('lrf_time', 'lat', 'lon'), {'long_name': 'Downward Longwave Radiation', 'units': 'Watts/m^2'}),
         'rain':        ('f4', ('rain_time', 'lat', 'lon'), {'long_name': 'Precipitation Rate', 'units': 'kg/m^2/s'}),
         'Pair':        ('f4', ('pair_time', 'lat', 'lon'), {'long_name': 'Surface Air Pressure', 'units': 'millibars'}),
     }

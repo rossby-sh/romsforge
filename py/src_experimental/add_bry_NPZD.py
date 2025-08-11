@@ -16,7 +16,7 @@ import datetime as dt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-My_Bry='/data/share/DATA/ROMS_INPUTS/bry/MCC/roms_bry_npzd_15km_v2_250531_250701_modified.nc' # Initial file name (to create)
+My_Bry='/data/share/DATA/ROMS_INPUTS/bry/roms_bry_npzd_15km_v2_250430_250701.nc' # Initial file name (to create)
 My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
  
 Parallel=False
@@ -62,7 +62,7 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2025-05-31 00:00', '2025-07-01 23:00']
+t_rng = ['2025-04-30 00:00', '2025-07-01 23:00']
 # t_rng = ['2024-12-31 00:00', '2025-04-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units

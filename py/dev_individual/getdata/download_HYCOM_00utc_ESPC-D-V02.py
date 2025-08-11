@@ -10,7 +10,7 @@ with open("config.yml") as f:
     cfg = yaml.safe_load(f)
 
 # config에서 불러오기
-w_pth = cfg["output"]["base_dir"]+'HYCOM/'
+w_pth = cfg["output"]["base_dir"]+"HYCOM/"
 d_st = dt.strptime(cfg["time"]["start"], "%Y-%m-%d")
 d_ed = dt.strptime(cfg["time"]["end"],   "%Y-%m-%d")
 lat_range = tuple(cfg["region"]["lat"])

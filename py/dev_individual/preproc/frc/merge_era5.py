@@ -8,9 +8,9 @@
 import xarray as xr
 
 #rpth='/data/share/DATA/RAW/ERA5/'
-rpth='/data/share/DATA/TEST/tmp_frc/'
+rpth='/data/share/DATA/PROC/ERA5/'
 #wnpth='/data/share/DATA/PROC/ERA5/ERA5_221231-230228.nc'
-wnpth='/data/share/DATA/TEST/tmp_frc/ERA5_test.nc'
+wnpth='/data/share/DATA/PROC/ERA5/ERA5_hourly_2506.nc'
 
 Accum = xr.open_mfdataset(rpth+'acc*').loc[dict(latitude=slice(60,5),longitude=slice(100,170))] 
 Instant = xr.open_mfdataset(rpth+'inst*').loc[dict(latitude=slice(60,5),longitude=slice(100,170))] 

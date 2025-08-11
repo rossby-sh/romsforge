@@ -1,0 +1,13 @@
+time:
+  start: "2025-06-30"
+  end:   "2025-08-01"
+  ref_time: "days since 2000-1-1 00:00:00"
+
+region:
+  lat: [5, 60]
+  lon: [100, 180]
+
+output:
+  base_dir: "/home/shjo/ROMS/romsforge/py/dev_individual/getdata/test/"
+
+

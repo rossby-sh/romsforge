@@ -60,6 +60,15 @@ qair_values = 100 * (
     np.exp((17.625 * T2_values) / (243.04 + T2_values))
 )
 
+#tsur  = nc_read(InpFile, 'v2t', Rec);     % 2m temperature
+#tdew  = nc_read(InpFile, 'v2d', Rec);     % 2m dewpoint
+#tsur  = T2_values
+#tdew  = D2_values
+#E     = 6.11 * 10.0 ** (7.5 * tdew / (237.7 + tdew));
+#Es    = 6.11 * 10.0 ** (7.5 * tsur / (237.7 + tsur));
+#rain_values = 100.0 * (E / Es);
+
+
 # Calculate dqdsst
 wind_speed = np.sqrt(u_values ** 2 + v_values ** 2)
 dqdsst_values = cn.get_dqdsst(
