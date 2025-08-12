@@ -10,17 +10,19 @@ region:
   lon: [100, 180]
 
 output:
-  base_dir: "/home/shjo/ROMS/romsforge/py/dev_individual/getdata/test/"
+  base_dir: "/data/shjo/mcc/jul/"
+
+core_num : 3
 
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-ininame : /data/share/DATA/ROMS_INPUTS/ini/yes2k_ini_230101.nc
-bryname : /data/share/DATA/ROMS_INPUTS/bry/roms_bry_npzd_15km_v2_250430_250701.nc
 grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
-frcname: test_grib.nc
+ininame : /data/shjo/mcc/jul/roms_inputs/nifs_ini_20250701.nc
+#bryname : This will set automatically
+#frcname : This will set automatically
 
-weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight.nc
+weight_file: ./NWP_weight.nc
 calc_weight: True
 
 ncformat: NETCDF4 # NETCDF3_64BIT
@@ -29,9 +31,11 @@ force_write: True
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt      #griddata / edt / linearND
  
-initdate            : 2023-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-ogcm_name_ini       : /data/share/DATA/RAW/00utc/HYCOM_20230101_00UTC.nc 
-ogcm_path_bry       : /home/shjo/ROMS/romsforge/py/dev_individual/getdata/test/
+initdate            : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+ogcm_name           : /data/shjo/mcc/jul/hycom/HYCOM_20250701_00UTC.nc
+#ogcm_path_bry      : This will set automaticaly 
+
+bio_model_type      : npzd # None npzd, fennel 
 
 ogcm_var_name:
     longitude       : lon
@@ -44,12 +48,12 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2025-04-30 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2025-06-30 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-08-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 
-global_attrs_ini: 
+global_attrs: 
     title           : ROMS ini
     clm_file        : ROMS ini
     type            : ROMS ini
