@@ -3,7 +3,7 @@
 # === Download config ===
 time:
   start: "2025-06-30"
-  end:   "2025-08-01"
+  end:   "2025-08-05"
 
 region:
   lat: [5, 60]

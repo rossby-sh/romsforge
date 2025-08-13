@@ -66,7 +66,7 @@ def read_grib(path, wanted=None, accum=False):
     lat1 = latN = lon1 = dlat = dlon = None
     lat_rev = False
 
-    ACC_M_TO_MM = {"tp", "e", "pev", "ro"}
+    ACC_M_TO_MM = { "e", "pev", "ro"}
     ACC_J_TO_WM2 = {"ssr", "ssrd", "str", "strd", "slhf", "sshf"}
 
     with open(path, "rb") as f:
@@ -185,7 +185,7 @@ cloud_values = INS["tcc"]["data"]
 srf_values       = ACC["ssr"]["data"]                  # W m-2
 lwrad_down_values= ACC["strd"]["data"]                 # W m-2
 lwrad_values     = ACC["str"]["data"]                  # W m-2
-rain_values      = ACC["tp"]["data"]                   # mm hr-1
+rain_values      = ACC["tp"]["data"] * 1000 / 3600     # mm hr-1 → m/s(=kg m-2 s-1)
 
 qair_values = Q["q"]["data"]*1000 if "q" in Q else None     # g/kg @ 1000hPa (없으면 None)
 

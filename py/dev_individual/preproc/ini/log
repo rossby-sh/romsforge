@@ -1,0 +1,26 @@
+== Initial Condition Build (ini) ===============================================
+· grid=/data/share/DATA/ROMS_INPUTS/grd/yes2k_grd.nc
+· ini_out=/data/share/DATA/ROMS_INPUTS/ini/test_ini.nc
+· wght_out=/data/share/DATA/ROMS_INPUTS/wght/yes2k.nc
+· ogcm=/data/share/DATA/RAW/00utc/HYCOM_20230101_00UTC.nc
+[OK]   [01] Load configuration and input metadata | dur=0.020s
+[OK]   [02] Time index matching & relative time | dur=0.005s
+[NOTE] Deactivate initiating biological variables ---
+[+] Initial file created: /data/share/DATA/ROMS_INPUTS/ini/test_ini.nc ---
+[OK]   [03] Create initial NetCDF | dur=1.630s
+[+] Weight file created: /data/share/DATA/ROMS_INPUTS/wght/yes2k.nc ---
+[OK]   [04] Prepare weights | dur=7.314s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-01 00:00:00
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-01 00:00:00
+[OK]   [05] Load OGCM fields | dur=1.354s
+[OK]   [06] Remap (weights) | dur=2.147s
+[NOTE] Flood method: griddata
+[OK]   [07] Flood: horizontal | dur=168.631s
+[OK]   [08] Flood: vertical | dur=2.736s
+[OK]   [09] Mask & clean | dur=0.046s
+[OK]   [10] Rotate & stagger (u,v) | dur=0.586s
+[OK]   [11] z→σ interpolation | dur=4.600s
+[OK]   [12] Conserve volume & fix barotropic | dur=1.077s
+[OK]   [13] Write variables | dur=0.161s
+== Summary =====================================================================
+Total elapsed: 190.308s

@@ -1,0 +1,53 @@
+== Boundary Build ==============================================================
+· src=OGCM grid=roms_grd_fennel_15km_smooth_v2.nc
+· out=/.../bry/test.nc wght=/.../wght/NWP_weight.nc
+[OK]   [01] Load configuration and input metadata | dur=0.017s
+[OK]   [02] Time index matching & relative time | dur=4.933s
+--- [NOTE] Initiating biological variables: npzd type ---
+--- [+] Boundary file created: /data/share/DATA/ROMS_INPUTS/bry/test.nc ---
+[OK]   [03] Create initial NetCDF | dur=0.033s
+--- [+] Weight file created: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight.nc ---
+[OK]   [04] Prepare weights | dur=7.682s
+-- Notes -----------------------------------------------------------------------
+· Biological variables: npzd
+· Flood method (boundary): edt
+[OK]   [05] List & group OGCM files | dur=0.000s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-04-30 00 file=HYCOM_20250430_00UTC.nc
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-04-30 00 file=HYCOM_20250430_00UTC.nc
+[OK]   [07] Load OGCM fields | dur=1.887s
+[OK]   [08] Remap (weights) | dur=0.342s
+[OK]   [09] Flood H/V | dur=1.366s
+[OK]   [10] Mask & rotate | dur=0.134s
+[OK]   [11] z→σ & save bry | dur=0.703s
+[DONE] 2025-04-30 00 |  4.436s
+[OK]   [06] Open source file | dur=4.436s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-05-01 00 file=HYCOM_20250501_00UTC.nc
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-05-01 00 file=HYCOM_20250501_00UTC.nc
+[OK]   [07] Load OGCM fields | dur=1.993s
+[OK]   [08] Remap (weights) | dur=0.344s
+[OK]   [09] Flood H/V | dur=0.822s
+[OK]   [10] Mask & rotate | dur=0.151s
+[OK]   [11] z→σ & save bry | dur=0.202s
+[DONE] 2025-05-01 00 |  3.517s
+[OK]   [06] Open source file | dur=3.517s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-05-02 00 file=HYCOM_20250502_00UTC.nc
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-05-02 00 file=HYCOM_20250502_00UTC.nc
+[OK]   [07] Load OGCM fields | dur=4.633s
+[OK]   [08] Remap (weights) | dur=0.355s
+[OK]   [09] Flood H/V | dur=0.820s
+[OK]   [10] Mask & rotate | dur=0.155s
+[OK]   [11] z→σ & save bry | dur=0.207s
+[DONE] 2025-05-02 00 |  6.174s
+[OK]   [06] Open source file | dur=6.175s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-05-03 00 file=HYCOM_20250503_00UTC.nc
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2025-05-03 00 file=HYCOM_20250503_00UTC.nc
+[OK]   [07] Load OGCM fields | dur=4.736s
+[OK]   [08] Remap (weights) | dur=0.365s
+[OK]   [09] Flood H/V | dur=0.828s
+[OK]   [10] Mask & rotate | dur=0.158s
+[OK]   [11] z→σ & save bry | dur=0.202s
+[DONE] 2025-05-03 00 |  6.294s
+[OK]   [06] Open source file | dur=6.294s
+[OK]   [12] Write variables | dur=0.017s
+== Summary =====================================================================
+Total elapsed: 33.105s

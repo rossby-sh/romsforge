@@ -1,0 +1,58 @@
+== Boundary Build (multi) ======================================================
+· grid=/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
+· bry_out=/data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc
+· wght_out=/data/share/DATA/ROMS_INPUTS/wght/test_weight.nc
+[OK]   [01] Load configuration and input metadata | dur=0.009s
+· zeta: files=914 times=3
+· temp: files=914 times=3
+· salt: files=914 times=3
+· u: files=914 times=3
+· v: files=914 times=3
+[NOTE] All variables share identical time indices
+[OK]   [02] Index OGCM files & collect times | dur=24.492s
+· zeta: first3=2022-12-31T00:00:00, 2023-01-01T00:00:00, 2023-01-02T00:00:00
+· temp: first3=2022-12-31T00:00:00, 2023-01-01T00:00:00, 2023-01-02T00:00:00
+· salt: first3=2022-12-31T00:00:00, 2023-01-01T00:00:00, 2023-01-02T00:00:00
+· u: first3=2022-12-31T00:00:00, 2023-01-01T00:00:00, 2023-01-02T00:00:00
+· v: first3=2022-12-31T00:00:00, 2023-01-01T00:00:00, 2023-01-02T00:00:00
+[OK]   [02b] Preview time entries | dur=0.000s
+[OK]   [02c] Load OGCM metadata (zeta) | dur=0.005s
+--- [NOTE] Initiating biological variables: None type ---
+--- [+] Boundary file created: /data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc ---
+[+] Created file: /data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc
+[OK]   [03] Create boundary NetCDF | dur=0.022s
+· Use existing wght file /data/share/DATA/ROMS_INPUTS/wght/test_weight.nc
+[OK]   [04] Prepare weights | dur=0.012s
+[OK]   [04b] Allocate bry buffers | dur=0.000s
+· groups=3
+[OK]   [05] Group files & map indices | dur=0.000s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2022-12-31 00
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2022-12-31 00
+[OK]   [07] Load OGCM fields | dur=4.629s
+[OK]   [08] Remap (weights) | dur=0.354s
+[OK]   [09] Flood H/V | dur=1.379s
+[OK]   [10] Mask & rotate | dur=0.148s
+[OK]   [11] z→σ & save bry | dur=0.676s
+[DONE] 2022-12-31 00 |  0.000s
+[OK]   [06] Open source files | dur=7.208s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-01 00
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-01 00
+[OK]   [07] Load OGCM fields | dur=4.612s
+[OK]   [08] Remap (weights) | dur=0.355s
+[OK]   [09] Flood H/V | dur=0.834s
+[OK]   [10] Mask & rotate | dur=0.146s
+[OK]   [11] z→σ & save bry | dur=0.202s
+[DONE] 2023-01-01 00 |  0.000s
+[OK]   [06] Open source files | dur=6.165s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-02 00
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-02 00
+[OK]   [07] Load OGCM fields | dur=4.612s
+[OK]   [08] Remap (weights) | dur=0.354s
+[OK]   [09] Flood H/V | dur=0.810s
+[OK]   [10] Mask & rotate | dur=0.139s
+[OK]   [11] z→σ & save bry | dur=0.200s
+[DONE] 2023-01-02 00 |  0.000s
+[OK]   [06] Open source files | dur=6.132s
+[OK]   [13] Write variables | dur=0.012s
+== Summary =====================================================================
+Total elapsed: 44.058s

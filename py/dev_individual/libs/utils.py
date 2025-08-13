@@ -239,7 +239,7 @@ def build_bilinear_regridder(lon_src, lat_src, lon_dst, lat_dst, wghtname, reuse
         })
 
         xe.Regridder(ds_src, ds_dst, method="bilinear", filename=wghtname, reuse_weights=reuse)
-        print(f"--- Weight file created: {wghtname} ---")
+        print(f"--- [+] Weight file created: {wghtname} ---")
         return 0
 
     except Exception as e:

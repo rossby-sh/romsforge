@@ -7,13 +7,13 @@
 # === Define file names ===
 #ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
 #grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
-bryname : /data/share/DATA/ROMS_INPUTS/bry/roms_bry_npzd_15km_v2_250430_250701.nc
+bryname : /data/share/DATA/ROMS_INPUTS/bry/test.nc
 #bryname : /data/share/DATA/ROMS_INPUTS/bry/test_250531_250603.nc
 grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
 weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight.nc
-calc_weight: True
+calc_weight: False
 
 ncformat: NETCDF4 # NETCDF3_64BIT
 force_write: True
@@ -37,7 +37,7 @@ ogcm_var_name:
     zeta            : surf_el
 
 bry_start_date      : 2025-04-30 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-05-03 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 

@@ -7,7 +7,7 @@
 # === Define file names ===
 #ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
 #grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
-ininame : /data/share/DATA/ROMS_INPUTS/ini/yes2k_ini_230101.nc
+ininame : /data/share/DATA/ROMS_INPUTS/ini/test_ini.nc
 #grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
 grdname : /data/share/DATA/ROMS_INPUTS/grd/yes2k_grd.nc
 

@@ -7,51 +7,46 @@ import glob
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
 import create_B as cn
 import utils as tl
 from io_utils import collect_time_info
 from collections import defaultdict
 import time 
 
+start1=time.time()
+
+print("=== Make boundary ===")
 # --- [01] Load configuration and input metadata ---
 cfg  = tl.parse_config("./config_single.yaml")
 grd  = tl.load_roms_grid(cfg.grdname)
 filelist = sorted(glob.glob(os.path.join(cfg.ogcm_path, "*.nc")))
 
-assert len(filelist) > 0, "No HYCOM files found in ogcm_path!"
+assert len(filelist) > 0, "No OGCM files found in ogcm_path!"
 
 ogcm = tl.load_ogcm_metadata(filelist[0], cfg.ogcm_var_name)
 
-start1=time.time()
 # --- [02] Time index matching and relative time calculation ---
+print("--- Calculatates time index matching and relative time calculation  ---")
 tinfo = collect_time_info(filelist, cfg.ogcm_var_name.time,\
         (str(cfg.bry_start_date), str(cfg.bry_end_date)) )
-print(f'--- Time elapsed: {time.time()-start1:.3f}s ---')
 
 datenums = np.array([ti.raw_value for ti in tinfo])
 relative_time = tl.compute_relative_time(datenums, ogcm.time_unit, cfg.time_ref)
 
 # --- [03] Create initial NetCDF file ---
-print(f"--- [03] Creating boundary NetCDF file: {cfg.bryname} ---")
 status = cn.create_bry(cfg, grd, relative_time,  bio_model=cfg.bio_model_type, ncFormat=cfg.ncformat)
 if status:
-    print(f"--- [!ERROR] Failed to creating file {cfg.bryname} ---")
     raise
-print(f"--- Created file: {cfg.bryname} ---")
 
 # --- [04] Crop OGCM domain and prepare remap weights ---
 lon_crop, lat_crop, idx, idy = tl.crop_to_model_domain(ogcm.lat, ogcm.lon, grd.lat, grd.lon)
-
 if cfg.calc_weight:
-    print(f"--- [04] Calculating weight: {cfg.weight_file} ---")
     status = tl.build_bilinear_regridder(lon_crop, lat_crop, grd.lon, grd.lat, cfg.weight_file, reuse=False)
-    
     if status:
-        print(f"--- [!ERROR] Failed to generate remap weights: {cfg.weight_file} ---")
         raise  
 else: 
-    print(f"--- [04] Use existing wght file {cfg.weight_file} ---")
+    print(f"--- Use existing wght file {cfg.weight_file} ---")
 
 
 
@@ -66,7 +61,7 @@ bry_data = tl.make_all_bry_data_shapes(['zeta','ubar','vbar','temp','salt','u','
 bry_time = []
 
 # --- [05] Load OGCM raw fields (zeta, temp, salt, u, v) ---
-print("--- [05] Loading OGCM data ---")
+print("--- Listing and organizing OGCM files ---")
 grouped = defaultdict(list)
 for entry in tinfo:
     grouped[entry.filename].append(entry)
@@ -77,11 +72,13 @@ for entries in grouped.values():
 
 time_index_map = {entry.datetime: n for n, entry in enumerate(tinfo)}
 
-import time
-
+print("--- Loop by ogcm files: ---")
+print("--- Subroutine starts >>>>")
+print("Process:\n1) Load ogcm field \n2) Remapping (weight)\n3) Horizontal & vertical flood \n4) Apply landmask (mask->0) \n5) Vector rotation \n6) z level to sigma level (4 direction)")
+print(f"[NOTE] Flood method for boundary: {cfg.flood_method_for_bry}")
 # --- 파일 단위 루프 ---
 for filename, entries in grouped.items():
-    print("--- [05] Loading OGCM data ---")
+    start2=time.time()
     with Dataset(filename, maskandscale=True) as nc:
         nc_wrap = tl.MaskedNetCDF(nc)
         
@@ -102,27 +99,17 @@ for filename, entries in grouped.items():
 
             field = tl.ConfigObject(zeta=zeta, ubar=ubar, vbar=vbar,
                                     temp=temp, salt=salt, u=u, v=v)
-            start=time.time()
             # [06] Remap
-            print("--- [06] Remapping ---")
             for var in vars(field):
                 var_src = getattr(field, var)
                 remapped = tl.remap_variable(var_src, row, col, S, grd.lon.shape, method="coo")
                 setattr(field, var, remapped)
 
-            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
-            start=time.time()
-            
             # [07] Horizontal Flood
-            print("--- [07] Apply horizontal flood ---")
             for var in vars(field):
                 val = getattr(field, var)
                 val_flooded = tl.flood_horizontal(val, grd.lon, grd.lat, method=cfg.flood_method_for_bry)
                 setattr(field, var, val_flooded)
-            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
-            start=time.time()
-
-            print("--- [08] Apply vertical flood ---")
 
             for var in vars(field):
                 val = getattr(field, var)
@@ -131,10 +118,7 @@ for filename, entries in grouped.items():
                 #val_flooded = tl.flood_vertical_vectorized(val, grd.mask, spval=-1e10)
                 val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
                 setattr(field, var, val_flooded)
-            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
-            start=time.time()
             # [09] Mask land
-            print("--- [09] Masking land to 0 ---")
             for var in vars(field):
                 arr = getattr(field, var)
                 if arr.ndim==2:
@@ -144,18 +128,14 @@ for filename, entries in grouped.items():
                 setattr(field, var, arr)
 
             # [10] Rotate
-            print("--- [10] Rotate vectors ---")
             u_rot, v_rot       = tl.rotate_vector_euler(field.u,    field.v,    grd.angle, to_geo=False)
             ubar_rot, vbar_rot = tl.rotate_vector_euler(field.ubar, field.vbar, grd.angle, to_geo=False)
             setattr(field, 'u',    tl.rho2uv(u_rot, 'u'))
             setattr(field, 'v',    tl.rho2uv(v_rot, 'v'))
             setattr(field, 'ubar', tl.rho2uv(ubar_rot, 'u'))
             setattr(field, 'vbar', tl.rho2uv(vbar_rot, 'v'))
-            print(f'--- Time elapsed: {time.time()-start:.3f}s ---')
-            start=time.time()
 
             # [11] Vertical interpolation
-            print("--- [11] Vertical interpolation from z to sigma ---")
 
             # --- [11~13] 방향별 수직 보간 및 저장 ---
             directions = ['north', 'south', 'east', 'west']
@@ -231,14 +211,14 @@ for filename, entries in grouped.items():
                 # 시간 저장
                 time_converted = tl.compute_relative_time(tval, ogcm.time_unit, cfg.time_ref)
                 bry_time.append(time_converted)
-            print(num2date(time_converted,cfg.time_ref)) 
+            #print(num2date(time_converted,cfg.time_ref)) 
 
+    print(f"[DONE] {str(t)[:13]} --> Time elapsed: {time.time()-start2:.3f}s")
 bry_time = np.array(bry_time)
-
+print("<<< subroutine end ---")
 
 # --- [10] Write all remapped variables to ini.nc ---
-print(f"--- [13] Write all remapped variables to {cfg.bryname} ---")
-
+print(f"--- Writing all variables to {cfg.bryname} ---")
 with Dataset(cfg.bryname, 'a') as nc:
     # 시간 변수들
 #    for tname in ['bry_time', 'zeta_time', 'temp_time', 'salt_time', 'v2d_time', 'v3d_time']:
@@ -249,10 +229,8 @@ with Dataset(cfg.bryname, 'a') as nc:
         for direction in bry_data[varname]:
             var_fullname = f"{varname}_{direction}"
             nc[var_fullname][:] = bry_data[varname][direction]
-print("--- [DONE] ---")
 
-
-print(f'--- Time elapsed: {time.time()-start1:.3f}s ---')
+print(f'--- Total time elapsed: {time.time()-start1:.3f}s ---')
 
 
 

@@ -1,0 +1,9 @@
+== Initial Condition Build (ini, multi-source) =================================
+· grid=/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
+· ini_out=/data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc
+· wght_out=/data/share/DATA/ROMS_INPUTS/wght/test_weight.nc
+[OK]   [01] Load configuration and input metadata | dur=0.009s
+/data/share/DATA/RAW/00utc/HYCOM_20230101_00UTC.nc
+surf_el
+[FAIL] [02] Index OGCM files & match init time | dur=0.000s | AssertionError: No files found for variable: zeta
+       at mk_ini_multi_new.py:44 in <module>

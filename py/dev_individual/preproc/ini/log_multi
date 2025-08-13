@@ -1,0 +1,35 @@
+== Initial Condition Build (ini, multi-source) =================================
+· grid=/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
+· ini_out=/data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc
+· wght_out=/data/share/DATA/ROMS_INPUTS/wght/test_weight.nc
+[NOTE] reference_var=zeta
+[OK]   [01] Load configuration and input metadata | dur=0.009s
+· zeta: files_matched=1 first=HYCOM_20230101_00UTC.nc
+· temp: files_matched=1 first=HYCOM_20230101_00UTC.nc
+· salt: files_matched=1 first=HYCOM_20230101_00UTC.nc
+· u: files_matched=1 first=HYCOM_20230101_00UTC.nc
+· v: files_matched=1 first=HYCOM_20230101_00UTC.nc
+[NOTE] All variables aligned at init: 2023-01-01T00:00:00
+[OK]   [02] Index OGCM files & match init time | dur=0.025s
+· ref_file=/data/share/DATA/RAW/00utc/HYCOM_20230101_00UTC.nc
+[OK]   [02b] Load OGCM metadata (ref) | dur=0.005s
+--- [NOTE] Deactivate initiating biological variables ---
+--- [+] Initial file created: /data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc ---
+[+] Created file: /data/share/DATA/ROMS_INPUTS/bry/test_multi_bry.nc
+[OK]   [03] Create initial NetCDF | dur=0.054s
+· Use existing wght file /data/share/DATA/ROMS_INPUTS/wght/test_weight.nc
+[OK]   [04] Prepare weights | dur=0.002s
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-01 00
+[WARN] utils.py:277 — invalid value encountered in divide | ts=2023-01-01 00
+[OK]   [05] Load OGCM fields (@init) | dur=5.159s
+[OK]   [06] Remap (weights) | dur=0.376s
+[NOTE] Flood method: griddata
+[OK]   [07] Flood: horizontal | dur=16.240s
+[OK]   [08] Flood: vertical | dur=0.573s
+[OK]   [09] Mask & clean | dur=0.010s
+[OK]   [10] Rotate & stagger (u,v) | dur=0.180s
+[OK]   [11] z→σ interpolation | dur=0.937s
+[OK]   [12] Conserve volume & fix barotropic | dur=0.274s
+[OK]   [13] Write variables | dur=0.047s
+== Summary =====================================================================
+Total elapsed: 23.893s
