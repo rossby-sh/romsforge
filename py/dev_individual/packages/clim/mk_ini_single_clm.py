@@ -21,7 +21,7 @@ bar("Initial Condition Build (ini)")
 
 # [01] Load configuration and input metadata
 with step("[01] Load configuration and input metadata"):
-    cfg  = tl.parse_config("./config.yaml")
+    cfg  = tl.parse_config("./config_single.yaml")
     grd  = tl.load_roms_grid(cfg.grdname)
     ogcm = tl.load_ogcm_metadata(cfg.ogcm_name, cfg.ogcm_var_name)
     info(f"grid={cfg.grdname}")

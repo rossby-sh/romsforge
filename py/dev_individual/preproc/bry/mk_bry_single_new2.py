@@ -161,7 +161,7 @@ for filename, entries in grouped.items():
                     # HYCOM depth padding
                     Z = np.zeros(len(ogcm.depth) + 2)
                     Z[0] = 100
-                    Z[1:-1] = -ogcm.depth
+                    Z[1:-1] = -np.abs(ogcm.depth)
                     Z[-1] = -100000
                     Z_flipped = np.flipud(Z)
 

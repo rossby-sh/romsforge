@@ -1,0 +1,65 @@
+###
+#
+# INFO
+# This script is for HYCOM data
+###
+
+# === Define file names ===
+ininame : /data/shjo/clim/eccov4_clm_ini.nc
+bryname : /data/shjo/clim/eccov4_clm_bry.nc
+grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
+
+#weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
+weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight.nc
+calc_weight: True
+
+ncformat: NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+bio_model_type: npzd
+
+flood_method_for_ini: griddata #griddata / edt / linearND
+flood_method_for_bry: edt #griddata / edt / linearND
+
+initdate : 1993-01-01 00:00:00 
+ogcm_name: /data/share/DATA/RAW/ECCOv4/eccov4_clm.nc
+
+time_ref : seconds since 1980-1-1 00:00:00
+
+ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : Z
+    time            : time
+    temperature     : THETA
+    salinity        : SALT
+    u               : EVEL
+    v               : NVEL
+    zeta            : SSH
+
+global_attrs: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+
+vertical:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+
+bio_ogcm_name : /data/share/DATA/RAW/Bvar_hindcast/clm_CMEMS_bio.nc
+
+bio_ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : depth
+    time            : time
+    phyt            : phyc
+    NO3             : no3
+    zoop            : zoop
+    detritus        : detr
+

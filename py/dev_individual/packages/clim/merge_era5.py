@@ -8,12 +8,12 @@
 import xarray as xr
 
 #rpth='/data/share/DATA/RAW/ERA5/'
-rpth='/data/share/DATA/PROC/ERA5/'
+rpth='/data/share/DATA/PROC/ERA5/monthly/'
 #wnpth='/data/share/DATA/PROC/ERA5/ERA5_221231-230228.nc'
-wnpth='/data/share/DATA/PROC/ERA5/ERA5_hourly_2506.nc'
+wnpth='/data/share/DATA/PROC/ERA5/ERA5_monthly_30Y.nc'
 
-Accum = xr.open_mfdataset(rpth+'acc*').loc[dict(latitude=slice(60,5),longitude=slice(100,170))] 
-Instant = xr.open_mfdataset(rpth+'inst*').loc[dict(latitude=slice(60,5),longitude=slice(100,170))] 
+Accum = xr.open_mfdataset('/data/share/DATA/PROC/ERA5/monthly/data_stream-moda_stepType-avgad.nc').loc[dict(latitude=slice(60,5),longitude=slice(100,175))] 
+Instant = xr.open_mfdataset('/data/share/DATA/PROC/ERA5/monthly/data_stream-moda_stepType-avgua.nc').loc[dict(latitude=slice(60,5),longitude=slice(100,175))] 
 
 print('=== Reading Data ===')
 ERA5 = xr.merge([Accum,Instant],compat='override')

@@ -1,0 +1,9 @@
+
+#input_file: /data/share/DATA/PROC/ERA5/ERA5_3hourly_230101-250430.nc
+input_file: /data/share/DATA/PROC/ERA5/ERA5_monthly_30Y.nc
+output_file: /data/shjo/clim/romsf_930102-250805.nc
+ref_time: days since 1980-1-1 00:00:00
+
+dt: monthly
+
+

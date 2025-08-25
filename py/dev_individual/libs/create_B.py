@@ -179,6 +179,174 @@ def create_bry(cfg, grd, bry_time, bio_model=None, ncFormat='NETCDF3_CLASSIC'):
     return 0
 
 
+
+def create_bry_clm(cfg, grd, bry_time, bio_model=None, ncFormat='NETCDF3_CLASSIC'):
+    vstretching, vtransform = cfg.vertical.vstretching, cfg.vertical.vtransform
+    theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b
+    tcline, layer_n = cfg.vertical.tcline, cfg.vertical.layer_n
+
+    hmin_ = np.min(grd.topo[grd.mask == 1])
+    if vtransform == 1 and tcline > hmin_:
+        print("--- [!ERROR] Tcline must be <= hmin when Vtransform == 1 ---")
+        return 1
+
+    Mp, Lp = grd.topo.shape
+    L, M, N, Np = Lp - 1, Mp - 1, layer_n, layer_n + 1
+
+    directions = ['north', 'south', 'east', 'west']
+    grids = {
+        'north': 'xi', 'south': 'xi',
+        'east': 'eta', 'west': 'eta'
+    }
+
+    # Dimensions
+    dimensions = {
+        'xi_u': L,
+        'xi_v': Lp,
+        'xi_rho': Lp,
+        'eta_u': Mp,
+        'eta_v': M,
+        'eta_rho': Mp,
+        's_rho': N,
+        's_w': Np,
+        'one': 1,
+        'bry_time': len(bry_time),
+        'zeta_time': len(bry_time),
+        'temp_time': len(bry_time),
+        'salt_time': len(bry_time),
+        'v2d_time': len(bry_time),
+        'v3d_time': len(bry_time)
+    }
+
+    # --- [01] Base variables + stretching 통합 정의 ---
+    sc_r, Cs_r = ru.stretching(vstretching, theta_s, theta_b, layer_n, 0)
+    sc_w, Cs_w = ru.stretching(vstretching, theta_s, theta_b, layer_n, 1)
+
+    base_variables = {
+        'spherical':    ('S1',   ('one',),   {}, 'T'),
+        'Vtransform':   ('f4',   ('one',),   {'long_name': 'vertical terrain-following transformation equation'}, vtransform),
+        'Vstretching':  ('f4',   ('one',),   {'long_name': 'vertical terrain-following stretching function'}, vstretching),
+        'theta_s':      ('f4',   ('one',),   {'long_name': 'S-coordinate surface control parameter', 'units': 'nondimensional'}, theta_s),
+        'theta_b':      ('f4',   ('one',),   {'long_name': 'S-coordinate bottom control parameter', 'units': 'nondimensional'}, theta_b),
+        'Tcline':       ('f4',   ('one',),   {'long_name': 'S-coordinate surface/bottom layer width', 'units': 'meter'}, tcline),
+        'hc':           ('f4',   ('one',),   {'long_name': 'S-coordinate parameter, critical depth', 'units': 'meter'}, tcline),
+        'sc_r':         ('f4',   ('s_rho',), {'long_name': 'S-coordinate at RHO-points', 'units': 'nondimensional'}, sc_r),
+        'Cs_r':         ('f4',   ('s_rho',), {'long_name': 'S-coordinate stretching curves at RHO-points', 'units': 'nondimensional'}, Cs_r),
+        'sc_w':         ('f4',   ('s_w',),   {'long_name': 'S-coordinate at W-points', 'units': 'nondimensional'}, sc_w),
+        'Cs_w':         ('f4',   ('s_w',),   {'long_name': 'S-coordinate stretching curves at W-points', 'units': 'nondimensional'}, Cs_w),
+    }
+
+
+    time_dims = ['bry_time', 'zeta_time', 'temp_time', 'salt_time', 'v2d_time', 'v3d_time']
+
+    standard_vars = {
+        'zeta':  ('f4', ('zeta_time', 'eta_rho', 'xi_rho'),     {'long_name': 'free-surface', 'units': 'meter'}),
+        'ubar':  ('f4', ('v2d_time', 'eta_u', 'xi_u'),          {'long_name': 'vertically integrated u-momentum', 'units': 'meter second-1'}),
+        'vbar':  ('f4', ('v2d_time', 'eta_v', 'xi_v'),          {'long_name': 'vertically integrated v-momentum', 'units': 'meter second-1'}),
+        'u':     ('f4', ('v3d_time', 's_rho', 'eta_u', 'xi_u'), {'long_name': 'u-momentum', 'units': 'meter second-1'}),
+        'v':     ('f4', ('v3d_time', 's_rho', 'eta_v', 'xi_v'), {'long_name': 'v-momentum', 'units': 'meter second-1'}),
+        'temp':  ('f4', ('temp_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'potential temperature', 'units': 'Celsius'}),
+        'salt':  ('f4', ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'salinity', 'units': 'PSU'})
+    }
+
+    bio_vars = {
+        'npzd': {
+            'NO3':   ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'nitrate concentration', 'units': 'mmol N m-3'}),
+            'phyt':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'phytoplankton biomass', 'units': 'mmol N m-3'}),
+            'zoop':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'zooplankton biomass', 'units': 'mmol N m-3'}),
+            'detritus': ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'detritus concentration', 'units': 'mmol N m-3'})
+        },
+        'fennel': {
+            'NO3':   ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'nitrate concentration', 'units': 'mmol N m-3'}),
+            'NH4':   ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'ammonium concentration', 'units': 'mmol N m-3'}),
+            'PO4':   ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'phosphate concentration', 'units': 'mmol P m-3'}),
+            'chlo':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'chlorophyll concentration', 'units': 'mg Chl m-3'}),
+            'phyt':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'small phytoplankton biomass', 'units': 'mmol N m-3'}),
+            'zoop':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'zooplankton biomass', 'units': 'mmol N m-3'}),
+            'oxygen':('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'oxygen concentration', 'units': 'mmol O2 m-3'}),
+            'TIC':   ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'total inorganic carbon', 'units': 'mmol C m-3'}),
+            'alkalinity': ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'total alkalinity', 'units': 'umol kg-1'}),
+            'SdeC':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'small carbon detritus', 'units': 'mmol C m-3'}),
+            'LdeC':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'large carbon detritus', 'units': 'mmol C m-3'}),
+            'RdeC':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'river carbon detritus', 'units': 'mmol C m-3'}),
+            'SdeN':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'small nitrogen detritus', 'units': 'mmol N m-3'}),
+            'LdeN':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'large nitrogen detritus', 'units': 'mmol N m-3'}),
+            'RdeN':  ('f4', ('bry_time', 's_rho', 'eta_rho', 'xi_rho'), {'long_name': 'river nitrogen detritus', 'units': 'mmol N m-3'})
+        }
+    }
+
+    # --- [02] 선택된 변수 조합 ---
+    all_vars = dict(standard_vars)
+    if bio_model is not None and bio_model.lower() in bio_vars:
+        all_vars.update(bio_vars[bio_model.lower()])
+        print(f"--- [NOTE] Initiating biological variables: {bio_model} type ---")
+    else:
+        print(f"--- [NOTE] Initiating biological variables: {bio_model} type ---")
+
+
+    # --- [NEW] NetCDF 파일 열기 ---
+    mode = 'w' if cfg.force_write else 'x'
+    try:
+        ncfile = Dataset(cfg.bryname, mode=mode, format=ncFormat)
+    except FileExistsError:
+        print(f"--- [!ERROR] {cfg.ininame} already exists and force_write=False ---")
+        return 1
+
+    # --- [NEW] 차원 정의 ---
+    for name, size in dimensions.items():
+        ncfile.createDimension(name, size)
+
+    # --- [NEW] base_variables 기록 ---
+    for name, (dtype, dims, attrs, value) in base_variables.items():
+        var = ncfile.createVariable(name, dtype, dims)
+        var.setncatts(attrs)
+        var[:] = value
+
+    # --- [03] 방향별로 변수 확장 ---
+
+    def get_bry_dims(dims, direction):
+        keep_dim = 'xi_' if direction in ['north', 'south'] else 'eta_'
+        return tuple(
+            d for d in dims
+            if not d.startswith(('xi_', 'eta_')) or d.startswith(keep_dim)
+        )
+
+    bry_variables = {}
+    for varname, (dtype, dims, attrs) in all_vars.items():
+        for d in directions:
+            dims_d = get_bry_dims(dims, d)
+            bry_variables[f'{varname}_{d}'] = (
+                dtype, dims_d, {**attrs, 'long_name': f"{attrs['long_name']} at {d} boundary"}
+            )
+
+
+
+    # Time variables
+    for name in time_dims:
+        v = ncfile.createVariable(name, 'f4', (name,))
+        v.units = "day"
+        v.cycle_length = 365.25
+        v.long_name = f"time for {name.replace('_time','')} condition"
+        v[:] = bry_time
+
+    # Boundary variables
+    for name, (dtype, dims, attrs) in bry_variables.items():
+        var = ncfile.createVariable(name, dtype, dims)
+        var.setncatts(attrs)
+        var[:] = 0.0
+
+    # Global attrs
+    ncfile.title = cfg.global_attrs.title
+    ncfile.clim_file = cfg.bryname
+    ncfile.grd_file = cfg.grdname
+    ncfile.type = cfg.global_attrs.type
+    ncfile.history = f"Created on {dt.datetime.now().isoformat()}"
+
+    ncfile.close()
+    print(f"--- [+] Boundary file created: {cfg.bryname} ---")
+    return 0
+
+
 def create_bry_nifs(bryname,cfg, grd, bry_time, bio_model=None, ncFormat='NETCDF3_CLASSIC'):
     vstretching, vtransform = cfg.vertical.vstretching, cfg.vertical.vtransform
     theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b

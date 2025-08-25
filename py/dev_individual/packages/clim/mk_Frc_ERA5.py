@@ -14,7 +14,7 @@ import numpy as np
 import datetime as dt
 import yaml
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
 import create_F as cn
 from utils import compute_relative_time
 
@@ -27,21 +27,22 @@ R_FILE = os.path.join(config['input_file'])
 W_FILE = os.path.join(config['output_file'])
 
 # Load ERA5 data
-ds = Dataset(R_FILE)
+ds = Dataset("/data/share/DATA/PROC/ERA5/monthly/data_stream-moda_stepType-avgua.nc")
+ds2= Dataset("/data/share/DATA/PROC/ERA5/monthly/data_stream-moda_stepType-avgad.nc")
 LON = ds.variables['longitude'][:]
 LAT = np.flip(ds.variables['latitude'][:], axis=0)
 TIMES = ds.variables['valid_time']
 
 print('=== Calc ROMS Frc ===')
 # Read and process variables
-srf_values       = np.flip(ds.variables['ssr'][:], axis=1) / 3600
-lrf_values       = np.flip(ds.variables['str'][:], axis=1) / 3600
-lrf_down_values  = np.flip(ds.variables['strd'][:], axis=1) / 3600
+srf_values       = np.flip(ds2.variables['ssr'][:], axis=1) / 86400
+lrf_values       = np.flip(ds2.variables['str'][:], axis=1) / 86400
+lrf_down_values  = np.flip(ds2.variables['strd'][:], axis=1) / 86400
 
 u_values         = np.flip(ds.variables['u10'][:], axis=1)
 v_values         = np.flip(ds.variables['v10'][:], axis=1)
 cloud_values     = np.flip(ds.variables['tcc'][:], axis=1)
-rain_values      = np.flip(ds.variables['tp'][:], axis=1) * 1000 / 3600
+rain_values      = np.flip(ds2.variables['tp'][:], axis=1) * 1000 / 86400
 sst_values       = np.flip(ds.variables['sst'][:].data, axis=1) - 273.15
 # sst_values = np.nan_to_num(sst_values, nan=0.0)  # NaN 제거
 sst_values[sst_values != sst_values] = 0
@@ -112,7 +113,7 @@ cn.createF_era5(
     TIME_CONVERTED_NUM,
     MY_TIME_REF,
     forcing_vars,
-    "NETCDF3_64BIT_OFFSET"
+    "NETCDF4"
 )
 #cn.createF_era5_(
 #    W_FILE,

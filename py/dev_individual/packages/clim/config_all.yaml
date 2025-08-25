@@ -2,15 +2,15 @@
 
 # === Download config ===
 time:
-  start: "1993-01-01"
-  end:   "2025-08-05"
+  start: "1990-01-01"
+  end:   "2025-07-31"
 
 region:
   lat: [5, 60]
   lon: [100, 180]
 
 output:
-  base_dir: "/data/shjo/clim/"
+  base_dir: "/data/shjo/frc/"
 
 core_num : 3
 

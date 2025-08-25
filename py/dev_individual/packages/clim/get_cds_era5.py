@@ -1,34 +1,35 @@
 import os, random, time, yaml
 from datetime import datetime as dt, timedelta
 import cdsapi
+import numpy as np
 import multiprocessing as mp
 
-# 워커 (요청 + 리트라이)
+# 워커 (요청 + 리트라이 + 원자적 저장)
 def worker(dataset, request, outpath, retries=5):
     client = cdsapi.Client()
+    tmp_path = outpath + ".part"
     for i in range(retries):
         try:
-            print(f"[{os.getpid()}] retrieve → {outpath}")
-            client.retrieve(dataset, request, outpath)
+            print(f"[{os.getpid()}] retrieve → {outpath} ({request.get('variable')})")
+            client.retrieve(dataset, request, tmp_path)
+            os.replace(tmp_path, outpath)
             return outpath
         except Exception as e:
+            if os.path.exists(tmp_path):
+                try: os.remove(tmp_path)
+                except: pass
             wait = (2**i) + random.random()
             print(f"[retry {i+1}/{retries}] {e} → sleep {wait:.1f}s")
             time.sleep(wait)
     raise RuntimeError(f"failed: {outpath}")
 
-# 하루 8타임
-#TIME = ["00:00","03:00","06:00","09:00","12:00","15:00","18:00","21:00"]
-TIME = ["00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00",\
-        "08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00",\
-        "16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"]
+# 24시간
+TIME = [f"{h:02d}:00" for h in np.arange(0,24,6)]
 
 if __name__ == "__main__":
-    # config 읽기 (날짜만 줘도 됨: %Y-%m-%d)
     with open("config_all.yaml") as f:
         cfg = yaml.safe_load(f)
 
-    # 날짜만 입력해도 동작하게: 시는 00시로 들어감
     start_dt = dt.strptime(cfg["time"]["start"], "%Y-%m-%d")
     end_dt   = dt.strptime(cfg["time"]["end"],   "%Y-%m-%d")
     pad_before = int(cfg["time"].get("pad_before_days", 0))
@@ -41,42 +42,15 @@ if __name__ == "__main__":
     tmp_dir = os.path.join(base_dir, "era5")
     os.makedirs(tmp_dir, exist_ok=True)
 
+    # 패딩 포함 요청 범위(풀데이로 받을 거라 date는 범위 문자열)
     req_start = (start_dt - timedelta(days=pad_before)).date()
     req_end   = (end_dt   + timedelta(days=pad_after)).date()
-
-    s_date = start_dt.date()
-    e_date = end_dt.date()
-
-    # 시작 partial/끝 partial → 날짜만 줘도 항상 생성되도록
-    start_times = [h for h in TIME if int(h[:2]) >= start_dt.hour] or TIME
-    start_days  = [s_date]
-
-    end_times = [h for h in TIME if int(h[:2]) <= end_dt.hour] or TIME
-    end_days  = [e_date]
-
-    # 중간 full days(패딩 포함)
-    middle_days = []
-    d = req_start
-    while d < s_date:
-        middle_days.append(d); d += timedelta(days=1)
-    d = s_date + timedelta(days=1)
-    while d < e_date:
-        middle_days.append(d); d += timedelta(days=1)
-    d = e_date + timedelta(days=1)
-    while d <= req_end:
-        middle_days.append(d); d += timedelta(days=1)
-
-    # 날짜 → 문자열 리스트 변환
-    def ymd_lists(days_list):
-        ys = sorted({d.strftime("%Y") for d in days_list})
-        ms = sorted({d.strftime("%m") for d in days_list})
-        ds = sorted({d.strftime("%d") for d in days_list})
-        return ys, ms, ds
+    period_tag = f"{req_start.strftime('%Y%m%d')}-{req_end.strftime('%Y%m%d')}"
 
     # 데이터셋
     dataset_sl = "reanalysis-era5-single-levels"
-    dataset_pl = "reanalysis-era5-pressure-levels"  # ← 1000hPa specific humidity
-    area = [lat_max, lon_min, lat_min, lon_max]
+    dataset_pl = "reanalysis-era5-pressure-levels"
+    area = [lat_max, lon_min, lat_min, lon_max]  # N, W, S, E
 
     # 변수 목록
     accum_vars = [
@@ -101,91 +75,49 @@ if __name__ == "__main__":
         "skin_temperature",
         "total_cloud_cover",
     ]
-    # pressure-level: 1000hPa specific humidity
     q1000_vars = ["specific_humidity"]
     q1000_extra = {"pressure_level": ["1000"]}
 
-    jobs = []
-    # kind별 세그먼트 경로 저장해서 나중에 병합+삭제
-    seg_info = []  # (kind, seg_paths)
-    period_tag = f"{req_start.strftime('%Y%m%d')}-{req_end.strftime('%Y%m%d')}"
-
-    def add_segment(dataset_name, kind, vars_list, days_list, times_list, seg_name, extra=None):
-        if not days_list:
-            return None
-        ys, ms, ds = ymd_lists(days_list)
+    # 공통 요청 빌더 (풀데이, 범위문자열)
+    def build_req(var_name, extra=None):
         req = {
             "product_type": ["reanalysis"],
-            "variable": vars_list,
-            "year": ys, "month": ms, "day": ds,
-            "time": times_list,
+            "variable": [var_name],
+            "date": f"{req_start:%Y-%m-%d}/{req_end:%Y-%m-%d}",
+            "time": TIME,
             "format": "grib",
             "area": area,
         }
         if extra:
-            req.update(extra)  # pressure_level 등 추가
-        seg_path = os.path.join(tmp_dir, f"{kind}_{seg_name}_{period_tag}.grib")
-        if not os.path.exists(seg_path):
-            jobs.append((dataset_name, req, seg_path))
-        return seg_path
+            req.update(extra)
+        return req
 
-    # 1) accum (single-levels)
-    segs_accum = []
-    s = add_segment(dataset_sl, "accum", accum_vars, start_days,  start_times, "seg1")
-    if s: segs_accum.append(s)
-    s = add_segment(dataset_sl, "accum", accum_vars, middle_days, TIME,       "seg2")
-    if s: segs_accum.append(s)
-    s = add_segment(dataset_sl, "accum", accum_vars, end_days,    end_times,   "seg3")
-    if s: segs_accum.append(s)
-    seg_info.append(("accum", segs_accum))
+    jobs = []
 
-    # 2) inst (single-levels)
-    segs_inst = []
-    s = add_segment(dataset_sl, "inst", instant_vars, start_days,  start_times, "seg1")
-    if s: segs_inst.append(s)
-    s = add_segment(dataset_sl, "inst", instant_vars, middle_days, TIME,       "seg2")
-    if s: segs_inst.append(s)
-    s = add_segment(dataset_sl, "inst", instant_vars, end_days,    end_times,   "seg3")
-    if s: segs_inst.append(s)
-    seg_info.append(("inst", segs_inst))
+    def add_job_var(dataset_name, kind, var_name, extra=None):
+        outpath = os.path.join(tmp_dir, f"{kind}__{var_name}_{period_tag}.grib")
+        if not os.path.exists(outpath):
+            req = build_req(var_name, extra=extra)
+            jobs.append((dataset_name, req, outpath))
+        else:
+            print(f"[skip] exists: {outpath}")
 
-    # 3) q1000 (pressure-levels, specific humidity @1000hPa)
-    segs_q1000 = []
-    s = add_segment(dataset_pl, "q1000", q1000_vars, start_days,  start_times, "seg1", extra=q1000_extra)
-    if s: segs_q1000.append(s)
-    s = add_segment(dataset_pl, "q1000", q1000_vars, middle_days, TIME,       "seg2", extra=q1000_extra)
-    if s: segs_q1000.append(s)
-    s = add_segment(dataset_pl, "q1000", q1000_vars, end_days,    end_times,   "seg3", extra=q1000_extra)
-    if s: segs_q1000.append(s)
-    seg_info.append(("q1000", segs_q1000))
+    # single-levels: 누적/순간 변수 각각 파일 하나씩
+    for v in accum_vars:
+        add_job_var(dataset_sl, "accum", v)
+    for v in instant_vars:
+        add_job_var(dataset_sl, "inst", v)
+
+    # pressure-levels: q1000
+    for v in q1000_vars:
+        add_job_var(dataset_pl, "q1000", v, extra=q1000_extra)
 
     print(f"총 작업 {len(jobs)}개")
     if jobs:
-        with mp.Pool(processes=9) as pool:   # 원하면 2~3으로 낮춰도 됨
+        # 과도한 병렬은 429 잘 남. 기본 3, 환경변수로 조절 가능
+        nproc = int(os.getenv("CDS_WORKERS", "1"))
+        with mp.Pool(processes=nproc) as pool:
             pool.starmap(worker, jobs, chunksize=1)
-
-    # 머지 + seg 삭제 (accum, inst, q1000 각각)
-    for kind, segs in seg_info:
-        final_path = os.path.join(tmp_dir, f"{kind}_{period_tag}.grib")
-        # merge (없을 때만 생성)
-        if not os.path.exists(final_path):
-            with open(final_path, "wb") as w:
-                for seg in segs:
-                    if os.path.exists(seg):
-                        with open(seg, "rb") as r:
-                            w.write(r.read())
-            print(f"[merge] {final_path}")
-        else:
-            print(f"[skip merge] exists: {final_path}")
-        # cleanup
-        removed = 0
-        for seg in segs:
-            if os.path.exists(seg):
-                try:
-                    os.remove(seg); removed += 1
-                except OSError as e:
-                    print(f"[cleanup] 삭제 실패: {seg} ({e})")
-        print(f"[cleanup] {kind}: removed {removed} seg files")
 
     print("--- Done ---")
 

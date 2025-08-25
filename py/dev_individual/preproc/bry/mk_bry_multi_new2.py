@@ -190,7 +190,7 @@ for (f_zeta, f_temp, f_salt, f_u, f_v), entries in zip(filename_tuple_list, grou
                 # HYCOM depth padding
                 Z = np.zeros(len(ogcm.depth) + 2)
                 Z[0] = 100
-                Z[1:-1] = -ogcm.depth
+                Z[1:-1] = -np.abs(ogcm.depth)
                 Z[-1] = -100000
                 Z_flipped = np.flipud(Z)
 

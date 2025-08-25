@@ -164,7 +164,7 @@ for f, entries in grouped.items():
             zu, zv = tl.rho2uv(zr, 'u'), tl.rho2uv(zr, 'v')
 
             Z = np.zeros(len(ogcm.depth) + 2)
-            Z[0] = 100; Z[1:-1] = -ogcm.depth; Z[-1] = -100000
+            Z[0] = 100; Z[1:-1] = -np.abs(ogcm.depth); Z[-1] = -100000
 
             for var, zgrid in zip(['temp', 'salt', 'u', 'v'], [zr, zr, zu, zv]):
                 val = getattr(field, var)
