@@ -10,7 +10,7 @@ region:
   lon: [100, 180]
 
 output:
-  base_dir: "/data/shjo/frc/"
+  base_dir: "/data/shjo/frc/era5/"
 
 core_num : 3
 
