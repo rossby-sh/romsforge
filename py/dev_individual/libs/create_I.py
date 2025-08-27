@@ -212,7 +212,23 @@ def create_ini__(cfg, grd, initime_num, bio_model=None, ncFormat='NETCDF3_CLASSI
             'zooplankton':   {'long_name': 'zooplankton biomass',    'units': 'millimole nitrogen meter-3'},
             'detritus':      {'long_name': 'mole_concentration_of_detritus_expressed_as_nitrogen_in_sea_water', 'units': 'millimole nitrogen meter-3'},
         },
-        # fennel 생략 가능
+        'fennel': {
+            'NO3':        {'long_name': 'nitrate concentration', 'units': 'millimole nitrogen meter-3'},
+            'NH4':        {'long_name': 'ammonium concentration', 'units': 'millimole nitrogen meter-3'},
+            'PO4':        {'long_name': 'phosphate concentration', 'units': 'millimole PO4 meter-3'},
+            'chlorophyll': {'long_name': 'chlorophyll concentration', 'units': 'millimole chlorophyll meter-3'},
+            'phytoplankton': {'long_name': 'small phytoplankton biomass', 'units': 'millimole nitrogen meter-3'},
+            'zooplankton':   {'long_name': 'zooplankton biomass', 'units': 'millimole nitrogen meter-3'},
+            'oxygen':     {'long_name': 'oxygen concentration', 'units': 'millimole oxygen meter-3'},
+            'TIC':        {'long_name': 'total inorganic carbon', 'units': 'millimole carbon meter-3'},
+            'alkalinity': {'long_name': 'total alkalinity', 'units': 'milliequivalent meter-3'},
+            'SdetritusC': {'long_name': 'small carbon-detritus concentration', 'units': 'millimole carbon meter-3'},
+            'LdetritusC': {'long_name': 'large carbon-detritus concentration', 'units': 'millimole carbon meter-3'},
+            'RdetritusC': {'long_name': 'river carbon-detritus concentration', 'units': 'millimole carbon meter-3'},
+            'SdetritusN': {'long_name': 'small nitrogen-detritus concentration', 'units': 'millimole nitrogen meter-3'},
+            'LdetritusN': {'long_name': 'large nitrogen-detritus concentration', 'units': 'millimole nitrogen meter-3'},
+            'RdetritusN': {'long_name': 'river nitrogen-detritus concentration', 'units': 'millimole nitrogen meter-3'}
+        }       # fennel 생략 가능
     }
 
     if bio_model in bio_tracers:
