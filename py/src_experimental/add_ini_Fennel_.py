@@ -17,8 +17,8 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/tmp/NWP12_ini_NWP4.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP12_grd_NWP4.nc' # Grd name
+My_Ini='/data/shjo/nifs01/NWP4_ini_subsampled.nc' # Initial file name (to create)
+My_Grd='/data/shjo/nifs01/NWP4_grd_3_10m_LP_subsampled.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
 ncdir='/data/share/DATA/RAW/Bvar/'
@@ -34,7 +34,7 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
 
 # Define time info
 t_rng=['2023-01-01','2023-01-01'] # Inital time 
-My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
+My_time_ref='seconds since 1980-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================
 
@@ -45,7 +45,7 @@ print(ncG)
 
 lonG,latG=ncG['lon_rho'][:],ncG['lat_rho'][:]
 angle,topo,mask=ncG['angle'][:],ncG['h'][:],ncG['mask_rho'][:]
-MyVar={'Layer_N':36,'Vtransform':2,\
+MyVar={'Layer_N':20,'Vtransform':2,\
        'Vstretching':2,'Theta_s':7,\
            'Theta_b':0.1,'Tcline':200,'hmin':10}
 ncG.close()
