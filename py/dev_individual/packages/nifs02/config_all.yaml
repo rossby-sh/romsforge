@@ -2,15 +2,15 @@
 
 # === Download config ===
 time:
-  start: "2023-08-01"
-  end:   "2023-08-31"
+  start: "2025-07-31"
+  end:   "2025-08-22"
 
 region:
   lat: [5, 60]
   lon: [100, 180]
 
 output:
-  base_dir: "/data/shjo/mcc/data/"
+  base_dir: "/data/shjo/nifs02/aug/"
 
 core_num : 3
 
@@ -32,7 +32,7 @@ flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt      #griddata / edt / linearND
  
 initdate            : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-ogcm_name           : /data/shjo/mcc/jul/hycom/HYCOM_20250701_00UTC.nc
+ogcm_name           : /data/shjo/mcc/aug/hycom/HYCOM_20250701_00UTC.nc
 #ogcm_path_bry      : This will set automaticaly 
 
 bio_model_type      : npzd # None npzd, fennel 
@@ -48,8 +48,8 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2025-06-30 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-08-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2025-07-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-08-22 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 

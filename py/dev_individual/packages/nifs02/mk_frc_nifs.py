@@ -8,7 +8,7 @@ from datetime import datetime
 from netCDF4 import num2date
 from datetime import datetime as dt
 # libs
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
 import create_F as cn
 from utils import compute_relative_time
 

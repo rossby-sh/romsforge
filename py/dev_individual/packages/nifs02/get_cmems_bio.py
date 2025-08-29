@@ -19,7 +19,7 @@ def download_one(args):
         maximum_depth=depth_max,
         output_filename=out_name,
         output_directory=out_dir,
-        force_download=True,
+        force_download=False,
     )
     return f"[OK] {item['name']}: {os.path.join(out_dir, out_name)}"
 
@@ -63,8 +63,8 @@ if __name__ == "__main__":
     ]
 
     # 병렬 실행 (2~3 권장)
-    procs = int(os.environ.get("CMEMS_WORKERS", "3"))
-    with mp.Pool(processes=procs) as pool:
+    procs = int(os.environ.get("CMEMS_WORKERS", "1"))
+    with mp.Pool(processes=1) as pool:
         for msg in pool.imap_unordered(download_one, jobs, chunksize=1):
             print(msg)
 

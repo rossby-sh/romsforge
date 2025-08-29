@@ -17,8 +17,8 @@ output:
 core_num : 3
 
 # === Define file names ===
-ininame : /data/shjo/clim/eccov4_clm_ini.nc
-bryname : /data/shjo/clim/eccov4_clm_bry.nc
+ininame : /data/shjo/clim/eccov4_clm_ini_fennel.nc
+bryname : /data/shjo/clim/eccov4_clm_bry_fennel.nc
 grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
@@ -28,7 +28,7 @@ calc_weight: True
 ncformat: NETCDF4 # NETCDF3_64BIT
 force_write: True
 
-bio_model_type: npzd
+bio_model_type: fennel
 
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt #griddata / edt / linearND
@@ -72,6 +72,17 @@ bio_ogcm_var_name:
     time            : time
     phyt            : phyc
     NO3             : no3
-    zoop            : zoop
-    detritus        : detr
+    PO4             : po4
+    oxygen          : o2
+    chl             : chl
+    
+
+
+
+
+
+
+
+
+
 

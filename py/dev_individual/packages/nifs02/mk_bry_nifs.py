@@ -7,7 +7,7 @@ import glob
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
 import create_B as cn
 import utils as tl
 from io_utils import collect_time_info
