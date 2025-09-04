@@ -10,7 +10,7 @@ import xarray as xr
 import datetime
 
 # 파일 열기
-pth = 'D:/shjo/tmp/'
+pth = 'D:/shjo/modis_may/'
 flist=[pth+i for i in os.listdir(pth) if i.endswith('.nc')]
 
 ref_date = np.datetime64('2000-01-01')
@@ -50,8 +50,8 @@ plt.rcParams.update({
 
 
 
-val=ds_combined.chlor_a.loc[dict(time=slice(9283,9307))].mean(dim='time',skipna=True).values/(0.02*6.625*12)
-# val=ds_combined.chlor_a.mean(dim='time',skipna=True).values/(0.02*6.625*12)
+# val=ds_combined.chlor_a.loc[dict(time=slice(9283,9307))].mean(dim='time',skipna=True).values/(0.02*6.625*12)
+val=ds_combined.chlor_a.mean(dim='time',skipna=True).values/(0.02*6.625*12)
 
 # val=ds_combined.chlor_a[5].values/(0.02*6.625*12)
 

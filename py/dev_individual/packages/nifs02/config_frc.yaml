@@ -1,0 +1,33 @@
+# 
+
+# === Download config ===
+time:
+  start: "2025-07-31"
+  end:   "2025-08-22"
+
+region:
+  lat: [5, 60]
+  lon: [100, 180]
+
+output:
+  base_dir: "/data/shjo/nifs02/aug/"
+
+# --- Initial & Boundary and Forcing ---
+#frcname : This will set automatically
+
+time_ref            : seconds since 2000-1-1 00:00:00
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

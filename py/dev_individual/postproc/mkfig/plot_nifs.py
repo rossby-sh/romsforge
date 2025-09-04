@@ -20,11 +20,10 @@ from netCDF4 import Dataset, num2date
 
 # Gpth='D:/shjo/ROMS_inputs/NWP12_grd_NWP4.nc'
 
-Spth='/home/shjo/github/romsforge/py/dev_individual/postproc/mkfig/'
+Spth='E:/data/nifs/Bvar_hindcast/'
 
-title='nifs-may'
 
-wpth='/home/shjo/github/romsforge/py/dev_individual/postproc/mkfig/fig/'
+wpth='C:/Users/ust21/shjo/MCC/cmems_fig/'
 
 # flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
 # flist=[Spth+i for i in os.listdir(Spth) if i.startswith('NWP12_avg_')]
@@ -32,7 +31,7 @@ flist=[Spth+i for i in os.listdir(Spth) if i.startswith('CMEMS_')]
 
 # 0226 8457
 
-ncG=Dataset("/home/shjo/github/romsforge/py/dev_individual/postproc/mkfig/CMEMS_data_pft_2025-07.nc")
+ncG=Dataset("E:/data/nifs/Bvar_hindcast/CMEMS_data_2022-06-01.nc")
 lon=ncG['longitude'][:]
 lat=ncG['latitude'][:]
 lon,lat=np.meshgrid(lon,lat)
@@ -96,6 +95,7 @@ def draw_roms_pcolor(lon2d, lat2d, var2d, timestamp=None,
     fig = plt.figure(figsize=(10, 6))
     ax = plt.axes(projection=ccrs.PlateCarree())
     ax.set_extent([np.min(lon2d), np.max(lon2d), np.min(lat2d), np.max(lat2d)], crs=ccrs.PlateCarree())
+    ax.set_extent([105.5, 163.3, 15.0, 52.07], crs=ccrs.PlateCarree())
     ax.coastlines(resolution='10m', linewidth=1)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAND, facecolor='lightgray')
@@ -166,7 +166,7 @@ for f in flist:
             
             draw_roms_pcolor(lon, lat, phytS*0.02*6.625*12, timestamp=t_str, varname='chlo (calc with phyt)',\
                              units='miligram meter-3', log_scale=True, clim=None,\
-                                 output_path=wpth+'chl_p/'+t_str+'.png', cmap=plt.get_cmap('jet',27)) 
+                                 output_path=wpth+'phyt_chl/'+t_str+'.png', cmap=plt.get_cmap('jet',27)) 
             
 
             chlo=ncS['chl'][i,0].data
