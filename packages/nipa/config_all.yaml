@@ -1,0 +1,103 @@
+# 
+
+# === Download config ===
+time:
+  start: "2025-08-30"
+  end:   "2025-08-31"
+
+region:
+  lat: [5, 60]
+  lon: [100, 180]
+
+output:
+  base_dir: "/home/shjo/data/test/"
+
+core_num : 3 # currently not working
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+grdname : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_15km_smooth_v2.nc
+ininame : /home/shjo/data/test/nifs_ini_20250701.nc
+#bryname : This will set automatically
+#frcname : This will set automatically
+
+weight_file: ./NWP_weight.nc
+calc_weight: True
+
+ncformat: NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+flood_method_for_ini: griddata #griddata / edt / linearND
+flood_method_for_bry: edt      #griddata / edt / linearND
+ 
+initdate            : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+ogcm_name           : /data/shjo/mcc/aug/hycom/HYCOM_20250701_00UTC.nc
+#ogcm_path_bry      : This will set automaticaly 
+
+bio_model_type      : npzd # None npzd, fennel 
+
+ogcm_var_name:
+    longitude       : lon
+    latitude        : lat
+    depth           : depth
+    time            : time
+    temperature     : water_temp
+    salinity        : salinity
+    u               : water_u
+    v               : water_v
+    zeta            : surf_el
+
+bry_start_date      : 2025-07-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-08-22 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+
+time_ref            : seconds since 2000-1-1 00:00:00
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+global_attrs_bry: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+    history         : history
+
+vertical:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+# === Add bio ===
+bio_ogcm_name : /data/share/DATA/RAW/Bvar_hindcast/clm_CMEMS_bio.nc
+
+bio_ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : depth
+    time            : time
+    phyt            : phyc
+    NO3             : no3
+    PO4             : po4
+    oxygen          : o2
+    chl             : chl
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
