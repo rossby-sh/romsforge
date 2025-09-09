@@ -17,10 +17,8 @@ core_num : 3 # currently not working
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_15km_smooth_v2.nc
-ininame : /home/shjo/data/test/nifs_ini_20250701.nc
-#bryname : This will set automatically
-#frcname : This will set automatically
+grdname : /home/shjo/data/roms_inputs/grd/lte/NWP12_grd_NWP4.nc
+ininame : ./test_isl.nc
 
 weight_file: ./NWP_weight.nc
 calc_weight: True

@@ -25,7 +25,7 @@ grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
 weight_file: /data/share/DATA/ROMS_INPUTS/wght/NWP_weight.nc
 calc_weight: True
 
-ncformat: NETCDF4 # NETCDF3_64BIT
+ncformat: NETCDF3_64BIT # NETCDF3_64BIT
 force_write: True
 
 bio_model_type: fennel

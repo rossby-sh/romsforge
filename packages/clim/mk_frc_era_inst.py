@@ -232,14 +232,14 @@ forcing_vars = {
 }
 
 print("=== Save to netcdf ===")
-cn.createF_era5(
+cn.createF_era5_n3(
     W_FILE,
     LON,
     LAT,
     TIME_CONVERTED_NUM,
     MY_TIME_REF,
     forcing_vars,
-    "NETCDF4"
+    "NETCDF3_64BIT_OFFSET"
 )
 print("[done]", W_FILE)
 

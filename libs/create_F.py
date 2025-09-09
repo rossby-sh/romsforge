@@ -14,6 +14,99 @@ from netCDF4 import Dataset
 import xarray as xr
 import numpy as np
 
+def createF_era5_n3(nc_save_name, LON, LAT, TIME, Ref_time, variables, ncFormat='NETCDF3_64BIT_OFFSET'):
+    """
+    Create a ROMS-style forcing NetCDF file using ERA5-like variables.
+    - 모든 *_time 차원은 len(TIME)으로 고정 (unlimited 사용 안 함)
+    - 정의 단계와 쓰기 단계 분리
+    """
+    lat_len = len(LAT)
+    lon_len = len(LON)
+    time_len = len(TIME)
+
+    forcing_variables = {
+        'Uwind':       ('f4', ('wind_time', 'lat', 'lon'), {'long_name': 'Eastward Wind', 'units': 'm/s'}),
+        'Vwind':       ('f4', ('wind_time', 'lat', 'lon'), {'long_name': 'Northward Wind', 'units': 'm/s'}),
+        'Tair':        ('f4', ('tair_time', 'lat', 'lon'), {'long_name': 'Air Temperature', 'units': 'Celsius'}),
+        'Qair':        ('f4', ('qair_time', 'lat', 'lon'), {'long_name': 'Specific Humidity', 'units': 'g/kg'}),
+        'RH':          ('f4', ('qair_time', 'lat', 'lon'), {'long_name': 'Relative Humidity', 'units': 'percentage'}),
+        'Cloud':       ('f4', ('cloud_time', 'lat', 'lon'), {'long_name': 'Cloud Fraction', 'units': 'percent'}),
+        'sst':         ('f4', ('sst_time', 'lat', 'lon'), {'long_name': 'Sea Surface Temperature', 'units': 'Celsius'}),
+        'dqdsst':      ('f4', ('dqdsst_time', 'lat', 'lon'), {'long_name': 'dQ/dSST', 'units': 'Watts/m^2/C'}),
+        'srf':         ('f4', ('srf_time', 'lat', 'lon'), {'long_name': 'Net Shortwave Radiation Flux', 'units': 'Watts/m^2'}),
+        'lwrad':       ('f4', ('lrf_time', 'lat', 'lon'), {'long_name': 'Net Longwave Radiation Flux', 'units': 'Watts/m^2'}),
+        'lwrad_down':  ('f4', ('lrf_time', 'lat', 'lon'), {'long_name': 'Downward Longwave Radiation', 'units': 'Watts/m^2'}),
+        'rain':        ('f4', ('rain_time', 'lat', 'lon'), {'long_name': 'Precipitation Rate', 'units': 'kg/m^2/s'}),
+        'Pair':        ('f4', ('pair_time', 'lat', 'lon'), {'long_name': 'Surface Air Pressure', 'units': 'millibars'}),
+    }
+
+    # 모든 *_time 이름 뽑기
+    time_names = sorted({
+        dim for _, dims, _ in forcing_variables.values()
+        for dim in dims if dim.endswith('_time')
+    })
+
+    # 입력 데이터 time 길이 확인(선택)
+    for varname, data in variables.items():
+        if data.shape[0] != time_len:
+            raise ValueError(f"{varname}: data.shape[0]({data.shape[0]}) != len(TIME)({time_len})")
+
+    # ======================
+    # 1) 정의 단계 (쓰기 금지)
+    # ======================
+    with Dataset(nc_save_name, mode='w', format=ncFormat) as ncfile:
+        # 공간 차원
+        ncfile.createDimension('lon', lon_len)
+        ncfile.createDimension('lat', lat_len)
+
+        # 핵심: 모든 time 차원을 len(TIME)으로 "고정"
+        for tname in time_names:
+            ncfile.createDimension(tname, time_len)
+
+        # 좌표 변수
+        lon = ncfile.createVariable('lon', 'f4', ('lon',))
+        lat = ncfile.createVariable('lat', 'f4', ('lat',))
+        lon.long_name = 'Longitude'
+        lon.units = 'degrees_east'
+        lat.long_name = 'Latitude'
+        lat.units = 'degrees_north'
+
+        # 시간 변수(정의만)
+        for tname in time_names:
+            tvar = ncfile.createVariable(tname, 'f8', (tname,))
+            tvar.long_name = f'{tname.replace("_time", "").capitalize()} forcing time'
+            tvar.units = Ref_time
+            tvar.field = f"{tname}, scalar, series"
+
+        # Forcing 변수(정의만)
+        for varname, data in variables.items():
+            if varname not in forcing_variables:
+                raise KeyError(f"Unknown variable: {varname}")
+            dtype, dims, attrs = forcing_variables[varname]
+            v = ncfile.createVariable(varname, dtype, dims)  # netCDF3: 압축/청킹 옵션 X
+            for attr, val in attrs.items():
+                setattr(v, attr, val)
+            v.coordinates = 'lon lat'
+            v.time = dims[0]
+            v.field = f"{varname}, scalar, series"
+
+    # ======================
+    # 2) 쓰기 단계
+    # ======================
+    with Dataset(nc_save_name, mode='a') as ncfile:
+        ncfile.variables['lon'][:] = LON
+        ncfile.variables['lat'][:] = LAT
+
+        tvals = np.asarray(TIME, dtype='f8')
+        for tname in time_names:
+            ncfile.variables[tname][:] = tvals
+
+        for varname, data in variables.items():
+            ncfile.variables[varname][:, :, :] = data
+
+        ncfile.title = 'ROMS ERA5-style Forcing'
+        ncfile.history = 'Created using create_forcing_era5'
+    print(f"✅ NetCDF saved: {nc_save_name}")
 
 def createF_era5(nc_save_name, LON, LAT, TIME, Ref_time, variables, ncFormat='NETCDF3_CLASSIC'):
     """

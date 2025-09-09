@@ -291,7 +291,7 @@ cn.createF_era5(
     TIME_CONVERTED_NUM,
     MY_TIME_REF,
     forcing_vars,
-    "NETCDF4"   # define-mode 이슈 회피
+    "NETCDF3_64BIT_OFFSET"   # define-mode 이슈 회피
 )
 print("[done]", W_FILE)
 
