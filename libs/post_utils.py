@@ -453,13 +453,35 @@ def _pad_nearest(a, axis):
     hi = a[tuple(sl_hi)]
     return np.concatenate([np.expand_dims(lo, axis), a, np.expand_dims(hi, axis)], axis=axis)
 
-def _nan_pair_mean(a, b):
-    w1 = np.isfinite(a).astype(np.float32)
-    w2 = np.isfinite(b).astype(np.float32)
-    num = np.where(np.isfinite(a), a, 0.0) * w1 + np.where(np.isfinite(b), b, 0.0) * w2
-    den = w1 + w2
-    out = np.divide(num, den, out=np.full_like(num, np.nan, dtype=float), where=den>0)
-    return out
+# def _nan_pair_mean(a, b):
+#     w1 = np.isfinite(a).astype(np.float32)
+#     w2 = np.isfinite(b).astype(np.float32)
+#     num = np.where(np.isfinite(a), a, 0.0) * w1 + np.where(np.isfinite(b), b, 0.0) * w2
+#     den = w1 + w2
+#     out = np.divide(num, den, out=np.full_like(num, np.nan, dtype=float), where=den>0)
+#     return out
+
+
+def _nan_pair_mean(a, b, *, keep_nan_if_any=True):
+    """
+    keep_nan_if_any=True  -> 두 값 중 하나라도 NaN이면 결과 NaN (엄격)
+    keep_nan_if_any=False -> 기존처럼 유효한 것들만 평균
+    """
+    a_fin = np.isfinite(a)
+    b_fin = np.isfinite(b)
+
+    if keep_nan_if_any:
+        both = a_fin & b_fin
+        out = np.full(a.shape, np.nan, dtype=np.result_type(a, b, float))
+        out[both] = 0.5*(a[both] + b[both])
+        return out
+    else:
+        w1 = a_fin.astype(np.float32)
+        w2 = b_fin.astype(np.float32)
+        num = np.where(a_fin, a, 0.0) + np.where(b_fin, b, 0.0)
+        den = w1 + w2
+        out = np.divide(num, den, out=np.full_like(num, np.nan, dtype=float), where=den>0)
+        return out
 
 def u2rho_rutgers_safenan(u):
     """

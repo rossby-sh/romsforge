@@ -18,7 +18,7 @@ core_num : 3 # currently not working
 
 # --- Initial & Boundary and Forcing ---
 grdname : /home/shjo/data/roms_inputs/grd/lte/NWP12_grd_NWP4.nc
-ininame : ./test_isl.nc
+ininame : ./h2l_isl_leading_11.nc
 
 weight_file: ./NWP_weight.nc
 calc_weight: True
@@ -64,12 +64,12 @@ global_attrs_bry:
     history         : history
 
 vertical:
-    layer_n         : 36
+    layer_n         : 20
     vtransform      : 2
-    vstretching     : 4
-    theta_s         : 6.5
-    theta_b         : 1
-    tcline          : 400
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
 
 # === Add bio ===
 bio_ogcm_name : /data/share/DATA/RAW/Bvar_hindcast/clm_CMEMS_bio.nc

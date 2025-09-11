@@ -4,22 +4,27 @@ import os
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+sys.path.append("C:/Users/ust21/shjo/romsforge/libs/")
+
+import matplotlib.pyplot as plt
+
 #import create_I as cn
 import utils as ut
 import create_I as cn
 import post_utils as pu
 from scipy.interpolate import LinearNDInterpolator, griddata
 
-pthG_src="/home/shjo/data/roms_inputs/grd/lte/NWP4_grd_3_10m_LP.nc"
-pthG_dst="/home/shjo/data/roms_inputs/grd/lte/NWP12_grd_NWP4.nc"
-pthI_src="/home/shjo/data/lab/NWP4_ini_DA_8401.nc"
-pthI_dst="/home/shjo/data/lab/NWP4_ini_DA_8401.nc"
+pth="D:/shjo/ISL_TEST/"
+pthG_src=pth+"NWP4_grd_3_10m_LP.nc"
+pthG_dst=pth+"NWP12_grd_NWP4.nc"
+pthI_src=pth+"NWP4_ini_DA_8401.nc"
+pthI_dst=pth+"NWP4_ini_DA_8401.nc"
 
 weight_file="./test_wght.nc"
 
 cfg  = ut.parse_config("./config_all.yaml")
-grd  = ut.load_roms_grid(cfg.grdname)
+grd  = ut.load_roms_grid(pthG_dst)
 
 # Read grid
 ncG_src=Dataset(pthG_src)
@@ -54,24 +59,99 @@ zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,36,5,topo_dst,np.zeros_like(top
 lon_crop, lat_crop, idx, idy = ut.crop_to_model_domain(lat_dst, lon_dst, lat_src, lon_src)
 
 # --- calc weight ---
-status = ut.build_bilinear_regridder(lon_src, lat_src, lon_dst, lat_dst, weight_file, reuse=False)
-if status:
-    raise RuntimeError(f"Failed to generate remap weights: {weight_file}")
+# status = ut.build_bilinear_regridder(lon_src, lat_src, lon_dst, lat_dst, weight_file, reuse=False)
+# if status:
+    # raise RuntimeError(f"Failed to generate remap weights: {weight_file}")
 
 # --- Load & calc increments ---
-factor=1
-zeta_diff=(ncI_src["zeta"][0]-ncI_src["zeta"][1])*factor
-temp_diff=(ncI_src["temp"][0]-ncI_src["temp"][1])*factor
-salt_diff=(ncI_src["salt"][0]-ncI_src["salt"][1])*factor
-u_diff=(ncI_src["u"][0]-ncI_src["u"][1])*factor
-v_diff=(ncI_src["v"][0]-ncI_src["v"][1])*factor
-ubar_diff=(ncI_src["ubar"][0]-ncI_src["ubar"][1])*factor
-vbar_diff=(ncI_src["vbar"][0]-ncI_src["vbar"][1])*factor
+# factor=1
+# zeta_diff=(ncI_src["zeta"][0]-ncI_src["zeta"][1])*factor
+# temp_diff=(ncI_src["temp"][0]-ncI_src["temp"][1])*factor
+# salt_diff=(ncI_src["salt"][0]-ncI_src["salt"][1])*factor
+# u_diff=(ncI_src["u"][0]-ncI_src["u"][1])*factor
+# v_diff=(ncI_src["v"][0]-ncI_src["v"][1])*factor
+# ubar_diff=(ncI_src["ubar"][0]-ncI_src["ubar"][1])*factor
+# vbar_diff=(ncI_src["vbar"][0]-ncI_src["vbar"][1])*factor
 
+# u_diff=pu.uv2rho_rutgers_safenan(u_diff,"u")
+# v_diff=pu.uv2rho_rutgers_safenan(v_diff,"v")
+# ubar_diff=pu.uv2rho_rutgers_safenan(ubar_diff,"u")
+# vbar_diff=pu.uv2rho_rutgers_safenan(vbar_diff,"v")
+
+factor=1
+zeta_diff=ncI_src["zeta"][0]
+temp_diff=ncI_src["temp"][0]
+salt_diff=ncI_src["salt"][1]
+u_diff=ncI_src["u"][1]
+v_diff=ncI_src["v"][1]
+ubar_diff=ncI_src["ubar"][1]
+vbar_diff=ncI_src["vbar"][1]
 u_diff=pu.uv2rho_rutgers_safenan(u_diff,"u")
 v_diff=pu.uv2rho_rutgers_safenan(v_diff,"v")
 ubar_diff=pu.uv2rho_rutgers_safenan(ubar_diff,"u")
 vbar_diff=pu.uv2rho_rutgers_safenan(vbar_diff,"v")
+
+
+def _interp2d_linear_then_nearest(VD, XD, YD, XR, YR,
+                                  Dmask=None,
+                                  treat_zero_as_fill=False,
+                                  fill_value_from_attr=None):
+    """
+    VD: donor 값 (nyd, nxd)
+    XD, YD: donor 좌표 2D
+    XR, YR: receiver 좌표 2D
+    Dmask: donor mask_rho (1=sea, 0=land)
+    """
+    x = XD.ravel(); y = YD.ravel()
+    v = VD.ravel()
+    if Dmask is not None:
+        m = Dmask.ravel()
+        valid = (m >= 0.5)
+    else:
+        valid = np.ones_like(v, dtype=bool)
+
+    valid &= ~np.isnan(v)
+    if fill_value_from_attr is not None:
+        valid &= (v != fill_value_from_attr)
+    if treat_zero_as_fill:
+        valid &= (v != 0.0)
+
+    if valid.sum() == 0:
+        return np.full_like(XR, np.nan, dtype=VD.dtype)
+
+    points = np.column_stack((x[valid], y[valid]))
+    values = v[valid]
+
+    out = griddata(points, values, (XR, YR), method='linear')
+    nan_mask = np.isnan(out)
+    if np.any(nan_mask):
+        out[nan_mask] = griddata(points, values,
+                                 (XR[nan_mask], YR[nan_mask]),
+                                 method='nearest')
+    return out
+
+def interp2d_with_masks(VD, XD, YD, XR, YR, Dmask=None, Rmask=None,
+                        treat_zero_as_fill=False, fill_value_from_attr=None):
+    V = _interp2d_linear_then_nearest(
+            VD, XD, YD, XR, YR,
+            Dmask=Dmask,
+            treat_zero_as_fill=treat_zero_as_fill,
+            fill_value_from_attr=fill_value_from_attr)
+    if Rmask is not None:
+        V = np.where(Rmask >= 0.5, V, 0.0)
+    return V
+
+def interp3d_with_masks(VD3, XD, YD, XR, YR, Dmask=None, Rmask=None,
+                        treat_zero_as_fill=False, fill_value_from_attr=None):
+    nz = VD3.shape[0]
+    out = np.empty((nz,) + XR.shape, dtype=VD3.dtype)
+    for k in range(nz):
+        out[k] = interp2d_with_masks(
+            VD3[k], XD, YD, XR, YR,
+            Dmask=Dmask, Rmask=Rmask,
+            treat_zero_as_fill=treat_zero_as_fill,
+            fill_value_from_attr=fill_value_from_attr)
+    return out
 
 def interp_angle_like_matlab(angle_src, lon_src, lat_src, lon_dst, lat_dst):
     """
@@ -160,26 +240,87 @@ def uv_barotropic_from_3d(u: np.ndarray,
 field = ut.ConfigObject(zeta=zeta_diff, temp=temp_diff, salt=salt_diff,\
         u=u_diff,v=v_diff,ubar=ubar_diff,vbar=vbar_diff)
 
-# --- Load and apply remap weights to all fields ---
-with Dataset(weight_file) as nc:
-    row = nc.variables["row"][:] - 1
-    col = nc.variables["col"][:] - 1
-    S   = nc.variables["S"][:]
-for varname in vars(field):
-    var_src = getattr(field, varname)
-    remapped = ut.remap_variable(var_src, row, col, S, lon_dst.shape, method="coo")
-    setattr(field, varname, remapped)
+    
+Dmask = ncG_src["mask_rho"][:]   # 도너
+Rmask = ncG_dst["mask_rho"][:]   # 리시버
 
-# --- Horizontal flood (all fields) ---
-for var in vars(field):
-    val = getattr(field, var)
-    val_flooded = ut.flood_horizontal(val, lon_dst, lat_dst, method="griddata")
-    setattr(field, var, val_flooded)
+
+for name in ["zeta","temp","salt","u","v","ubar","vbar","angle"]:
+    print(name)
+    if not hasattr(field, name): 
+        continue
+    arr = getattr(field, name)
+    if arr is None:
+        continue
+
+    if arr.ndim == 2:
+        out = interp2d_with_masks(arr, lon_src, lat_src, lon_dst, lat_dst,
+                                  Dmask=Dmask, Rmask=Rmask,
+                                  treat_zero_as_fill=True)
+        setattr(field, name, out.astype(arr.dtype, copy=False))
+
+    elif arr.ndim == 3:
+        nz = arr.shape[0]
+        out = np.empty((nz,) + lon_dst.shape, dtype=arr.dtype)
+        for k in range(nz):
+            out[k] = interp2d_with_masks(arr[k], lon_src, lat_src, lon_dst, lat_dst,
+                                         Dmask=Dmask, Rmask=Rmask,
+                                         treat_zero_as_fill=True)
+        setattr(field, name, out)
+        
+        
+from copy import deepcopy 
+        
+# # --- Load and apply remap weights to all fields ---/
+# with Dataset(weight_file) as nc:
+#     row = nc.variables["row"][:] - 1
+#     col = nc.variables["col"][:] - 1
+#     S   = nc.variables["S"][:]
+# for varname in vars(field):
+#     print(varname)
+#     var_src = getattr(field, varname)
+#     remapped = ut.remap_variable(var_src, row, col, S, lon_dst.shape, method="coo")
+#     setattr(field, varname, remapped)
+
+
+# plt.pcolor(field['temp'][-1])
+# plt.show()
+
+
+# # --- Horizontal flood (all fields) ---
+# for var in vars(field):
+#     val = getattr(field, var)
+#     val_flooded = ut.flood_horizontal(val, lon_dst, lat_dst, method="griddata")
+#     setattr(field, var, val_flooded)
+    
+    
+    
 #    done("flood_h", time.time()-t0)
+plt.pcolor(field['temp'][-1])
+plt.show()
+
+field2= deepcopy(field)
 
 # --- interp zr ---
-zr_src_remapped = ut.remap_variable(zr_src, row, col, S, lon_dst.shape, method="coo")
-zr_src_flooded = ut.flood_horizontal(zr_src_remapped, lon_dst, lat_dst, method="griddata")
+# zr_src_remapped = ut.remap_variable(zr_src, row, col, S, lon_dst.shape, method="coo")
+# zr_src_flooded = ut.flood_horizontal(zr_src_remapped, lon_dst, lat_dst, method="griddata")
+
+nz = zr_src.shape[0]
+out = np.empty((nz,) + lon_dst.shape, dtype=zr_src.dtype)
+
+for k in range(nz):
+    out[k] = interp2d_with_masks(
+        zr_src[k],          # donor z_r at level k
+        lon_src, lat_src,   # donor coords (rho)
+        lon_dst, lat_dst,   # target coords (rho)
+        Dmask=Dmask,    # donor mask_rho (1=sea)
+        Rmask=None,         # zr에는 리시버 마스크 적용하지 않음
+        treat_zero_as_fill=False,   # 0은 유효 (표층)
+        fill_value_from_attr=None
+    )
+zr_src_remapped = out
+
+
 """
 # --- Mask land to 0 ---
 for varname in vars(field):
@@ -190,18 +331,24 @@ for varname in vars(field):
         var[:, mask_dst == 0] = 0.0
     setattr(field, varname, var)
 """
+
 # --- vertical interpolation ---
-for varname in vars(field):
-    var = getattr(field,varname)
+for varname in vars(field2):
+    var = getattr(field2,varname)
     if var.ndim==2:
         continue
     print(varname)
-    var = getattr(field, varname)
-    var_zinterp = pu.vertical_interp_to_ZR(zr_src_flooded, var, zr_dst,
+    var = getattr(field2, varname)
+    var_zinterp = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,
                                          n_jobs=-1,
                                          dedup="mean",
-                                         extrap_mode="padding")
-    setattr(field, varname, var_zinterp)
+                                         extrap_mode="leading")
+    setattr(field2, varname, var_zinterp)
+
+field=field2
+plt.pcolor(field2['temp'][-5])
+plt.show()
+
 
 # angle_src -> T.parent_angle (dst로 선형보간)
 angle_par_on_dst = interp_angle_like_matlab(angle_src, lon_src, lat_src, lon_dst, lat_dst)
@@ -234,12 +381,10 @@ ubar, vbar = uv_barotropic_from_3d(field.u, field.v, Hz_dst, mask_u=mask_u, mask
 setattr(field, "ubar", ubar)
 setattr(field, "vbar", vbar)
 
-
 # [03] Create initial NetCDF file
 status = cn.create_ini__(cfg, grd, 0, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
 if status:
     raise RuntimeError(f"Failed creating file {cfg.ininame}")
-
 
 # [13] Write all variables to ini.nc
 with Dataset(cfg.ininame, mode='a') as nc:
