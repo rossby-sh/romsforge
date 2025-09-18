@@ -18,7 +18,7 @@ core_num : 3 # currently not working
 
 # --- Initial & Boundary and Forcing ---
 grdname : /home/shjo/data/roms_inputs/grd/lte/NWP12_grd_NWP4.nc
-ininame : ./h2l_isl_leading_11.nc
+ininame : ./add_incre_1cycle.nc
 
 weight_file: ./NWP_weight.nc
 calc_weight: True

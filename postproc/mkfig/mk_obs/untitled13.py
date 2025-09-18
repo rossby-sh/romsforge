@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 21 08:29:33 2025
+Created on Thu Jun 26 10:38:14 2025
 
 @author: ust21
 """
 
+import os
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.colors as mcolors
 import numpy as np
+import xarray as xr
+from netCDF4 import Dataset, num2date
+# import cmocean
 
-from netCDF4 import Dataset
-import cmocean
+Spth='D:/shjo/ostia_aug.nc'
 
-Gpth='D:/shjo/ROMS_inputs/roms_grd_fennel_15km_smooth_v2.nc'
-Spth='D:/shjo/ROMS_OUTS/sst_phyto_ust11/NWP15_ini_9252_HTS.nc'
+title='OSTIA SST'
 
-Spth='D:/shjo/ROMS_OUTS/nifs_may/NWP15_ini_9252_HTS.nc'
+# wpth='D:/shjo/MCC/ostia_jul/'
+
+# flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
+flist=[Spth]
+
+
+
+
 
 
 def draw_roms_pcolor(lon2d, lat2d, var2d, timestamp=None,
@@ -78,15 +87,21 @@ def draw_roms_pcolor(lon2d, lat2d, var2d, timestamp=None,
     # 지도 설정
     fig = plt.figure(figsize=(10, 6))
     ax = plt.axes(projection=ccrs.PlateCarree())
-    ax.set_extent([np.min(lon2d), np.max(lon2d), np.min(lat2d), np.max(lat2d)], crs=ccrs.PlateCarree())
+    ax.set_extent([115.0, 150.0, 20.0, 49.0], crs=ccrs.PlateCarree())
+    #ax.set_extent([110.0, 157, 15.0, 49.04], crs=ccrs.PlateCarree())
+    # ax.set_extent([105.5, 163.3, 15.0, 52.07], crs=ccrs.PlateCarree())
+    # ax.set_extent([110., 157, 15.0, 49.0], crs=ccrs.PlateCarree())
+
     ax.coastlines(resolution='10m', linewidth=1)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAND, facecolor='lightgray')
     ax.add_feature(cfeature.OCEAN, facecolor='white')
-    gl = ax.gridlines(draw_labels=True, linestyle='-.')
+    gl = ax.gridlines(draw_labels=True, linestyle='-.',linewidth=0)
     gl.top_labels = False
     gl.right_labels = False
 
+    ct=ax.contour(lon2d, lat2d, val_plot,colors='k',linestyles='-',linewidths=0.8,alpha=0.85,levels=[4,8,12,16,20,24,28,30,32])
+    ax.clabel(ct, colors='k', fontsize=12)
     # pcolormesh
     pcm = ax.pcolormesh(
         lon2d, lat2d, val_plot,
@@ -126,43 +141,58 @@ def draw_roms_pcolor(lon2d, lat2d, var2d, timestamp=None,
 
     plt.close()
 
-ncS=Dataset(Spth)
-ncG=Dataset(Gpth)
 
-NN=0
 
-lon=ncG['lon_rho'][:]
-lat=ncG['lat_rho'][:]
-tempS=ncS['temp'][NN,-1]
-tempS[tempS==0]=np.nan
+ncS=Dataset(flist[0])
+    
+times=ncS['time'][:]
 
-phytS=ncS['phytoplankton'][NN,-1]
+lon,lat=ncS['longitude'][:].data,ncS['latitude'][:].data
 
-# Temperature
-draw_roms_pcolor(lon, lat, tempS, timestamp=None, varname='NWP15_ini_9252_HTS('+str(NN+1)+') SST',\
-                 units='celcius', log_scale=False, clim=(-1,32), output_path=None, cmap=plt.get_cmap('Spectral_r',27))
+lon,lat=np.meshgrid(lon,lat)
+
+# for i in range(len(times)):
+
+tempS=ncS['analysed_sst'][1:-4].data-273.15
+tempS=ncS['analysed_sst'][:].data-273.15
+tempS=np.nanmean(tempS,axis=0)
+
+
+for i in np.arange(0,32,1):
+
+
+    t=times[i]
+    t_str=str(num2date(t,'seconds since 1981-01-01'))[:13]
+    # t_str=str(num2date(t,'seconds since 2000-1-1'))[:10]
+
+    # draw_roms_pcolor(lon, lat, phytS, timestamp=t_str, varname='Surface phyt',\
+    #                  units='millimole_nitrogen meter-3', log_scale=True, clim=None,\
+    #                      output_path=None, cmap=plt.get_cmap('viridis',27)) 
     
+
+        
+    tempS[tempS<-1000]=np.nan
+    draw_roms_pcolor(lon, lat, tempS, timestamp=None, varname=title+' AUG',\
+                        units=f'degree', log_scale=False, clim=(-1,32),\
+                            output_path=None,\
+                            cmap=plt.get_cmap('Spectral_r',27) )
     
-# phytS
-draw_roms_pcolor(lon, lat, phytS, timestamp=None, varname='NWP15_ini_9252_HTS('+str(NN+1)+') PHYT',\
-                 units='millimole_nitrogen meter-3', log_scale=True, clim=None, output_path=None, cmap=plt.get_cmap('jet',27)) 
+    # saltS=ncS['salt'][i,-1].data
+    # saltS[saltS>1000]=np.nan
+    # draw_roms_pcolor(lon, lat, saltS, timestamp=t_str, varname='Surface salt',\
+    #                     units=f'psu', log_scale=False, clim=(32.5,35.5),\
+    #                         output_path=wpth+'salt/'+t_str+'.png',\
+    #                         cmap=cmocean.cm.haline) 
     
-# draw_roms_pcolor(lon, lat, phytS, timestamp=None, varname='Surface phyt',\
-#                  units='millimole_nitrogen meter-3', log_scale=False, clim=None, output_path=None, cmap='jet') 
+            
+                 
     
-# # zoopS
-# draw_roms_pcolor(lon, lat, zoopS, timestamp=None, varname='Surface zoop',\
-#                  units='millimole_nitrogen meter-3', log_scale=False, clim=None, output_path=None, cmap='jet') 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+            
+  
+    # cmocean.cm.haline
+
+        
+
     
     
     

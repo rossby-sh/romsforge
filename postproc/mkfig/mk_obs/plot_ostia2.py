@@ -15,7 +15,7 @@ import numpy as np
 from netCDF4 import Dataset, num2date
 # import cmocean
 
-Spth='D:/shjo/MCC/OSTIA_SST_250501-250531.nc'
+Spth='D:/shjo/ostia_aug.nc'
 
 title='OSTIA SST'
 
@@ -24,9 +24,7 @@ title='OSTIA SST'
 # flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
 flist=[Spth]
 
-
-
-
+wpth="D:/shjo/aug_ostia/"
 
 
 def draw_roms_pcolor(lon2d, lat2d, var2d, timestamp=None,
@@ -171,7 +169,7 @@ for i in np.arange(0,32,1):
     tempS[tempS<-1000]=np.nan
     draw_roms_pcolor(lon, lat, tempS, timestamp=t_str, varname=title,\
                         units=f'degree', log_scale=False, clim=(-1,32),\
-                            output_path=None,\
+                            output_path=wpth+t_str+'.png',\
                             cmap=plt.get_cmap('Spectral_r',27) )
     
     # saltS=ncS['salt'][i,-1].data

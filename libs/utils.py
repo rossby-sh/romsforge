@@ -190,13 +190,19 @@ def load_roms_grid(grdname):
         lat = nc["lat_rho"][:]
         angle = nc["angle"][:]
         h = nc["h"][:]
-        mask = nc["mask_rho"][:]
+        mask_rho = nc["mask_rho"][:]
+        mask_u   = nc["mask_u"][:]
+        mask_v   = nc["mask_v"][:]
+
     return ConfigObject(
         lon     = lon,
         lat     = lat,
         angle   = angle,
         topo    = h,
-        mask    = mask
+        mask_rho= mask_rho,
+        mask_u  = mask_u,
+        mask_v  = mask_v
+
     )
 
 def load_ogcm_metadata(ogcm_name,ogcm_var_name):
@@ -625,6 +631,7 @@ def ztosigma_1d(var,z,depth):
 
         
 def zlevs(Vtransform, Vstretching,theta_s, theta_b, hc, N,igrid, h, zeta):
+    # Vstretching=2;Vtransform=2;theta_s=7;theta_b=0.1;hc=200;N=36;igrid=1;h=topo_dst; zeta=np.zeros_like(h)
     from copy import deepcopy
     
     # for get section
@@ -660,7 +667,7 @@ def zlevs(Vtransform, Vstretching,theta_s, theta_b, hc, N,igrid, h, zeta):
         hu=0.5*(h[:L,:Mp]+h[1:Lp,:Mp])
         zetau=0.5*(zeta[:L,:Mp]+zeta[1:Lp,:Mp])
     elif igrid==4:
-        hv=0.5*(hp[:Lp,:M]+h[:Lp,1:Mp])
+        hv=0.5*(h[:Lp,:M]+h[:Lp,1:Mp])
         zetav=0.5*(zeta[:Lp,:M]+zeta[:Lp,1:Mp])        
     elif igrid==5:
         hr=deepcopy(h)

@@ -22,7 +22,7 @@ import cmocean
 
 # Gpth='D:/shjo/ROMS_inputs/NWP12_grd_NWP4.nc'
 
-Spth='D:/shjo/MCC/MCC_TEST/nifs_jun_sst_4dvarF/avg_re/'
+Spth='D:/shjo/nifs02/'
 
 
 title=''
@@ -31,7 +31,7 @@ wpth=Spth+'figs/'
 
 # flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
 # flist=[Spth+i for i in os.listdir(Spth) if i.startswith('NWP12_avg_')]
-flist=[Spth+i for i in os.listdir(Spth) if i.startswith('NIFS_NWP')]
+flist=[Spth+i for i in os.listdir(Spth) if i.startswith('theta')]
 
 # 0226 8457
 
@@ -123,7 +123,7 @@ def draw_roms_pcolor(lon2d, lat2d, var2d, timestamp=None,
 
     # colorbar
     cbar = plt.colorbar(pcm, ax=ax, orientation='vertical', pad=0.02, shrink=0.8)
-    label = f'{"log(" if log_scale else ""}{varname}{")" if log_scale else ""} [{units}]'
+    label = f'[{units}]'
     cbar.set_label(label, fontsize=14)
 
     # log tick (optional)
@@ -170,12 +170,20 @@ draw_roms_pcolor(lon, lat, phytS, timestamp=t_str, varname='Mean surface phyto',
 
     
     
-tempS=ncS['temp'][0].data
+tempS=ncS['thetao'][0,0].data
 tempS[tempS>1000]=np.nan
 draw_roms_pcolor(lon, lat, tempS, timestamp=t_str, varname='Mean surface temp',\
                     units=f'degree', log_scale=False, clim=(-1,32),\
                         output_path=wpth+'temp_'+t_str+'.png',\
                         cmap=plt.get_cmap('Spectral_r',27) )
+    
+tempS=ncS['thetao'][0,0].data
+tempS[tempS>1000]=np.nan
+draw_roms_pcolor(lon, lat, tempS, timestamp=None, varname='Mean surface temp',\
+                    units=f'degree', log_scale=False, clim=(-1,32),\
+                        output_path=None,\
+                        cmap=plt.get_cmap('Spectral_r',27) )
+
 
 saltS=ncS['salt'][0].data
 saltS[saltS>1000]=np.nan

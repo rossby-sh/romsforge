@@ -1,0 +1,58 @@
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+grdname_src : D:/shjo/ISL_TEST/test/NWP12_grd_edit_depth.nc
+grdname_dst : D:/shjo/ISL_TEST/test/NWP4_grd_3_10m_LP_subsampled.nc
+
+ininame_src : D:/shjo/ISL_TEST/test/NWP12_RST_DA_lev36.nc
+ininame_dst : D:/shjo/ISL_TEST/test/NWP4_RST_DA.nc
+
+weight_file: ./NWP_weight.nc
+calc_weight: True
+
+ncformat: NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+global_attrs_bry: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+    history         : history
+
+vertical_src:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+vertical_dst:
+    layer_n         : 20
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -17,17 +17,15 @@ from netCDF4 import Dataset, num2date
 import ROMS_utils02 as ru
 import cmocean
 
-# Gpth='D:/shjo/ROMS_inputs/NWP12_grd_NWP4.nc'
-Gpth='D:/shjo/ROMS_inputs/NWP4_grd_314_10m.nc'
+Gpth='D:/shjo/del_ROMS_inputs/roms_grd_fennel_15km_smooth_v2.nc'
 
-# Gpth='D:/shjo/ROMS_inputs/NWP12_grd_NWP4.nc'
-
-Spth='D:/shjo/MCC/jul025_20E_re/'
+Spth='D:/shjo/nifs02/aug_all/'
 
 title='nifs-may'
 
-wpth='D:/shjo/MCC/jul025_20E_re/figs/'
+wpth='D:/shjo/nifs02/figures/aug_all/'
 
+chl_bool=0
 # flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
 # flist=[Spth+i for i in os.listdir(Spth) if i.startswith('NWP12_avg_')]
 flist=[Spth+i for i in os.listdir(Spth) if i.startswith('NWP15_')]
@@ -154,61 +152,49 @@ for f,nn in zip(flist,range(len(flist))):
         times=ncS['ocean_time'][:]
         
         for i in range(len(times)):
-            n+=1
+        
             phytS=ncS['phytoplankton'][i,-1].data
             phytS[phytS>1000]=np.nan
             t=times[i]
             # t_str=str(num2date(t,'seconds since 2000-1-1'))[:13]
-            t_str=str(num2date(t,'seconds since 2000-1-1'))[:13]
+            t_str=str(num2date(t,'seconds since 2000-1-1'))[:10]
 
-            # draw_roms_pcolor(lon, lat, phytS, timestamp=t_str, varname='Surface phyt',\
-            #                  units='millimole_nitrogen meter-3', log_scale=True, clim=None,\
-            #                      output_path=None, cmap=plt.get_cmap('viridis',27)) 
-            
-            draw_roms_pcolor(lon, lat, phytS, timestamp=t_str, varname='jul025_20E',\
+            draw_roms_pcolor(lon, lat, phytS, timestamp=t_str, varname='phyt '+title,\
                              units='millimole_nitrogen meter-3', log_scale=True, clim=None,\
-                                 output_path=wpth+'phyt_avg/'+t_str+'.png', cmap=plt.get_cmap('jet',27)) 
+                                 output_path=wpth+'phyt_avg/'+str(nn)+'_'+t_str+"_"+str(n)+'.png', cmap=plt.get_cmap('jet',27))
             
-            
-                
+
             tempS=ncS['temp'][i,-1].data
             tempS[tempS>1000]=np.nan
-            draw_roms_pcolor(lon, lat, tempS, timestamp=t_str, varname='jul025_20E',\
+            draw_roms_pcolor(lon, lat, tempS, timestamp=t_str, varname='SST '+title,\
                                 units=f'degree', log_scale=False, clim=(-1,32),\
                                     output_path=wpth+'temp_avg/'+str(nn)+'_'+t_str+"_"+str(n)+'.png',\
                                     cmap=plt.get_cmap('Spectral_r',27) )
-            if n==8:
-                n=0
-            # saltS=ncS['salt'][i,-1].data
-            # saltS[saltS>1000]=np.nan
-            # draw_roms_pcolor(lon, lat, saltS, timestamp=t_str, varname='Surface salt',\
-            #                     units=f'psu', log_scale=False, clim=(32.5,35.5),\
-            #                         output_path=wpth+'salt/'+t_str+'.png',\
-            #                         cmap=cmocean.cm.haline) 
             
-                    
-                         
-            # uS=ncS['u'][i,-22].data
-            # uS[uS>1000]=np.nan
-            # vS=ncS['v'][i,-22].data
-            # vS[vS>1000]=np.nan            
-            
-            # speed=(uS[1:,:]**2+vS[:,1:]**2)**(1/2)
-
-            
-            # draw_roms_pcolor(lon[1:,1:], lat[1:,1:], speed, timestamp=t_str+' (N22)', varname='Speed',\
-            #                  units=f'm.s', log_scale=False, clim=(0,2),\
-            #                      output_path=wpth+'speed/N22/'+t_str+'.png',\
-            #                          cmap=plt.get_cmap('Reds',27) )
-                        
+            if chl_bool:
+                chloS=ncS['chlorophyll'][i,-1].data
+                chloS[chloS>1000]=np.nan   
+            else:
+                chloS=phytS*(0.02*6.625*12)
+            draw_roms_pcolor(lon, lat, chloS, timestamp=t_str, varname='chl '+title,\
+                             units='millimole_nitrogen meter-3', log_scale=True, clim=None,\
+                                 output_path=wpth+'chl_avg/'+str(nn)+'_'+t_str+"_"+str(n)+'.png', cmap=plt.get_cmap('jet',27))
                 
-  
-    # cmocean.cm.haline
-
-        
-       
-   
-   
+            
+            if np.nanmin(chloS)<0:
+                print(np.nanmin(chloS))
+                
+            
+                
+            saltS=ncS['salt'][i,-1].data
+            saltS[saltS>1000]=np.nan
+            draw_roms_pcolor(lon, lat, saltS, timestamp=t_str, varname='Surface salt',\
+                                units=f'psu', log_scale=False, clim=(32.5,35.5),\
+                                    output_path=wpth+'salt_avg/'+str(nn)+'_'+t_str+"_"+str(n)+'.png',\
+                                    cmap=cmocean.cm.haline) 
+            
+    
+    
     
     
     
