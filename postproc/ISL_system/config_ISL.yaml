@@ -12,7 +12,7 @@ weight_file: ./NWP_weight.nc
 calc_weight: True
 
 ncformat: NETCDF4 # NETCDF3_64BIT
-force_write: True
+force_write: True 
 
 global_attrs: 
     title           : ROMS ini
@@ -41,15 +41,6 @@ vertical_dst:
     theta_s         : 7
     theta_b         : 0.1
     tcline          : 200
-
-
-
-
-
-
-
-
-
 
 
 

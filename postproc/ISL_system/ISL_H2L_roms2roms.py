@@ -25,6 +25,7 @@ lon_dst,lat_dst=grd_dst['lon'][:], grd_dst['lat'][:]
 
 topo_src = grd_src["topo"][:]
 topo_dst = grd_dst["topo"][:]
+# topo_dst = topo_src_h # 15km -> 5km 인터폴레
 Rmask = grd_dst["mask_rho"][:]
 Dmask = grd_src["mask_rho"][:]
 
@@ -43,33 +44,25 @@ zr_src=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_src,1,topo_src,np.zeros_
 zr_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,1,topo_dst,np.zeros_like(topo_dst))
 zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,5,topo_dst,np.zeros_like(topo_dst))
 
+
+# zr_src=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_src,1,topo_src,Dataset(cfg["ininame_src"])['zeta'][0])
+# zr_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,1,topo_dst,field.zeta)
+# zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,5,topo_dst,field.zeta)
+
 # --- Load fields (example: single time) ---
 # idt=0
+TIME=Dataset(cfg["ininame_src"])["ocean_time"]
+ocean_time=TIME[:]
+time_ref=TIME.units
 with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     nc = ut.MaskedNetCDF(nc_raw)
-    zeta_post = nc.get('zeta', 0, slice(None))
-    ubar_post = nc.get('ubar', 0, slice(None))
-    vbar_post = nc.get('vbar', 0, slice(None))
-    temp_post = nc.get('temp', 0, slice(None))
-    salt_post = nc.get('salt', 0, slice(None))
-    u_post    = nc.get('u',    0, slice(None))
-    v_post    = nc.get('v',    0, slice(None))
-    
-    zeta_prior = nc.get('zeta', 1, slice(None))
-    ubar_prior = nc.get('ubar', 1, slice(None))
-    vbar_prior = nc.get('vbar', 1, slice(None))
-    temp_prior = nc.get('temp', 1, slice(None))
-    salt_prior = nc.get('salt', 1, slice(None))
-    u_prior    = nc.get('u',    1, slice(None))
-    v_prior    = nc.get('v',    1, slice(None))
-
-    zeta = zeta_post - zeta_prior 
-    ubar = ubar_post - ubar_prior 
-    vbar = vbar_post - vbar_prior 
-    temp = temp_post - temp_prior 
-    salt = salt_post - salt_prior 
-    u = u_post - u_prior 
-    v = v_post - v_prior 
+    zeta = nc.get('zeta', slice(None)).squeeze()
+    ubar = nc.get('ubar', slice(None)).squeeze()
+    vbar = nc.get('vbar', slice(None)).squeeze()
+    temp = nc.get('temp', slice(None)).squeeze()
+    salt = nc.get('salt', slice(None)).squeeze()
+    u    = nc.get('u',    slice(None)).squeeze()
+    v    = nc.get('v',    slice(None)).squeeze()
 
     # U/V -> RHO (NaN 보존)
     u=pu.uv2rho_rutgers_safenan(u,"u")
@@ -111,7 +104,7 @@ nz = zr_src.shape[0]
 zr_src_remapped = np.empty((nz,) + lon_dst.shape, dtype=np.float64)
 for k in range(nz):
     zr_src_remapped[k] = pu.apply_lni_cache(zr_src[k].astype(np.float64, copy=False), cache_rho)
-zr_src_remapped[-1]=0
+# zr_src_remapped[-1]=0
 # --- Vertical interpolation to zr_dst ---
 field2 = ut.ConfigObject()
 for name in ["temp","salt","u","v"]:
@@ -119,6 +112,7 @@ for name in ["temp","salt","u","v"]:
     if hasattr(field, name):
         var = getattr(field, name)
         if var is None or var.ndim != 3:
+            print(name)
             continue
         # MATLAB 경계복제와 유사한 padding 외삽 사용(너가 쓰던 설정 유지)
         var_z = pu.vertical_interp_to_ZR(
@@ -126,8 +120,10 @@ for name in ["temp","salt","u","v"]:
             var.astype(np.float64, copy=False),
             zr_dst.astype(np.float64, copy=False),
             n_jobs=-1, dedup="mean", extrap_mode="padding",
-            zsur=0.0, zbot=-5500.0
+            zsur=0.0, zbot=None
         )
+        # var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,
+        #                          n_jobs=-1, dedup="mean", extrap_mode="leading")
         setattr(field2, name, var_z.astype(np.float64, copy=False))
 
 # 수직보간 끝난 뒤 Rmask 적용 (스칼라만)
@@ -167,44 +163,31 @@ ubar, vbar = pu.uv_barotropic_from_3d(field2.u, field2.v, Hz_dst, mask_u=mask_u,
 field2.ubar = ubar.astype(np.float64, copy=False)
 field2.vbar = vbar.astype(np.float64, copy=False)
 
-# --- Create initial NetCDF and write ---
-# status = cn.create_ini__(cfg, grd, 0, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
-# if status:
-#     raise RuntimeError(f"Failed creating file {cfg.ininame}")
-
 # load hres initial
-with Dataset(cfg["ininame_dst"], maskandscale=True) as nc_raw:
-    nc = ut.MaskedNetCDF(nc_raw)
-    zeta_hres = nc.get('zeta', 0, slice(None))
-    ubar_hres = nc.get('ubar', 0, slice(None))
-    vbar_hres = nc.get('vbar', 0, slice(None))
-    temp_hres = nc.get('temp', 0, slice(None))
-    salt_hres = nc.get('salt', 0, slice(None))
-    u_hres    = nc.get('u',    0, slice(None))
-    v_hres    = nc.get('v',    0, slice(None))
-
-
-add_zeta_incre = zeta_hres + getattr(field2,'zeta')
-setattr(field2,"zeta",add_zeta_incre)
-add_ubar_incre = ubar_hres + getattr(field2,'ubar')
-setattr(field2,"ubar",add_ubar_incre)
-add_vbar_incre = vbar_hres + getattr(field2,'vbar')
-setattr(field2,"vbar",add_vbar_incre)
-add_temp_incre = temp_hres + getattr(field2,'temp')
-setattr(field2,"temp",add_temp_incre)
-add_salt_incre = salt_hres + getattr(field2,'salt')
-setattr(field2,"salt",add_salt_incre)
-add_u_incre = u_hres + getattr(field2,'u')
-setattr(field2,"u",add_u_incre)
-add_v_incre = v_hres + getattr(field2,'v')
-setattr(field2,"v",add_v_incre)
+status = cn.create_roms(cfg, grd_dst, ocean_time,time_ref, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
+if status:
+    raise RuntimeError(f"Failed creating file {cfg.ininame}")
 
 
 with Dataset(cfg["ininame_dst"], mode='a') as nc:
-    nc['zeta'][0] = field2.zeta.astype(nc['zeta'].dtype, copy=False)
-    nc['temp'][0] = field2.temp.astype(nc['temp'].dtype, copy=False)
-    nc['salt'][0] = field2.salt.astype(nc['salt'].dtype, copy=False)
-    nc['u'][0]    = field2.u.astype(nc['u'].dtype, copy=False)
-    nc['v'][0]    = field2.v.astype(nc['v'].dtype, copy=False)
-    nc['ubar'][0] = field2.ubar.astype(nc['ubar'].dtype, copy=False)
-    nc['vbar'][0] = field2.vbar.astype(nc['vbar'].dtype, copy=False)
+    for varname in vars(field):
+        nc[varname][0] = field2[varname]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -580,7 +580,7 @@ def inpaint_nan_smooth(arr, mask=None, max_iter=300, tol=1e-5):
                 np.where(np.isfinite(south), south, 0.0) +
                 np.where(np.isfinite(west ), west,  0.0) +
                 np.where(np.isfinite(east ), east,  0.0)
-            )
+            ) 
             with np.errstate(invalid='ignore'):
                 a[nan_fill] = np.where(wsum[nan_fill] > 0, newv[nan_fill]/wsum[nan_fill], a[nan_fill])
 
@@ -603,7 +603,6 @@ def inpaint_nan_smooth(arr, mask=None, max_iter=300, tol=1e-5):
         return np.stack(out, axis=0)
     else:
         raise ValueError("arr must be 2D or 3D")
-
 
 def build_lni_cache(XD2D, YD2D, Dmask2D, XR2D, YR2D, knn_k=8):
     """
