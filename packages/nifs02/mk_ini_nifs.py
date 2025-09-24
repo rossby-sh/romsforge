@@ -6,7 +6,7 @@ import os
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
 import create_I as cn
 import utils as tl
 from io_utils import collect_time_info_legacy
@@ -97,7 +97,7 @@ print(f"걸린 시간: {end - start:.3f}초")
 print("--- [08] Apply vertical flood ---")
 for var in ['temp', 'salt', 'u', 'v']:
     val = getattr(field, var)
-    val_flooded = tl.flood_vertical_vectorized(val, grd.mask, spval=-1e10)
+    val_flooded = tl.flood_vertical_vectorized(val, grd.mask_rho, spval=-1e10)
     #val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
     setattr(field, var, val_flooded)
 
@@ -106,12 +106,12 @@ print(f"걸린 시간: {time.time() - end:.3f}초")
 print("--- [09] Masking land to 0 ---")
 for varname in ['zeta', 'ubar', 'vbar']:
     var = getattr(field, varname)
-    var[grd.mask == 0] = 0.0
+    var[grd.mask_rho == 0] = 0.0
     setattr(field, varname, var)
 
 for varname in ['temp', 'salt', 'u', 'v']:
     var = getattr(field, varname)
-    var[:, grd.mask == 0] = 0.0  # broadcast over vertical dim
+    var[:, grd.mask_rho == 0] = 0.0  # broadcast over vertical dim
     setattr(field, varname, var)
 # --- [07] Rotate vectors to model grid and convert to u/v points ---
 print("--- [10] Rotate vectors ---")

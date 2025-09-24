@@ -21,7 +21,7 @@ My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Gr
  
 Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='/data/shjo/mcc/jul/cmems_bio/'
+ncdir='/data/shjo/nifs02/aug/cmems_bio/'
 NO3NC=ncdir
 phytNC=ncdir
 
@@ -62,7 +62,7 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2025-06-30 00:00', '2025-08-01 23:00']
+t_rng = ['2025-07-31 00:00', '2025-09-04 23:00']
 # t_rng = ['2024-12-31 00:00', '2025-04-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units

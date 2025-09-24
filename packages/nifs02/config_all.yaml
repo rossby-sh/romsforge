@@ -3,7 +3,7 @@
 # === Download config ===
 time:
   start: "2025-07-31"
-  end:   "2025-08-22"
+  end:   "2025-09-04"
 
 region:
   lat: [5, 60]
@@ -17,22 +17,22 @@ core_num : 3
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
-ininame : /data/shjo/mcc/jul/roms_inputs/nifs_ini_20250701.nc
+grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_5km_smooth_v2.nc
+ininame : /data/shjo/nifs02/aug/roms_inputs/nifs_ini_20250801.nc
 #bryname : This will set automatically
 #frcname : This will set automatically
 
 weight_file: ./NWP_weight.nc
 calc_weight: True
 
-ncformat: NETCDF4 # NETCDF3_64BIT
+ncformat: NETCDF3_64BIT  # NETCDF4 # NETCDF3_64BIT
 force_write: True
 
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt      #griddata / edt / linearND
  
-initdate            : 2025-07-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-ogcm_name           : /data/shjo/mcc/aug/hycom/HYCOM_20250701_00UTC.nc
+initdate            : 2025-08-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+ogcm_name           : /data/shjo/nifs02/aug/hycom/hycom_20250801_00utc.nc
 #ogcm_path_bry      : This will set automaticaly 
 
 bio_model_type      : npzd # None npzd, fennel 
@@ -49,7 +49,7 @@ ogcm_var_name:
     zeta            : surf_el
 
 bry_start_date      : 2025-07-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-08-22 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-09-04 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 

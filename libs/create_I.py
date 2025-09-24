@@ -18,7 +18,7 @@ def create_ini(cfg, grd, initime_num, bio_model=None, ncFormat='NETCDF3_CLASSIC'
     theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b
     tcline, layer_n = cfg.vertical.tcline, cfg.vertical.layer_n
 
-    hmin_ = np.min(grd.topo[grd.mask == 1])
+    hmin_ = np.min(grd.topo[grd.mask_rho == 1])
     if vtransform == 1 and tcline > hmin_:
         print(f"--- [!ERROR] Tcline must be <= hmin when Vtransform == 1 ---")
         return 1 
@@ -159,7 +159,7 @@ def create_ini__(cfg, grd, initime_num, bio_model=None, ncFormat='NETCDF3_CLASSI
     theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b
     tcline, layer_n = cfg.vertical.tcline, cfg.vertical.layer_n
 
-    hmin_ = np.min(grd.topo[grd.mask == 1])
+    hmin_ = np.min(grd.topo[grd.mask_rho == 1])
     if vtransform == 1 and tcline > hmin_:
         print(f"--- [!ERROR] Tcline must be <= hmin when Vtransform == 1 ---")
         return 1 
@@ -305,7 +305,7 @@ def create_ini_(cfg, grd, initime_num, bio_model=None, ncFormat='NETCDF3_CLASSIC
     theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b
     tcline, layer_n = cfg.vertical.tcline, cfg.vertical.layer_n
 
-    hmin_ = np.min(grd.topo[grd.mask == 1])
+    hmin_ = np.min(grd.topo[grd.mask_rho == 1])
     if vtransform == 1 and tcline > hmin_:
         print(f"--- [!ERROR] Tcline must be <= hmin when Vtransform == 1 ---")
         return 1 
@@ -430,14 +430,14 @@ def create_ini_(cfg, grd, initime_num, bio_model=None, ncFormat='NETCDF3_CLASSIC
 
 
 
-def create_ini_tmp(ininame, mask, topo, myvar, initime_num, My_time_ref, ncFormat='NETCDF3_CLASSIC', bio_model=None):
+def create_ini_tmp(ininame, mask_rho, topo, myvar, initime_num, My_time_ref, ncFormat='NETCDF3_CLASSIC', bio_model=None):
 
 
     vstretching, vtransform = myvar['Vstretching'], myvar['Vtransform']
     theta_s, theta_b = myvar['Theta_s'], myvar['Theta_b']
     tcline, layer_n = myvar['Tcline'], myvar['Layer_N']
 
-    hmin_ = np.min(topo[mask == 1])
+    hmin_ = np.min(topo[mask_rho == 1])
     if vtransform == 1 and tcline > hmin_:
         print(f"--- [!ERROR](Tcline must be <= hmin when Vtransform == 1 ---")
         return 1 
