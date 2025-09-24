@@ -13,7 +13,7 @@ import create_I as cn
 import post_utils as pu
 from scipy.interpolate import LinearNDInterpolator, griddata
 
-cfg  = ut.parse_config("./config_tmp.yaml")
+cfg  = ut.parse_config("./config_isl_h2l.yaml")
 grd_src  = ut.load_roms_grid(cfg["grdname_src"])
 grd_dst  = ut.load_roms_grid(cfg["grdname_dst"])
 
