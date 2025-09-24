@@ -1,0 +1,47 @@
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+grdname_src : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
+grdname_dst : /home/shjo/data/nifs02/aug_5km/roms_grd_fennel_5km_smooth_v2.nc
+
+ininame_src : /home/shjo/data/nifs02/aug/roms_inputs/NWP15k_nrm_i_V4B_NPZD.nc
+ininame_dst : /home/shjo/data/nifs02/aug_5km/test_nrm.nc
+
+weight_file: ./NWP_weight.nc
+calc_weight: True
+
+
+bio_model_type : npzd
+
+ncformat: NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+global_attrs_bry: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+    history         : history
+
+vertical_src:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+vertical_dst:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+

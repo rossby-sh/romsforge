@@ -5,7 +5,7 @@ Created on Wed Apr 23 13:04:04 2025
 @author: ust21
 """
 
-PKG_path = '/home/shjo/ROMS/romsforge/py/dev_individual/libs/' # Location of JNUROMS directory
+PKG_path = '/home/shjo/github/romsforge/libs/' # Location of JNUROMS directory
 import sys 
 sys.path.append(PKG_path)
 import ROMS_utils01 as ru
@@ -18,11 +18,11 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/shjo/clim/eccov4_clm_ini.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
+My_Ini='/home/shjo/applications/nifs02_clm/data/eccov4_clm5km_ini_fennel.nc' # Initial file name (to create)
+My_Grd='/home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc' # Grd name
 #-- Define OGCM path ----------------------------------------------------------
 
-ncdir='/data/share/DATA/RAW/Bvar_hindcast/clm_CMEMS_bio.nc'
+ncdir='/home/shjo/data/raw/cmems_bio_hist/clm_CMEMS_bio.nc'
 NO3NC=ncdir
 phytNC=ncdir
 #o2NC=ncdir+'BIO/CMEMS_data_bio_2025-02.nc'

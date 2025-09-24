@@ -1,0 +1,55 @@
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+
+grdname_src : ${GRDNAME_NL}
+grdname_dst : ${GRDNAME_DA}
+
+ininame_src : ${ININAME_NL}
+ininame_dst : ${ININAME_DA}
+
+bio_model_type : fennel
+
+weight_file: ./NWP_weight.nc
+calc_weight: True
+
+ncformat: NETCDF3_64BIT #NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+vertical_src:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+vertical_dst:
+    layer_n         : 20
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

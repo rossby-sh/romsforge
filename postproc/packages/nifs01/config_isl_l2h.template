@@ -1,0 +1,43 @@
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+grdname_src : ${GRDNAME_DA}
+grdname_dst : ${GRDNAME_NL}
+
+ininame_src : ${ININAME_DA}
+ininame_dst : ${ININAME_NL}
+
+weight_file: ./NWP_weight.nc
+calc_weight: True
+
+ncformat: NETCDF4 # NETCDF3_64BIT
+force_write: True 
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+vertical_src:
+    layer_n         : 20
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+vertical_dst:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+
+
+
+
+
