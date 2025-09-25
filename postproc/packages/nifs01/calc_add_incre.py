@@ -3,8 +3,11 @@ import sys
 import os
 import numpy as np
 import datetime as dt
+from pathlib import Path
+base = Path(__file__).resolve().parent
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append("C:/Users/ust21/shjo/romsforge/libs/")
+#sys.path.append("C:/Users/ust21/shjo/romsforge/libs/")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'libs')))
 
 import matplotlib.pyplot as plt
 
@@ -13,7 +16,7 @@ import create_I as cn
 import post_utils as pu
 from scipy.interpolate import LinearNDInterpolator, griddata
 
-cfg  = ut.parse_config("config_isl_l2h.yaml")
+cfg  = ut.parse_config(str(base / "config_isl_l2h.yaml"))
 grd_src  = ut.load_roms_grid(cfg["grdname_src"])
 grd_dst  = ut.load_roms_grid(cfg["grdname_dst"])
 
@@ -200,6 +203,11 @@ add_u_incre = u_hres + getattr(field2,'u')
 setattr(field2,"u",add_u_incre)
 add_v_incre = v_hres + getattr(field2,'v')
 setattr(field2,"v",add_v_incre)
+
+for varname in vars(field):
+    var=getattr(field2,varname)
+    var[var!=var]=0
+    setattr(field2,varname,var)
 
 
 with Dataset(cfg["ininame_dst"], mode='a') as nc:

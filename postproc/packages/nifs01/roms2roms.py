@@ -4,8 +4,9 @@ import os
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'libs')))
+from pathlib import Path
+base = Path(__file__).resolve().parent
 import matplotlib.pyplot as plt
 
 import utils as ut
@@ -13,7 +14,7 @@ import create_I as cn
 import post_utils as pu
 from scipy.interpolate import LinearNDInterpolator, griddata
 
-cfg  = ut.parse_config("./config_isl_h2l.yaml")
+cfg  = ut.parse_config(str(base / "config_isl_h2l.yaml"))
 grd_src  = ut.load_roms_grid(cfg["grdname_src"])
 grd_dst  = ut.load_roms_grid(cfg["grdname_dst"])
 
@@ -120,10 +121,9 @@ for name in ["temp","salt","u","v"]:
             var.astype(np.float64, copy=False),
             zr_dst.astype(np.float64, copy=False),
             n_jobs=-1, dedup="mean", extrap_mode="padding",
-            zsur=0.0, zbot=None
+            zsur=0.0, zbot=6000
         )
-        # var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,
-        #                          n_jobs=-1, dedup="mean", extrap_mode="leading")
+#        var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,n_jobs=-1, dedup="mean", extrap_mode="leading")
         setattr(field2, name, var_z.astype(np.float64, copy=False))
 
 # 수직보간 끝난 뒤 Rmask 적용 (스칼라만)

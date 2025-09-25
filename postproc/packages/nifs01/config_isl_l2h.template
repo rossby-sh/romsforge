@@ -5,8 +5,8 @@
 grdname_src : ${GRDNAME_DA}
 grdname_dst : ${GRDNAME_NL}
 
-ininame_src : ${ININAME_DA}
-ininame_dst : ${ININAME_NL}
+ininame_src : ${TRUNK}/${ININAME_DA}
+ininame_dst : ${TRUNK}/${ININAME_NL}
 
 weight_file: ./NWP_weight.nc
 calc_weight: True

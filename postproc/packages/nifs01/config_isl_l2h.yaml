@@ -2,20 +2,17 @@
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
+grdname_src : /data/shjo/applications/nifs01_test/storage/data/NWP4_grd_3_10m_LP.nc
+grdname_dst : /data/shjo/applications/nifs01_test/storage/data/NWP12_grd_NWP4.nc
 
-grdname_src : ${GRDNAME_NL}
-grdname_dst : ${GRDNAME_DA}
-
-ininame_src : ${TRUNK}/${RSTNAME_NL}
-ininame_dst : ${TRUNK}/${RSTNAME_DA}
-
-bio_model_type : fennel
+ininame_src : /data/shjo/applications/nifs01_test/storage/test_isl_mpv2/trunk/wnp25km_ini.nc
+ininame_dst : /data/shjo/applications/nifs01_test/storage/test_isl_mpv2/trunk/wnp8km_ini.nc
 
 weight_file: ./NWP_weight.nc
 calc_weight: True
 
-ncformat: NETCDF3_64BIT #NETCDF4 # NETCDF3_64BIT
-force_write: True
+ncformat: NETCDF4 # NETCDF3_64BIT
+force_write: True 
 
 global_attrs: 
     title           : ROMS ini
@@ -24,14 +21,6 @@ global_attrs:
     history         : history
 
 vertical_src:
-    layer_n         : 36
-    vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
-
-vertical_dst:
     layer_n         : 20
     vtransform      : 2
     vstretching     : 2
@@ -39,14 +28,13 @@ vertical_dst:
     theta_b         : 0.1
     tcline          : 200
 
-
-
-
-
-
-
-
-
+vertical_dst:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
 
 
 
