@@ -27,7 +27,7 @@ def worker(dataset, request, outpath, retries=5):
 TIME = [f"{h:02d}:00" for h in np.arange(0,24,3)]
 
 if __name__ == "__main__":
-    with open("config_all.yaml") as f:
+    with open("config_clm.yaml") as f:
         cfg = yaml.safe_load(f)
 
     start_dt = dt.strptime(cfg["time"]["start"], "%Y-%m-%d")

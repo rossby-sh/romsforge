@@ -185,7 +185,7 @@ def create_bry_clm(cfg, grd, bry_time, bio_model=None, ncFormat='NETCDF3_CLASSIC
     theta_s, theta_b = cfg.vertical.theta_s, cfg.vertical.theta_b
     tcline, layer_n = cfg.vertical.tcline, cfg.vertical.layer_n
 
-    hmin_ = np.min(grd.topo[grd.mask == 1])
+    hmin_ = np.min(grd.topo[grd.mask_rho == 1])
     if vtransform == 1 and tcline > hmin_:
         print("--- [!ERROR] Tcline must be <= hmin when Vtransform == 1 ---")
         return 1

@@ -1,0 +1,88 @@
+###
+#
+# INFO
+# This script is for HYCOM data
+###
+time:
+  start: "2017-12-31"
+  end:   "2025-09-04"
+
+region:
+  lat: [5, 60]
+  lon: [100, 180]
+
+output:
+  base_dir: "/data/shjo/data/nifs01/"
+
+core_num : 3
+
+# === Define file names ===
+ininame : /data/shjo/data/nifs01/nifs01_eccov4_clm25km_ini_jan.nc
+bryname : /data/shjo/data/nifs01/nifs01_eccov4_clm25km_bry.nc
+grdname : /data/shjo/data/nifs01/NWP12_grd_NWP4_topo_modi.nc
+
+#weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
+weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_eccov4_wght.nc
+bio_weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_cmems_wght.nc
+calc_weight: True
+
+ncformat: NETCDF3_64BIT # NETCDF3_64BIT
+force_write: True
+
+bio_model_type: fennel
+
+flood_method_for_ini: griddata #griddata / edt / linearND
+flood_method_for_bry: edt #griddata / edt / linearND
+
+initdate : 2018-01-01 00:00:00 
+ogcm_name: /data/shjo/data/nifs01/clm_nc/eccov4_clm.nc
+
+time_ref : seconds since 2000-1-1 00:00:00
+
+ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : Z
+    time            : time
+    temperature     : THETA
+    salinity        : SALT
+    u               : EVEL
+    v               : NVEL
+    zeta            : SSH
+
+global_attrs: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+
+vertical:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+bio_ogcm_name : /data/shjo/data/nifs01/clm_nc/cmems_bio_clm.nc
+
+bio_ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : depth
+    time            : time
+    phyt            : phyc
+    NO3             : no3
+    PO4             : po4
+    oxygen          : o2
+    chl             : chl
+    
+
+
+
+
+
+
+
+
+
+
