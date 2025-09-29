@@ -18,11 +18,13 @@ core_num : 3
 
 # === Define file names ===
 ininame : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_ini_npzd.nc
-bryname : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_bry_npzd.nc
-grdname : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc
+#bryname : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_bry_npzd.nc
+bryname : /data/shjo/data/nifs02_5km_clm/nifs02_eccov4_clm5km_bry.nc
+grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
-weight_file: /home/shjo/applications/nifs02_clm/data/NWP_weight.nc
+#weight_file: /home/shjo/applications/nifs02_clm/data/NWP_weight.nc
+weight_file:  ./NWP_weight.nc
 calc_weight: True
 
 ncformat: NETCDF3_64BIT # NETCDF3_64BIT
@@ -63,7 +65,7 @@ vertical:
     tcline          : 400
 
 
-bio_ogcm_name : /home/shjo/data/raw/cmems_bio_hist/clm_CMEMS_bio.nc
+bio_ogcm_name : /data/shjo/data/nifs01/clm_nc/cmems_bio_clm.nc
 
 bio_ogcm_var_name:
     longitude       : longitude

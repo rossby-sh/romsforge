@@ -17,24 +17,29 @@ output:
 core_num : 3
 
 # === Define file names ===
-ininame : /data/shjo/data/nifs01/nifs01_eccov4_clm25km_ini_jan.nc
-bryname : /data/shjo/data/nifs01/nifs01_eccov4_clm25km_bry.nc
-grdname : /data/shjo/data/nifs01/NWP12_grd_NWP4_topo_modi.nc
+#ininame : /data/shjo/data/nifs01/nifs01_eccov4_clm25km_ini_jan.nc
+ininame : /data/shjo/data/nifs02_5km_clm/nifs02_eccov4_clm5km_ini_jan.nc
+bryname : /data/shjo/data/nifs02_5km_clm/nifs02_eccov4_clm5km_bry.nc
+#grdname : /data/shjo/data/nifs01/NWP12_grd_NWP4_topo_modi.nc
+#grdname : /data/shjo/data/nifs01/NWP4_grd_314_10m.nc
+grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
-weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_eccov4_wght.nc
-bio_weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_cmems_wght.nc
+#weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_eccov4_wght.nc
+weight_file: /data/shjo/data/nifs02_5km_clm/wgth/nifs02_5km_eccov4_wght.nc
+#bio_weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_cmems_wght.nc
+bio_weight_file: /data/shjo/data/nifs02_5km_clm/wgth/nifs02_5km_cmems_wght.nc
 calc_weight: True
 
 ncformat: NETCDF3_64BIT # NETCDF3_64BIT
 force_write: True
 
-bio_model_type: fennel
+bio_model_type: npzd
 
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt #griddata / edt / linearND
 
-initdate : 2018-01-01 00:00:00 
+initdate : 2020-01-01 00:00:00 
 ogcm_name: /data/shjo/data/nifs01/clm_nc/eccov4_clm.nc
 
 time_ref : seconds since 2000-1-1 00:00:00
@@ -58,10 +63,10 @@ global_attrs:
 vertical:
     layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 bio_ogcm_name : /data/shjo/data/nifs01/clm_nc/cmems_bio_clm.nc
 
