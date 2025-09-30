@@ -53,17 +53,18 @@ zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,5,topo_dst,np.zeros_
 # --- Load fields (example: single time) ---
 # idt=0
 TIME=Dataset(cfg["ininame_src"])["ocean_time"]
-ocean_time=TIME[:]
+ocean_time=TIME[0]
+
 time_ref=TIME.units
 with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     nc = ut.MaskedNetCDF(nc_raw)
-    zeta = nc.get('zeta', slice(None)).squeeze()
-    ubar = nc.get('ubar', slice(None)).squeeze()
-    vbar = nc.get('vbar', slice(None)).squeeze()
-    temp = nc.get('temp', slice(None)).squeeze()
-    salt = nc.get('salt', slice(None)).squeeze()
-    u    = nc.get('u',    slice(None)).squeeze()
-    v    = nc.get('v',    slice(None)).squeeze()
+    zeta = nc.get('zeta',0, slice(None)).squeeze()
+    ubar = nc.get('ubar',0, slice(None)).squeeze()
+    vbar = nc.get('vbar',0, slice(None)).squeeze()
+    temp = nc.get('temp',0, slice(None)).squeeze()
+    salt = nc.get('salt',0, slice(None)).squeeze()
+    u    = nc.get('u',0,    slice(None)).squeeze()
+    v    = nc.get('v',0,    slice(None)).squeeze()
 
     # U/V -> RHO (NaN 보존)
     u=pu.uv2rho_rutgers_safenan(u,"u")
@@ -113,6 +114,7 @@ for name in ["temp","salt","u","v"]:
     if hasattr(field, name):
         var = getattr(field, name)
         if var is None or var.ndim != 3:
+            print(var.shape)
             print(name)
             continue
         # MATLAB 경계복제와 유사한 padding 외삽 사용(너가 쓰던 설정 유지)
@@ -135,6 +137,9 @@ for name in ["temp","salt"]:
 
 # 2D zeta는 앞 단계 결과 사용
 field2.zeta = field.zeta
+
+#print(vars(field))
+#print(vars(field2))
 
 # --- angle: parent_angle on dst (Dmask 사용; 캐시 재사용) ---
 angle_par_on_dst = pu.apply_lni_cache(angle_src.astype(np.float64, copy=False), cache_rho)
