@@ -203,6 +203,8 @@ def create_roms(cfg, grd, initime_num,time_ref, bio_model=None, ncFormat='NETCDF
             'phytoplankton': {'long_name': 'phytoplankton biomass',  'units': 'millimole nitrogen meter-3'},
             'zooplankton':   {'long_name': 'zooplankton biomass',    'units': 'millimole nitrogen meter-3'},
             'detritus':      {'long_name': 'mole_concentration_of_detritus_expressed_as_nitrogen_in_sea_water', 'units': 'millimole nitrogen meter-3'},
+         #   'phytoplanktonFe': {'long_name': 'phytoplankton biomass Fe',  'units': 'millimole nitrogen meter-3'},
+         #   'iron': {'long_name': 'iron',  'units': 'millimole iron meter-3'},
         },
         'fennel': {
             'NO3':        {'long_name': 'nitrate concentration', 'units': 'millimole nitrogen meter-3'},

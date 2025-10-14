@@ -188,6 +188,10 @@ def load_roms_grid(grdname):
     with Dataset(grdname) as nc:
         lon = nc["lon_rho"][:]
         lat = nc["lat_rho"][:]
+        lon_u = nc["lon_u"][:]
+        lat_u = nc["lat_u"][:]
+        lon_v = nc["lon_v"][:]
+        lat_v = nc["lat_v"][:]    
         angle = nc["angle"][:]
         h = nc["h"][:]
         mask_rho = nc["mask_rho"][:]
@@ -197,6 +201,10 @@ def load_roms_grid(grdname):
     return ConfigObject(
         lon     = lon,
         lat     = lat,
+        lon_u   = lon_u,
+        lat_u   = lat_u,
+        lon_v   = lon_v,
+        lat_v   = lat_v,
         angle   = angle,
         topo    = h,
         mask_rho= mask_rho,

@@ -21,20 +21,20 @@ global_attrs:
     history         : history
 
 vertical_src:
-    layer_n         : 20
+    layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 vertical_dst:
     layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 
 

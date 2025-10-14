@@ -9,7 +9,7 @@ grdname_dst : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_15km_smooth
 ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl/trunk/nifs5km_RST_DA.nc
 ininame_dst : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl/trunk/nifs15km_RST_DA.nc
 
-bio_model_type : fennel
+bio_model_type : npzd
 
 weight_file: ./NWP_weight.nc
 calc_weight: True
@@ -26,18 +26,18 @@ global_attrs:
 vertical_src:
     layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 vertical_dst:
-    layer_n         : 20
+    layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 
 

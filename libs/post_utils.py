@@ -727,7 +727,7 @@ def uv_barotropic_from_3d(u: np.ndarray,
     return ubar, vbar
 
 # NaN-aware ρ→U/V 평균 (필요시 ut.rho2uv 교체)
-def rho2uv_nanaware(F, pos='u'):
+def rho2uv_nanaware(F, pos='u',valid_max=1e10):
     is2d = (F.ndim == 2)
     if is2d:
         F = F[np.newaxis, ...]
@@ -739,7 +739,8 @@ def rho2uv_nanaware(F, pos='u'):
         b = F[...,  1:, :]
     else:
         raise ValueError("pos must be 'u' or 'v'")
-    fa = np.isfinite(a); fb = np.isfinite(b)
+    fa = np.isfinite(a) & (np.abs(a) < valid_max)
+    fb = np.isfinite(b) & (np.abs(b) < valid_max)
     out = np.where(fa & fb, 0.5*(a+b),
           np.where(fa, a, np.where(fb, b, np.nan)))
     return np.squeeze(out)
