@@ -2,17 +2,20 @@
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname_src : /home/shjo/data/nifs02/sep/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
-grdname_dst : /home/shjo/data/nifs02/sep/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
 
-ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs02_isl_sep/trunk/nifs15km_ini.nc
-ininame_dst : /home/shjo/applications/nifs02_5km/storage/nifs02_isl_sep/trunk/nifs5km_ini.nc
+grdname_src : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
+grdname_dst : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
+
+ininame_src : /home/shjo/data/nifs02/sep/roms_inputs/nifs5km_ini_DA_9376.nc
+ininame_dst : /home/shjo/data/nifs02/sep/roms_inputs/nifs15km_ini_250901.nc
+
+bio_model_type : npzd
 
 weight_file: ./NWP_weight.nc
 calc_weight: True
 
-ncformat: NETCDF4 # NETCDF3_64BIT
-force_write: True 
+ncformat: NETCDF3_64BIT #NETCDF4 # NETCDF3_64BIT
+force_write: True
 
 global_attrs: 
     title           : ROMS ini
@@ -35,6 +38,15 @@ vertical_dst:
     theta_s         : 6.5
     theta_b         : 1
     tcline          : 400
+
+
+
+
+
+
+
+
+
 
 
 

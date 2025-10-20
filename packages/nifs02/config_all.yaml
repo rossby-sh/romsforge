@@ -2,8 +2,8 @@
 
 # === Download config ===
 time:
-  start: "2023-01-31"
-  end:   "2024-12-31"
+  start: "2025-08-31"
+  end:   "2025-10-04"
 
 region:
   lat: [5, 60]
@@ -17,7 +17,7 @@ core_num : 3
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_5km_smooth_v2.nc
+grdname : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_15km_smooth_v2.nc
 ininame : /data/shjo/nifs02/aug/roms_inputs/nifs_ini_20250801.nc
 #bryname : This will set automatically
 #frcname : This will set automatically
@@ -48,8 +48,8 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2025-07-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-09-04 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2025-08-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-10-04 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 

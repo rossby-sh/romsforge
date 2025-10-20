@@ -3,11 +3,11 @@
 
 # --- Initial & Boundary and Forcing ---
 
-grdname_src : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
-grdname_dst : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
+grdname_src : /home/shjo/data/nifs02/sep/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
+grdname_dst : /home/shjo/data/nifs02/sep/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
 
-ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl_tide/trunk/nifs5km_RST_DA.nc
-ininame_dst : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl_tide/trunk/nifs15km_RST_DA.nc
+ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs02_isl_sep/trunk/nifs5km_RST_DA.nc
+ininame_dst : /home/shjo/applications/nifs02_5km/storage/nifs02_isl_sep/trunk/nifs15km_RST_DA.nc
 
 bio_model_type : npzd
 

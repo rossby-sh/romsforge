@@ -204,13 +204,13 @@ wind_speed = np.sqrt(u_values**2 + v_values**2)
 if qair_values is None:
     # qair 없으면 근사 필요하지만, 추정 금지 조건이라 그대로 둔다.
     raise RuntimeError("q1000(grib) 파일에서 'q'를 찾지 못했어. config_era5.yml의 input_q1000를 확인해줘.")
-dqdsst_values = cn.get_dqdsst(
-    sst_values,
-    TK_values,
-    1.2,
-    wind_speed,
-    qair_values / 1000.0
-)
+#dqdsst_values = cn.get_dqdsst(
+#    sst_values,
+#    TK_values,
+#    1.2,
+#    wind_speed,
+#    qair_values / 1000.0
+#)
 
 # ======================
 # 시간 변환: GRIB → ref_time
@@ -229,6 +229,15 @@ print(num2date(TIME_CONVERTED_NUM[-5:], MY_TIME_REF))
 # ======================
 # 저장
 # ======================
+print(u_values.shape)
+print(v_values.shape)
+print(t2_values.shape)
+print(qair_values.shape)
+print(rh_values.shape)
+print(sst_values.shape)
+print(srf_values.shape)
+
+
 forcing_vars = {
     'Uwind':       u_values,
     'Vwind':       v_values,
@@ -237,7 +246,7 @@ forcing_vars = {
     'RH':          rh_values,
     'Cloud':       cloud_values,
     'sst':         sst_values,
-    'dqdsst':      dqdsst_values,
+#    'dqdsst':      dqdsst_values,
     'srf':         srf_values,
     'lwrad':       lwrad_values,
     'lwrad_down':  lwrad_down_values,
