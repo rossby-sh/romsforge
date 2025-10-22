@@ -3,63 +3,158 @@ import os
 from pathlib import Path
 import xarray as xr
 from dask import compute
+import sys
+from netCDF4 import Dataset, date2num
+import numpy as np
+import pandas as pd
+import datetime as dt
 
-pth = "/home/msg/trunk_4_0/FENNEL_V2_0730/FENNEL_NWP12/output/V2_0730_1year/"
-files = sorted([str(Path(pth)/f) for f in os.listdir(pth) if f.startswith("avg_NWP12_")])
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
+import utils as tl
 
-print(files)
-VARS = ["temp", "salt", "chlorophyll", "NO3"]
+# --- [01] Load configuration ---
+cfg = tl.parse_config("./config_proc.yaml")
+grd = tl.load_roms_grid(cfg.grdname)
 
-# 수직차원 자동 감지 (time/lat/lon 제외)
+case = getattr(cfg, "case", "case")
+data_dir = Path(getattr(cfg, "data_dir", ".")).expanduser().resolve()
+data_prefix_header = getattr(cfg, "data_prefix_header", "")
+base_dir = Path(getattr(cfg, "base_dir", ".")).expanduser().resolve()
+VARS = getattr(cfg, "vars", ["temp", "salt", "chlorophyll", "NO3"])
+
+# var_names 블록 파싱
+vn = getattr(cfg, "var_names", None) or {}
+time_candidates = list(getattr(vn, "time_candidates", ["ocean_time", "time", "t"]))
+lat_candidates  = set(getattr(vn, "lat_candidates",  ["lat", "latitude", "y", "eta", "eta_rho"]))
+lon_candidates  = set(getattr(vn, "lon_candidates",  ["lon", "longitude", "x", "xi", "xi_rho"]))
+z_candidates    = list(getattr(vn, "z_candidates",   ["s_rho", "z", "depth", "lev", "layer"]))
+ref_time_name   = getattr(vn, "ref_time", None)  # 우선 사용할 시간 좌표 이름
+
+# 출력 디렉토리
+outdir = base_dir / case
+outdir.mkdir(parents=True, exist_ok=True)
+
+# 입력 파일 목록
+files = sorted([
+    str(p) for p in data_dir.iterdir()
+    if p.is_file() and p.name.startswith(data_prefix_header)
+       and p.suffix.lower() in {".nc", ".nc4", ".cdf"}
+])
+if not files:
+    raise FileNotFoundError(f"입력 파일 없음: {data_dir}, prefix={data_prefix_header}")
+
+print(f"[info] files={len(files)}개, 예: {files[:3]}")
+print(f"[info] 평균 변수: {VARS}")
+
+# --- [02] 표층 선택용 함수 ---
 def detect_zdim(var):
-    # 자주 쓰는 좌표 이름들
-    not_z = {"ocean_time","t","lat","latitude","y","eta","eta_rho",
-             "lon","longitude","x","xi","xi_rho"}
+    not_z = set(time_candidates) | lat_candidates | lon_candidates
     for d in var.dims:
         if d not in not_z and var.sizes[d] > 1:
             return d
-    # 못 찾으면 흔한 이름 중 존재하는 것 선택
-    for cand in ("s_rho","z","depth","lev","layer"):
+    for cand in z_candidates:
         if cand in var.dims:
             return cand
     raise ValueError(f"수직 차원을 찾지 못했어: dims={var.dims}")
 
-# 필요한 변수만 남기고, 표층(z=-1)만 잘라서 반환
 def preprocess_surface(ds):
     keep = [v for v in VARS if v in ds.data_vars]
+    if not keep:
+        return xr.Dataset()
     ds = ds[keep]
-    # 대표 변수로 zdim 판단 (temp 우선)
-    base = ds[keep[0]]
-    zdim = detect_zdim(base)
-    # 모든 변수 표층만 선택 (time은 그대로 유지)
-    sel = {zdim: -1}
-    ds = ds.isel(sel, drop=True)  # drop=True로 zdim 제거 → 3D(time, lat, lon)
-    return ds
+    zdim = detect_zdim(ds[keep[0]])
+    return ds.isel({zdim: -1}, drop=True)  # 표층만
 
-# 한 번만 열고, 파일당 time=1 구조 가정 → chunks={'time':1} 권장
+# --- [03] 병합 후 월평균 ---
 ds = xr.open_mfdataset(
     files,
     combine="by_coords",
     preprocess=preprocess_surface,
     parallel=True,
-    chunks={"ocean_time": 1},
     data_vars="minimal",
     coords="minimal",
     compat="override",
-    # engine="h5netcdf",  # 필요시 엔진 고정
+    engine="netcdf4",   # 읽기도 h5netcdf로 고정
 )
 
-# 월평균(월초 기준). 표층만 남겨놨으므로 3D: (time, lat, lon)
-print("monthly mean...")
-temp_m = ds["temp"].resample(ocean_time="MS").mean()
-salt_m = ds["salt"].resample(ocean_time="MS").mean()
-chl_m  = ds["chlorophyll"].resample(ocean_time="MS").mean()
-no3_m  = ds["NO3"].resample(ocean_time="MS").mean()
+# 시간좌표 결정 (ref_time_name 우선, 없으면 후보 순회)
+time_name = None
+if ref_time_name and ref_time_name in ds.coords:
+    time_name = ref_time_name
+else:
+    for cand in time_candidates:
+        if cand in ds.coords:
+            time_name = cand
+            break
+if time_name is None:
+    raise KeyError(f"시간 좌표 후보({time_candidates}) 중 찾은 게 없어.")
+print(f"[info] monthly mean using time: {time_name}")
 
-# 지연(Defer) 저장 태스크를 만들고 한 번에 compute → 오버헤드 절감
-t1 = temp_m.to_netcdf("6/temp_monthly_lee_org.nc", compute=False)
-t2 = salt_m.to_netcdf("6/salt_monthly_lee_org.nc", compute=False)
-t3 = chl_m.to_netcdf("6/chl_monthly_lee_org.nc", compute=False)
-t4 = no3_m.to_netcdf("6/no3_monthly_lee_org.nc", compute=False)
-compute(t1, t2, t3, t4)
-print("done.")
+# 시간축 청크 적용(안정성)
+ds = ds.chunk({time_name: 1})
+
+# 평균 계산
+merged = []
+for v in VARS:
+    if v not in ds:
+        print(f"[warn] {v} 없음 → 스킵")
+        continue
+    avg = ds[v].resample({time_name: "MS"}).mean()  # 월초 기준
+    merged.append(avg.to_dataset(name=v))
+if not merged:
+    raise RuntimeError("평균 낼 변수가 하나도 없어.")
+m = xr.merge(merged)
+
+# --- [03-1] 월평균 시간좌표를 '그 달 15일 00:00'로 맞춤 ---
+src_time = ds[time_name]
+time_units = (src_time.attrs.get("units")
+              or src_time.encoding.get("units")
+              or "days since 1970-01-01 00:00:00")
+time_cal = (src_time.attrs.get("calendar")
+            or src_time.encoding.get("calendar")
+            or "standard")
+
+coord_vals = m[time_name].values
+mid_dates = []
+if np.issubdtype(m[time_name].dtype, np.datetime64):
+    for t in pd.to_datetime(coord_vals):
+        mid_dates.append(dt.datetime(int(t.year), int(t.month), 15, 0, 0, 0))
+else:
+    cftime_cls = type(coord_vals[0])
+    for t in coord_vals:
+        mid_dates.append(cftime_cls(int(t.year), int(t.month), 15, 0, 0, 0))
+
+mid_nums = np.asarray(date2num(mid_dates, units=time_units, calendar=time_cal), dtype="float64")
+# (time_name, 값) 형태로 차원-좌표 변수로 명시
+m = m.assign_coords({time_name: (time_name, mid_nums)})
+
+# 시간좌표 attrs 유지(encoding엔 넣지 말 것)
+m[time_name].attrs["units"] = time_units
+m[time_name].attrs["calendar"] = time_cal
+
+# 모든 변수/좌표의 encoding에서 units/calendar 제거
+for name in list(m.variables):
+    m[name].encoding.pop("units", None)
+    m[name].encoding.pop("calendar", None)
+
+# 청크 정리 후 메모리에 로드(파일 핸들 의존 제거)
+m = m.unify_chunks()
+m = m.load()
+
+m[time_name].attrs.update({
+    "long_name": "time since initialization",
+    "calendar": "gregorian",
+    "field": "time, scalar, series",
+    "axis": "T",
+})
+m[time_name].encoding["_FillValue"] = None
+m[time_name].attrs.pop("_FillValue", None)
+
+# --- [04] 저장 ---
+outfile = outdir / f"surface_monthly_avg_{case}.nc"
+# 데이터 변수만 압축 인코딩 (좌표 X)
+encoding = {v: {"zlib": True, "complevel": 4, "shuffle": True} for v in m.data_vars}
+
+t = m.to_netcdf(outfile, encoding=encoding, engine="netcdf4", compute=False)
+compute(t)
+print(f"done. → {outfile}")
