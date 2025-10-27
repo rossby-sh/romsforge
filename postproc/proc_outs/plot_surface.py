@@ -31,7 +31,7 @@ import matplotlib.colors as mcolors
 
 title = case
 
-chl_bool = 0
+chl_bool = 1
 
 # flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
 flist=[str(datadir)+'/'+i for i in os.listdir(str(datadir)) if i.endswith('.nc')]

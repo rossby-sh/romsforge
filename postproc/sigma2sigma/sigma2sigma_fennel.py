@@ -4,7 +4,7 @@ import os
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
 from pathlib import Path
 base = Path(__file__).resolve().parent
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ import create_I as cn
 import post_utils as pu
 from scipy.interpolate import LinearNDInterpolator, griddata
 
-cfg  = ut.parse_config(str(base / "config_isl_h2l.yaml"))
+cfg  = ut.parse_config(str(base / "config_sigma2sigma_fennel.yaml"))
 grd_src  = ut.load_roms_grid(cfg["grdname_src"])
 grd_dst  = ut.load_roms_grid(cfg["grdname_dst"])
 
@@ -29,6 +29,11 @@ topo_dst = grd_dst["topo"][:]
 # topo_dst = topo_src_h # 15km -> 5km 인터폴레
 Rmask = grd_dst["mask_rho"][:]
 Dmask = grd_src["mask_rho"][:]
+
+lon_dst_u = grd_dst["lon_u"][:]
+lat_dst_u = grd_dst["lat_u"][:]
+lon_dst_v = grd_dst["lon_v"][:]
+lat_dst_v = grd_dst["lat_v"][:]
 
 angle_src = grd_src["angle"][:]
 angle_dst = grd_dst["angle"][:]
@@ -66,20 +71,44 @@ with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     u    = nc.get('u',0,    slice(None)).squeeze()
     v    = nc.get('v',0,    slice(None)).squeeze()
 
+    NO3         = nc.get('NO3',0,    slice(None)).squeeze()
+    phyt        = nc.get('phytoplankton',0,    slice(None)).squeeze()
+    zoop        = nc.get('zooplankton',0,    slice(None)).squeeze()
+    chlo = nc.get('chlorophyll',0,    slice(None)).squeeze()
+    PO4         = nc.get('PO4',0,    slice(None)).squeeze()
+    oxygen      = nc.get('oxygen',0,    slice(None)).squeeze()
+    zoop = phyt*0.3
+
+    alkalinity = np.ones_like(zoop) * 2350
+    TIC = np.ones_like(zoop) * 2100
+    NH4 = np.ones_like(zoop) * 0.01
+
+    SdeC = np.ones_like(zoop) * 0.04
+    LdeC = np.ones_like(zoop) * 0.04
+    RdeC = np.ones_like(zoop) * 0.04
+    SdeN = np.ones_like(zoop) * 0.04
+    RdeN = np.ones_like(zoop) * 0.04
+
+#    phytFe = nc.get('phytoplanktonFe',0, slice(None)).squeeze()
+#    iron = nc.get('iron',0, slice(None)).squeeze()
+
     # U/V -> RHO (NaN 보존)
     u=pu.uv2rho_rutgers_safenan(u,"u")
     v=pu.uv2rho_rutgers_safenan(v,"v")
     ubar=pu.uv2rho_rutgers_safenan(ubar,"u")
     vbar=pu.uv2rho_rutgers_safenan(vbar,"v")
 
-    field = ut.ConfigObject(zeta=zeta, ubar=None, vbar=None, temp=temp, salt=salt, u=u, v=v)
+    field = ut.ConfigObject(zeta=zeta, ubar=None, vbar=None, temp=temp, salt=salt, u=u, v=v,\
+            NO3=NO3, phytoplankton=phyt, chlorophyll=chlo, PO4=PO4, oxygen=oxygen,\
+            zooplankton=zoop,alkalinity=alkalinity, TIC=TIC, NH4=NH4, SdetritusC=SdeC,\
+            LdetritusC=LdeC,RdetritusC=RdeC, SdetritusN=SdeN, RdetritusN=RdeN)
 
 
 # --- 캐시 생성 (한 번만) ---
 cache_rho = pu.build_lni_cache(lon_src, lat_src, Dmask, lon_dst, lat_dst)
 
 # --- Horizontal interp (2D: Rmask 적용, 3D: Rmask 적용하지 않음) ---
-for name in ["zeta","temp","salt","u","v"]:
+for name in vars(field):
     print("Horizontal intrp: "+name)
     if not hasattr(field, name):
         continue
@@ -109,7 +138,7 @@ for k in range(nz):
 # zr_src_remapped[-1]=0
 # --- Vertical interpolation to zr_dst ---
 field2 = ut.ConfigObject()
-for name in ["temp","salt","u","v"]:
+for name in ["temp","salt","u","v","NO3","PO4","NH4","TIC","oxygen","chlorophyll","phytoplankton","zooplankton","alkalinity","SdetritusC","LdetritusC","RdetritusC","SdetritusN","RdetritusN"]:
     print('Vertical intrp: '+name)
     if hasattr(field, name):
         var = getattr(field, name)
@@ -129,8 +158,11 @@ for name in ["temp","salt","u","v"]:
         setattr(field2, name, var_z.astype(np.float64, copy=False))
 
 # 수직보간 끝난 뒤 Rmask 적용 (스칼라만)
-for name in ["temp","salt"]:
+for name in ["temp","salt","NO3","PO4","NH4","TIC","oxygen","chlorophyll","phytoplankton","zooplankton","alkalinity","SdetritusC","LdetritusC","RdetritusC","SdetritusN","RdetritusN"]:
     if hasattr(field2, name):
+        #print(name)
+        #if name=="iron":
+        #    print(getattr(field2,name))
         A = getattr(field2, name)
         A[:, Rmask == 0] = 0.0
         setattr(field2, name, A)
@@ -175,7 +207,6 @@ field2.vbar = vbar.astype(np.float64, copy=False)
 status = cn.create_roms(cfg, grd_dst, ocean_time,time_ref, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
 if status:
     raise RuntimeError(f"Failed creating file {cfg.ininame}")
-
 
 with Dataset(cfg["ininame_dst"], mode='a') as nc:
     for varname in vars(field):

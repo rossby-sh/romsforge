@@ -1,0 +1,55 @@
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+
+grdname_src : /data/shjo/warehouse/msg_data/NWP12_grd_edit_depth.nc
+grdname_dst : /data/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
+
+ininame_src : /data/shjo/warehouse/msg_data/HYCOM_Glorys_INI_COMB.nc
+ininame_dst : /data/shjo/warehouse/msg_data/ini_msg.nc
+
+bio_model_type : fennel
+
+weight_file: ./NWP_weight.nc
+calc_weight: True
+
+ncformat: NETCDF3_64BIT #NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+vertical_src:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 2
+    tcline          : 200
+
+vertical_dst:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 2
+    theta_s         : 7
+    theta_b         : 0.1
+    tcline          : 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
