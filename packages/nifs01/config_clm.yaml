@@ -5,14 +5,14 @@
 ###
 time:
   start: "2017-12-31"
-  end:   "2025-09-04"
+  end:   "2025-10-22"
 
 region:
   lat: [5, 60]
   lon: [100, 180]
 
 output:
-  base_dir: "/data/shjo/data/nifs01/"
+  base_dir: "/data/shjo/data/nifs01_nifs02/"
 
 core_num : 3
 
@@ -20,9 +20,9 @@ core_num : 3
 #ininame : /data/shjo/data/nifs01/nifs01_eccov4_clm25km_ini_jan.nc
 ininame : /data/shjo/data/nifs02_5km_clm/nifs02_eccov4_clm5km_ini_jan.nc
 bryname : /data/shjo/data/nifs02_5km_clm/nifs02_eccov4_clm5km_bry.nc
-#grdname : /data/shjo/data/nifs01/NWP12_grd_NWP4_topo_modi.nc
+grdname : /data/shjo/data/nifs01/NWP12_grd_NWP4_topo_modi.nc
 #grdname : /data/shjo/data/nifs01/NWP4_grd_314_10m.nc
-grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
+#grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
 #weight_file: /data/shjo/data/nifs01/wgth/nifs01_25km_eccov4_wght.nc
