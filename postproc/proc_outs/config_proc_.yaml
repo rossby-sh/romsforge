@@ -1,10 +1,10 @@
 
-case               : hindcastv1
-data_dir           : /data/share/DATA/RAW/hindcastv1/
-data_prefix_header : clim_monthly
-base_dir           : /data/shjo/warehouse
+case               : leev1_msgini
+data_dir           : /data/shjo/applications/fennel_version_test/storage/roms_fennel_4_0_leev1_msgini/
+data_prefix_header : 4_0_leev1_avg
+base_dir           : /data/shjo/warehouse/roms_exp/
 
-grdname            : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_5km_smooth_v3.nc
+grdname            : /data/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
 
 
 vars: ["temp", "salt", "chlorophyll", "NO3","phytoplankton"]

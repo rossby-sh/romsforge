@@ -5,7 +5,7 @@ from datetime import datetime as dt
 import copernicusmarine
 
 # config 읽기
-with open("config_all.yaml", "r") as f:
+with open("config_all_.yaml", "r") as f:
     cfg = yaml.safe_load(f)
 
 # 경로 준비: base_dir/ostia
