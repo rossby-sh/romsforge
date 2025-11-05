@@ -2,11 +2,11 @@
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname_src : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
-grdname_dst : /home/shjo/data/nifs02/aug/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
+grdname_src : /home/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_314_10m.nc
+grdname_dst : /home/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
 
-ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl/trunk/nifs15km_ini.nc
-ininame_dst : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl/trunk/nifs5km_ini.nc
+ininame_src : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4/trunk/wnp25km_ini.nc
+ininame_dst : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4/trunk/wnp8km_ini.nc
 
 weight_file: ./NWP_weight.nc
 calc_weight: True

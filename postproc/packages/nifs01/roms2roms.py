@@ -30,6 +30,11 @@ topo_dst = grd_dst["topo"][:]
 Rmask = grd_dst["mask_rho"][:]
 Dmask = grd_src["mask_rho"][:]
 
+lon_dst_u = grd_dst["lon_u"][:]
+lat_dst_u = grd_dst["lat_u"][:]
+lon_dst_v = grd_dst["lon_v"][:]
+lat_dst_v = grd_dst["lat_v"][:]
+
 angle_src = grd_src["angle"][:]
 angle_dst = grd_dst["angle"][:]
 

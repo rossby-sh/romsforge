@@ -1,0 +1,20 @@
+
+case               : nifs02_aug_tide
+data_dir           : /home/shjo/applications/nifs02_5km/storage/nifs02_5km_isl_tide/nl/tmp/
+data_prefix_header : nifs5km_avg
+base_dir           : /home/shjo/warehouse/nifs01/
+
+grdname            : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc
+
+
+vars: ["temp", "salt", "NO3","phytoplankton"]
+
+
+var_names:
+  time_candidates: ["ocean_time", "time", "t"]
+  lat_candidates: ["lat", "latitude", "y", "eta", "eta_rho"]
+  lon_candidates: ["lon", "longitude", "x", "xi", "xi_rho"]
+  z_candidates: ["s_rho", "z", "depth", "lev", "layer"]
+  ref_time: "seconds since 2000-1-1"
+
+

@@ -5,13 +5,13 @@ import glob
 import numpy as np
 import datetime as dt
 from netCDF4 import Dataset, num2date, date2num
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'libs')))
 import utils as tl
 import time 
 from pathlib import Path
 
 # --- [01] Load configuration and input metadata ---
-cfg  = tl.parse_config("./config_proc_nft.yaml")
+cfg  = tl.parse_config("./config_proc.yaml")
 grd  = tl.load_roms_grid(cfg.grdname)
 
 base_dir = Path(getattr(cfg, "base_dir", ".")).expanduser().resolve()
@@ -31,7 +31,7 @@ import matplotlib.colors as mcolors
 
 title = case
 
-chl_bool = 1
+chl_bool = 0
 
 # flist=[Spth+i for i in os.listdir(Spth) if i.endswith('.nc')]
 flist=[str(datadir)+'/'+i for i in os.listdir(str(datadir)) if i.endswith('.nc')]
@@ -163,12 +163,10 @@ for f in flist:
     with Dataset(f) as ncS:
         
         times=ncS['ocean_time'][:]
-        
         for i in range(len(times)):
             t=times[i]
             t_str=str(num2date(t,'seconds since 2000-1-1'))[:10]
 
-            
             phytS=ncS['phytoplankton'][i].data
             phytS[phytS>1000]=np.nan
             draw_roms_pcolor(lon, lat, phytS, timestamp=t_str, varname='phyt '+title,\
@@ -182,17 +180,16 @@ for f in flist:
                                 units=f'degree', log_scale=False, clim=(-1,32),\
                                     output_path=str(outdir)+'/temp/'+t_str+'.png',\
                                     cmap=plt.get_cmap('Spectral_r',27),levels=[4,8,12,16,20,24,28,30,32])
-            
-            if chl_bool:
-                chloS=ncS['chlorophyll'][i].data
-                chloS[chloS>1000]=np.nan   
-            else:
-                chloS=phytS*(0.02*6.625*12)
-            draw_roms_pcolor(lon, lat, chloS, timestamp=t_str, varname='chl '+title,\
-                             units='millimole_nitrogen meter-3', log_scale=True, clim=None,\
-                                 output_path=str(outdir)+'/chl/'+t_str+'.png', cmap=plt.get_cmap('jet',27))
-            
-            
+#            if chl_bool:
+#                chloS=ncS['chlorophyll'][i].data
+#                chloS[chloS>1000]=np.nan   
+#            else:
+#                chloS=phytS*(0.02*6.625*12)
+#            draw_roms_pcolor(lon, lat, chloS, timestamp=t_str, varname='chl '+title,\
+#                             units='millimole_nitrogen meter-3', log_scale=True, clim=None,\
+#                                 output_path=str(outdir)+'/chl/'+t_str+'.png', cmap=plt.get_cmap('jet',27))
+         
+
             # if np.nanmin(chloS)<0:
             #     print(np.nanmin(chloS))
             
@@ -221,6 +218,7 @@ for f in flist:
 
     
             TIME = [f"{h:02d}:00" for h in np.arange(0,24,3)]
+            print(TIME)
 
     
     

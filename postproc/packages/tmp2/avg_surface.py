@@ -9,11 +9,11 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'libs')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'libs')))
 import utils as tl
 
 # --- [01] Load configuration ---
-cfg = tl.parse_config("./config_proc_nft.yaml")
+cfg = tl.parse_config("./config_proc.yaml")
 grd = tl.load_roms_grid(cfg.grdname)
 
 case = getattr(cfg, "case", "case")

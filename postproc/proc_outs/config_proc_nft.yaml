@@ -1,10 +1,10 @@
 
-case               : leev1_msgini
-data_dir           : /data/shjo/applications/fennel_version_test/storage/roms_fennel_4_0_leev1_msgini/
-data_prefix_header : 4_0_leev1_avg
-base_dir           : /data/shjo/warehouse/roms_exp/
+case               : leev2_tak_clm
+data_dir           : /home/shjo/applications/nifs01_spinup/storage/leev2_tak_clm/
+data_prefix_header : leev2_tak_avg
+base_dir           : /home/shjo/warehouse/nifs01/
 
-grdname            : /data/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
+grdname            : /home/shjo/applications/nifs01_spinup/storage/data/NWP12_grd_NWP4_topo_modi.nc
 
 
 vars: ["temp", "salt", "chlorophyll", "NO3","phytoplankton"]
