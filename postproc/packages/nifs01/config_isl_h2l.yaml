@@ -6,8 +6,8 @@
 grdname_src : /home/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
 grdname_dst : /home/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_314_10m.nc
 
-ininame_src : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4/trunk/wnp8km_RST_DA.nc
-ininame_dst : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4/trunk/wnp25km_RST_DA.nc
+ininame_src : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4_allmdt/trunk/wnp8km_RST_DA.nc
+ininame_dst : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4_allmdt/trunk/wnp25km_RST_DA.nc
 
 bio_model_type : fennel
 

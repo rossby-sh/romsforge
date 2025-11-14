@@ -163,11 +163,11 @@ for f in flist:
     with Dataset(f) as ncS:
         
         times=ncS['ocean_time'][:]
-        
+           
         for i in range(len(times)):
             t=times[i]
             t_str=str(num2date(t,'seconds since 2000-1-1'))[:10]
-
+            print(t_str)
             
             phytS=ncS['phytoplankton'][i].data
             phytS[phytS>1000]=np.nan

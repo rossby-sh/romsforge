@@ -1,13 +1,14 @@
 
-case               : leev2_tak_clm
-data_dir           : /home/shjo/applications/nifs01_spinup/storage/leev2_tak_clm/
-data_prefix_header : leev2_tak_avg
+case               : leev2_tak_da8ol4_ssh_sst_kodc
+#case               : leev2_tak_da8ol4_ssh_sst_kodc
+data_dir           : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc/nl/
+data_prefix_header : wnp8km_avg_
 base_dir           : /home/shjo/warehouse/nifs01/
 
 grdname            : /home/shjo/applications/nifs01_spinup/storage/data/NWP12_grd_NWP4_topo_modi.nc
 
 
-vars: ["temp", "salt", "chlorophyll", "NO3","phytoplankton"]
+vars: ["zeta","u","v","temp", "salt", "chlorophyll", "NO3","phytoplankton"]
 
 
 var_names:
