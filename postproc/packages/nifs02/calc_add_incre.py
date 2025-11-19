@@ -61,8 +61,8 @@ with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     phyt_post = nc.get('phytoplankton', 0, slice(None))
     zoop_post = nc.get('zooplankton', 0, slice(None))
     detr_post = nc.get('detritus', 0, slice(None))
-    phytfe_post = nc.get('phytoplanktonFe', 0, slice(None))
-    iron_post = nc.get('iron', 0, slice(None))
+#    phytfe_post = nc.get('phytoplanktonFe', 0, slice(None))
+#    iron_post = nc.get('iron', 0, slice(None))
     
     zeta_prior = nc.get('zeta', 1, slice(None))
     ubar_prior = nc.get('ubar', 1, slice(None))
@@ -261,10 +261,10 @@ with Dataset(cfg["ininame_dst"], mode='a') as nc:
     nc['ubar'][0] = field2.ubar.astype(nc['ubar'].dtype, copy=False)
     nc['vbar'][0] = field2.vbar.astype(nc['vbar'].dtype, copy=False)
 
-    nc['phytoplankton'][0] = field2.vbar.astype(nc['phytoplankton'].dtype, copy=False)
-    nc['zooplankton'][0] = field2.vbar.astype(nc['zooplankton'].dtype, copy=False)
-    nc['NO3'][0] = field2.vbar.astype(nc['NO3'].dtype, copy=False)
-    nc['detritus'][0] = field2.vbar.astype(nc['detritus'].dtype, copy=False)
+    nc['phytoplankton'][0] = field2.phytoplankton.astype(nc['phytoplankton'].dtype, copy=False)
+    nc['zooplankton'][0] = field2.zooplankton.astype(nc['zooplankton'].dtype, copy=False)
+    nc['NO3'][0] = field2.NO3.astype(nc['NO3'].dtype, copy=False)
+    nc['detritus'][0] = field2.detritus.astype(nc['detritus'].dtype, copy=False)
 #    nc['phytoplanktonFe'][0] = field2.vbar.astype(nc['phytoplanktonFe'].dtype, copy=False)
 #    nc['iron'][0] = field2.vbar.astype(nc['iron'].dtype, copy=False)
 
