@@ -14,7 +14,7 @@ import create_I as cn
 import post_utils as pu
 from scipy.interpolate import LinearNDInterpolator, griddata
 
-cfg  = ut.parse_config(str(base / "config_sigma2sigma.yaml"))
+cfg  = ut.parse_config(str(base / "config_sigma2sigma_fennel.yaml"))
 grd_src  = ut.load_roms_grid(cfg["grdname_src"])
 grd_dst  = ut.load_roms_grid(cfg["grdname_dst"])
 
@@ -71,10 +71,20 @@ with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     u    = nc.get('u',0,    slice(None)).squeeze()
     v    = nc.get('v',0,    slice(None)).squeeze()
 
-    NO3 = nc.get('NO3',0, slice(None)).squeeze()
-    phyt = nc.get('phytoplankton',0, slice(None)).squeeze()
-    zoop = nc.get('zooplankton',0, slice(None)).squeeze()
-    detr = nc.get('detritus',0, slice(None)).squeeze()
+    NO3         = nc.get('NO3',0,    slice(None)).squeeze()
+    phyt        = nc.get('phytoplankton',0,    slice(None)).squeeze()
+    zoop        = nc.get('zooplankton',0,    slice(None)).squeeze()
+    chlo = nc.get('chlorophyll',0,    slice(None)).squeeze()
+#    oxygen      = nc.get('oxygen',0,    slice(None)).squeeze()
+
+    alkalinity  = nc.get('alkalinity',0,    slice(None)).squeeze()
+    TIC         = nc.get('TIC',0,    slice(None)).squeeze()
+    NH4         = nc.get('NH4',0,    slice(None)).squeeze()
+    LdeN        = nc.get('LdetritusN',0,    slice(None)).squeeze()
+    SdeN        = nc.get('SdetritusN',0,    slice(None)).squeeze()
+    LdeC        = nc.get('LdetritusC',0,    slice(None)).squeeze()
+    SdeC        = nc.get('SdetritusC',0,    slice(None)).squeeze()
+#    oxygen      = nc.get('oxygen',0,    slice(None)).squeeze()
 
 #    phytFe = nc.get('phytoplanktonFe',0, slice(None)).squeeze()
 #    iron = nc.get('iron',0, slice(None)).squeeze()
@@ -86,15 +96,16 @@ with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     vbar=pu.uv2rho_rutgers_safenan(vbar,"v")
 
     field = ut.ConfigObject(zeta=zeta, ubar=None, vbar=None, temp=temp, salt=salt, u=u, v=v,\
-            phytoplankton=phyt,zooplankton=zoop,NO3=NO3,detritus=detr)
+            NO3=NO3, phytoplankton=phyt, chlorophyll=chlo,\
+            zooplankton=zoop,alkalinity=alkalinity, TIC=TIC, NH4=NH4, SdetritusC=SdeC,\
+            LdetritusC=LdeC, SdetritusN=SdeN, LdetritusN=LdeN)
 
 
 # --- 캐시 생성 (한 번만) ---
 cache_rho = pu.build_lni_cache(lon_src, lat_src, Dmask, lon_dst, lat_dst)
 
 # --- Horizontal interp (2D: Rmask 적용, 3D: Rmask 적용하지 않음) ---
-for name in ["zeta","temp","salt","u","v","zooplankton","phytoplankton","NO3",\
-        "detritus"]:
+for name in vars(field):
     print("Horizontal intrp: "+name)
     if not hasattr(field, name):
         continue
@@ -124,8 +135,7 @@ for k in range(nz):
 # zr_src_remapped[-1]=0
 # --- Vertical interpolation to zr_dst ---
 field2 = ut.ConfigObject()
-for name in ["temp","salt","u","v","zooplankton","phytoplankton","NO3",\
-        "detritus"]:
+for name in ["temp","salt","u","v","NO3","NH4","TIC","chlorophyll","phytoplankton","zooplankton","alkalinity","SdetritusC","LdetritusC","SdetritusN","LdetritusN"]:
     print('Vertical intrp: '+name)
     if hasattr(field, name):
         var = getattr(field, name)
@@ -134,19 +144,18 @@ for name in ["temp","salt","u","v","zooplankton","phytoplankton","NO3",\
             print(name)
             continue
         # MATLAB 경계복제와 유사한 padding 외삽 사용(너가 쓰던 설정 유지)
-        #var_z = pu.vertical_interp_to_ZR(
-        #    zr_src_remapped.astype(np.float64, copy=False),
-        #    var.astype(np.float64, copy=False),
-        #    zr_dst.astype(np.float64, copy=False),
-        #    n_jobs=-1, dedup="mean", extrap_mode="padding",
-        #    zsur=0.0, zbot=6000
-        #)
-        var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,n_jobs=-1, dedup="mean", extrap_mode="leading")
+        var_z = pu.vertical_interp_to_ZR(
+            zr_src_remapped.astype(np.float64, copy=False),
+            var.astype(np.float64, copy=False),
+            zr_dst.astype(np.float64, copy=False),
+            n_jobs=-1, dedup="mean", extrap_mode="padding",
+            zsur=0.0, zbot=6000
+        )
+#        var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,n_jobs=-1, dedup="mean", extrap_mode="leading")
         setattr(field2, name, var_z.astype(np.float64, copy=False))
 
 # 수직보간 끝난 뒤 Rmask 적용 (스칼라만)
-for name in ["temp","salt","zooplankton","phytoplankton","NO3",\
-        "detritus"]:
+for name in ["temp","salt","NO3","NH4","TIC","chlorophyll","phytoplankton","zooplankton","alkalinity","SdetritusC","LdetritusC","SdetritusN","LdetritusN"]:
     if hasattr(field2, name):
         #print(name)
         #if name=="iron":

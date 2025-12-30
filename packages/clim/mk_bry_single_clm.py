@@ -115,7 +115,7 @@ for i, t in enumerate(time_ref_list):
                 if val.ndim == 2:
                     continue
                 with capture_warnings(tag):
-                    val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
+                    val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask_rho), spval=-1e10)
                 setattr(field, var, val_flooded)
 
         # [10] Mask & rotate
@@ -123,9 +123,9 @@ for i, t in enumerate(time_ref_list):
             for var in vars(field):
                 arr = getattr(field, var)
                 if arr.ndim == 2:
-                    arr[grd.mask == 0] = 0.0
+                    arr[grd.mask_rho == 0] = 0.0
                 else:
-                    arr[..., grd.mask == 0] = 0.0
+                    arr[..., grd.mask_rho == 0] = 0.0
                 setattr(field, var, arr)
             u_rot, v_rot       = tl.rotate_vector_euler(field.u,    field.v,    grd.angle, to_geo=False)
             ubar_rot, vbar_rot = tl.rotate_vector_euler(field.ubar, field.vbar, grd.angle, to_geo=False)

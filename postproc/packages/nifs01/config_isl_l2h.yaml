@@ -6,7 +6,7 @@ grdname_src : /home/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_3
 grdname_dst : /home/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
 
 ininame_src : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l3_eccov4/trunk/wnp25km_ini.nc
-ininame_dst : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l3_eccov4/trunk/wnp8km_ini_.nc
+ininame_dst : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l3_eccov4/trunk/wnp8km_ini.nc
 
 weight_file: ./NWP_weight.nc
 calc_weight: True

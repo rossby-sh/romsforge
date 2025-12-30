@@ -1,7 +1,7 @@
 
-case               : leev2_tak_da8ol4_l4_sst_kodc
+case               : leev2_tak_da8ol4_sst_kodc_surface
 #case               : leev2_tak_da8ol4_ssh_sst_kodc
-data_dir           : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc_l4_allmdt/nl/
+data_dir           : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc/nl/
 data_prefix_header : wnp8km_avg_
 base_dir           : /home/shjo/warehouse/nifs01/
 

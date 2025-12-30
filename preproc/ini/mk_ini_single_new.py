@@ -97,7 +97,7 @@ with step("[08] Flood: vertical"):
     for var in ['temp', 'salt', 'u', 'v']:
         val = getattr(field, var)
         with capture_warnings(tag="vflood"):
-            val_flooded = tl.flood_vertical_vectorized(val, grd.mask, spval=-1e10)
+            val_flooded = tl.flood_vertical_vectorized(val, grd.mask_rho, spval=-1e10)
             # Alternative:
             # val_flooded = tl.flood_vertical_numba(np.asarray(val), np.asarray(grd.mask), spval=-1e10)
         setattr(field, var, val_flooded)
@@ -107,11 +107,11 @@ with step("[08] Flood: vertical"):
 with step("[09] Mask & clean"):
     for varname in ['zeta', 'ubar', 'vbar']:
         var = getattr(field, varname)
-        var[grd.mask == 0] = 0.0
+        var[grd.mask_rho == 0] = 0.0
         setattr(field, varname, var)
     for varname in ['temp', 'salt', 'u', 'v']:
         var = getattr(field, varname)
-        var[:, grd.mask == 0] = 0.0
+        var[:, grd.mask_rho == 0] = 0.0
         setattr(field, varname, var)
 
 # [10] Rotate vectors to model grid and convert to u/v points

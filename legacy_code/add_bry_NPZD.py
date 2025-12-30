@@ -16,12 +16,14 @@ import datetime as dt
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-My_Bry='/home/shjo/data/nifs02/sep_isl_test/roms_inputs/nifs_bry_20250731-20251103.nc' # Initial file name (to create)
-My_Grd='/home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_5km_topo_sync.nc' # Grd name
+#My_Bry='/home/shjo/data/nifs02/apr_may/roms_inputs/nifs02_5km_bry_20250401-20250601.nc' # Initial file name (to create)
+My_Bry='/home/shjo/data/nifs02/nov/roms_inputs/nifs_bry_20251031-20251204.nc' # Initial file name (to create)
+#My_Grd='/home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_5km_topo_sync.nc' # Grd name
+My_Grd='/home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc' # Grd name
  
 Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='/home/shjo/data/nifs02/sep_isl_test/cmems_bio/'
+ncdir='/home/shjo/data/nifs02/nov/cmems_bio/'
 NO3NC=ncdir+'NUT/'
 phytNC=ncdir+'PFT/'
 
@@ -32,7 +34,7 @@ Bry_title='test'
 
 # OGCM Variables name
 OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time',\
-         'NO3':'no3','phyt':'phyc','zoop':'zooc','detr':'???'}
+         'NO3':'no3','phyt':'chl','zoop':'zooc','detr':'???'}
 
 conserv=1
 
@@ -62,14 +64,14 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2025-07-31 00:00', '2025-11-03 23:00']
+t_rng = ['2025-10-31 00:00', '2025-11-10 23:00']
 # t_rng = ['2024-12-31 00:00', '2025-04-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units
 
 # Convert OGCM time to datetime (e.g. HYCOM time is in "seconds since 1970-01-01")
 OGCM_times = num2date(OGCM_TIMES[:], TIME_UNIT)
-
+print(OGCM_times)
 # Define target datetime range
 Tst = dt.datetime.strptime(t_rng[0], "%Y-%m-%d %H:%M")
 Ted = dt.datetime.strptime(t_rng[1], "%Y-%m-%d %H:%M")
@@ -177,6 +179,7 @@ if NSEW[0]:
                     
         OGCM_Data[i]=data
         
+    OGCM_Data['phyt']=OGCM_Data['phyt']/(0.02*6.625*12)
     OGCM_Data['detr']=OGCM_Data['phyt']*0.1
     OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 
@@ -289,6 +292,7 @@ if NSEW[1]:
                     
         OGCM_Data[i]=data
         
+    OGCM_Data['phyt']=OGCM_Data['phyt']/(0.02*6.625*12)
     OGCM_Data['detr']=np.ones_like(OGCM_Data['phyt'])*0.04
     OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 
@@ -401,6 +405,7 @@ if NSEW[2]:
                     
         OGCM_Data[i]=data
         
+    OGCM_Data['phyt']=OGCM_Data['phyt']/(0.02*6.625*12)
     OGCM_Data['detr']=OGCM_Data['phyt']*0.1
     OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 

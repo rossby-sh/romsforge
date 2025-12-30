@@ -19,8 +19,9 @@ core_num : 3
 # === Define file names ===
 ininame : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_ini_npzd.nc
 #bryname : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_bry_npzd.nc
-bryname : /data/shjo/data/nifs02_5km_clm/nifs02_eccov4_clm5km_bry.nc
-grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
+bryname : /home/shjo/data/nifs02/apr_may/roms_inputs/nifs02_eccov4_clm5km_bry_topo_sync.nc
+#grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
+grdname : /home/shjo/data/nifs02/apr_may/roms_inputs/roms_grd_fennel_5km_topo_sync.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
 #weight_file: /home/shjo/applications/nifs02_clm/data/NWP_weight.nc
@@ -35,10 +36,10 @@ bio_model_type: npzd
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt #griddata / edt / linearND
 
-initdate : 1993-01-01 00:00:00 
+initdate : 2025-01-01 00:00:00 
 ogcm_name: /home/shjo/data/raw/eccov4/eccov4_clm.nc
 
-time_ref : seconds since 1980-1-1 00:00:00
+time_ref : seconds since 2000-1-1 00:00:00
 
 ogcm_var_name:
     longitude       : longitude
@@ -65,7 +66,7 @@ vertical:
     tcline          : 400
 
 
-bio_ogcm_name : /data/shjo/data/nifs01/clm_nc/cmems_bio_clm.nc
+bio_ogcm_name : /home/shjo/data/raw/cmems_bio_hist/clm_CMEMS_bio.nc
 
 bio_ogcm_var_name:
     longitude       : longitude

@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 """
-avg_surface_ol.py  오버랩(4일) 스킵 + 표층 선택 + 월평균 + 15일 정규화 (netCDF4 안정 저장)
+avg_surface_ol.py  오버랩(4일) 스킵 + 전층 유지(3D) + 월평균 + 15일 정규화 (netCDF4 안정 저장)
 - 파일명 끝 '<cycle:4d>_<chunk:4d>.nc'만 파싱 (접두어 변화 무관)
 - 첫 사이클: 0001~0008, 이후 사이클: 0005~0008만 사용
 - 엔진: netcdf4 (열기/저장)
@@ -138,29 +138,16 @@ if not files:
     raise RuntimeError("열 수 있는 파일이 없음.")
 
 
-# ---------------- [05] 표층 전처리 ----------------
-def detect_zdim(da: xr.DataArray):
-    # 1) 이름 후보 우선
-    for cand in z_candidates:
-        if cand in da.dims and da.sizes[cand] > 1:
-            return cand
-    # 2) 휴리스틱
-    not_z = set(time_candidates) | lat_candidates | lon_candidates
-    for d in da.dims:
-        if d not in not_z and da.sizes[d] > 1:
-            return d
-    return None  # 2D 변수일 수 있음
-
+# ---------------- [05] 전층 전처리 ----------------
 def preprocess_surface(ds: xr.Dataset) -> xr.Dataset:
+    """
+    VARS에 지정된 변수만 남기고, 수직 차원은 그대로 유지.
+    이후 단계에서 시간축을 따라 월평균만 수행.
+    """
     keep = [v for v in VARS if v in ds.data_vars]
     if not keep:
         return xr.Dataset()
-    out = []
-    for v in keep:
-        da = ds[v]
-        zdim = detect_zdim(da)
-        out.append(da if zdim is None else da.isel({zdim: -1}, drop=True))
-    return xr.merge([x.to_dataset(name=v) for x, v in zip(out, keep)])
+    return ds[keep]
 
 
 # ---------------- [06] 병합 (netCDF4, 병렬 OFF) ----------------

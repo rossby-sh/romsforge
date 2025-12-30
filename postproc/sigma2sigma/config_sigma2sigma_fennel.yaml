@@ -3,11 +3,11 @@
 
 # --- Initial & Boundary and Forcing ---
 
-grdname_src : /data/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
-grdname_dst : /data/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_314_10m.nc
+grdname_src : /home/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
+grdname_dst : /home/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_314_10m.nc
 
-ininame_src : /data/shjo/warehouse/msg_data/ini_msg.nc
-ininame_dst : /data/shjo/warehouse/msg_data/ini_msg_25km.nc
+ininame_src : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc/wnp8km_rst_8537.nc
+ininame_dst : /home/shjo/applications/isl_system_v250925/storage/da8ol4_osita_kodc/wnp25km_rst_8537.nc
 
 bio_model_type : fennel
 

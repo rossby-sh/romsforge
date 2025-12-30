@@ -19,13 +19,13 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/shjo/nifs02/aug/roms_inputs/nifs_ini_20250801.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_5km_smooth_v2.nc' # Grd name
+My_Ini='/home/shjo/applications/nifs02_5km/I4DVAR/nrm_test/nifs_ini_251101_nrmtest.nc' # Initial file name (to create)
+My_Grd='/home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc' # Grd name
 #-- Define OGCM path ----------------------------------------------------------
 
-ncdir='/data/shjo/nifs02/aug/cmems_bio/'
-NO3NC=ncdir+'CMEMS_nut_20250731-20250904.nc'
-phytNC=ncdir+'CMEMS_pft_20250731-20250904.nc'
+ncdir='/home/shjo/data/nifs02/nov/cmems_bio/'
+NO3NC=ncdir+'NUT/CMEMS_nut_20251031-20251204.nc'
+phytNC=ncdir+'PFT/CMEMS_pft_20251031-20251204.nc'
 #o2NC=ncdir+'BIO/CMEMS_data_bio_2025-02.nc'
 
 
@@ -40,7 +40,7 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
          'NO3':'no3','phyt':'phyc','zoop':'zooc','detr':'???'}
 
 # Define time info
-t_rng=['2025-08-01','2025-08-01'] # Inital time 
+t_rng=['2025-11-01','2025-11-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================

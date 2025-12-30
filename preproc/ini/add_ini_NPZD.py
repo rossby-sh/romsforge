@@ -5,7 +5,7 @@ Created on Wed Apr 23 13:04:04 2025
 @author: ust21
 """
 
-PKG_path = 'C:/Users/ust21/shjo/projects/myROMS/prc_tools/' # Location of JNUROMS directory
+PKG_path = '/home/shjo/github/romsforge/legacy_code/' # Location of JNUROMS directory
 import sys 
 sys.path.append(PKG_path)
 import utils.ROMS_utils01 as ru
@@ -19,14 +19,14 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='D:/shjo/ROMS_inputs/NWP15km/ROMS_ini_15km_250301_N36.nc' # Initial file name (to create)
-My_Grd='D:/shjo/ROMS_inputs/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
+My_Ini='/home/shjo/data/nifs02/apr_may/roms_inputs/nifs02_5km_ini4clm_20250101.nc' # Initial file name (to create)
+My_Grd='/home/shjo/data/nifs02/apr_may/roms_inputs/roms_grd_fennel_5km_topo_sync.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='D:/shjo/GLORYS/'
-NO3NC=ncdir+'nut/mercatorbiomer4v2r1_global_mean_nut_20250301.nc'
-phytNC=ncdir+'chl/mercatorbiomer4v2r1_global_mean_pft_20250301.nc'
-zoopNC=ncdir+'zoo/mercatorbiomer4v2r1_global_mean_plankton_20250301.nc'
+ncdir='/home/shjo/data/raw/cmems_bio/'
+NO3NC=ncdir+'CMEMS_data_nut_2025-01.nc'
+phytNC=ncdir+'CMEMS_data_pft_2025-01.nc'
+zoopNC=ncdir+''
 detrNC=ncdir+'HYCOM_'
 
 #-- Define Parameters ---------------------------------------------------------
@@ -35,10 +35,10 @@ Ini_title='my Test ROMS' # title for NC description
 conserv=1
 # OGCM Variables name
 OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time',\
-         'NO3':'no3','phyt':'phyc','zoop':'zooc','detr':'???'}
+         'NO3':'no3','phyt':'chl','zoop':'zooc','detr':'???'}
 
 # Define time info
-t_rng=['2025-03-01','2025-03-01'] # Inital time 
+t_rng=['2025-01-01','2025-01-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================
@@ -110,7 +110,7 @@ Ini_time_num=((date2num(dt.datetime(tmp_y,tmp_m,1),TIME_UNIT)-tmp_dif))*86400
 
 #-- Get OGCM data for initial -------------------------------------------------
 OGCM_Data={}#,OGCM_Mask={}
-for i in ['NO3','phyt','zoop']:
+for i in ['NO3','phyt']:
 #for i in ['temp']:
 
     print('!!! Data processing : '+i+' !!!')
@@ -151,6 +151,8 @@ for i in ['NO3','phyt','zoop']:
         n+=1
     OGCM_Data[i]=data
     
+OGCM_Data['phyt']=OGCM_Data['phyt']/(0.02*6.625*12)
+OGCM_Data['zoop']=OGCM_Data['phyt']*0.3
 OGCM_Data['detr']=OGCM_Data['phyt']*0.1
 
     
@@ -204,7 +206,7 @@ ncI=Dataset(My_Ini,mode='a')
 ncI['NO3'][0]=NO3
 ncI['phytoplankton'][0]=phyt
 ncI['zooplankton'][0]=zoop
-ncI['detritus'][0]=detr
+ncI['detritus'][0]=0.04
 ncI.close()
 
 
