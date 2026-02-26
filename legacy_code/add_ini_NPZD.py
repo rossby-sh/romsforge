@@ -19,8 +19,8 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/home/shjo/applications/nifs02_5km/I4DVAR/nrm_test/nifs_ini_251101_nrmtest.nc' # Initial file name (to create)
-My_Grd='/home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc' # Grd name
+My_Ini='/home/shjo/warehouse/nifs02/isl_stable/nifs02_ini_15km_nearest.nc' # Initial file name (to create)
+My_Grd='/home/shjo/warehouse/nifs02/grd/roms_grd_15km_neareast.nc' # Grd name
 #-- Define OGCM path ----------------------------------------------------------
 
 ncdir='/home/shjo/data/nifs02/nov/cmems_bio/'

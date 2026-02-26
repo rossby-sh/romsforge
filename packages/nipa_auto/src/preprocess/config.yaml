@@ -1,0 +1,100 @@
+# 
+
+# === Download config ===
+region:
+  lat: [5, 60]
+  lon: [100, 176]
+
+output:
+  base_dir: /home/shjo/github/romsforge/packages/nipa_auto/data
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+grdname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/fixed/roms_grd_15km_nearest.nc
+ininame : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260123/roms_nipa_ini_20260123.nc
+bryname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260123/roms_nipa_bry_20260123.nc
+frcname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260123/roms_nipa_frc_20260123.nc
+
+weight_file: ./NWP_weight.nc
+bio_weight_file: ./test_wgt.nc
+calc_weight: True
+
+ncformat: NETCDF3_64BIT  # NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+flood_method_for_ini: griddata #griddata / edt / linearND
+flood_method_for_bry: edt      #griddata / edt / linearND
+ 
+ogcm_name           : /home/shjo/github/romsforge/packages/nipa_auto/data/hycom/hycom_korea_20260123.nc
+ogcm_path_bry       : /home/shjo/github/romsforge/packages/nipa_auto/data/hycom/
+
+bio_model_type      : npzd # None, npzd, fennel 
+
+ogcm_var_name:
+    longitude       : lon
+    latitude        : lat
+    depth           : depth
+    time            : time
+    temperature     : water_temp
+    salinity        : salinity
+    u               : water_u
+    v               : water_v
+    zeta            : surf_el
+
+initdate            : 2026-01-23 00:00:00
+bry_start_date      : 2026-01-22 21:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2026-01-24 03:00:00 # 'YYYY-MM-DD HH:MM:SS'
+
+time_ref            : days since 2000-1-1
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+global_attrs_bry: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+    history         : history
+
+vertical:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+# === Add bio ===
+bio_ogcm_name : /home/shjo/github/romsforge/packages/nipa_auto/data/cmems
+
+bio_ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : depth
+    time            : time
+    phyt            : chl
+    NO3             : no3
+    PO4             : po4
+    oxygen          : o2
+    chl             : chl
+    chlorophyll: chl
+    phytoplankton: chl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

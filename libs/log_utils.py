@@ -14,12 +14,22 @@ from typing import Optional
 TERMW = 80
 SHOW_SECTIONS = False  # when True, prints "-- title -----" rulers
 
-RESET = "\033[0m"
-GRAY  = "\033[90m"
-RED   = "\033[91m"
-BLUE  = "\033[94m"
-YELLOW = "\033[93m"
-GREEN = "\033[92m"
+#RESET = "\033[0m"
+#GRAY  = "\033[90m"
+#RED   = "\033[91m"
+#BLUE  = "\033[94m"
+#YELLOW = "\033[93m"
+#GREEN = "\033[92m"
+
+RESET = ""
+GRAY  = ""
+RED   = ""
+BLUE  = ""
+YELLOW = ""
+GREEN = ""
+
+
+
 # --- configuration ------------------------------------------------------------
 def configure(width: Optional[int] = None, show_sections: Optional[bool] = None):
     global TERMW, SHOW_SECTIONS

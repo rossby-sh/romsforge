@@ -5,13 +5,10 @@
 ###
 
 # === Define file names ===
-#ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
-#grdname : /mnt/c/Users/shjo9/Bridge/DATA/NWP4_grd_3_10m_LP.nc
-ininame : /home/shjo/data/nifs02/apr_may/roms_inputs/nifs02_5km_ini4clm_20250101.nc
+ininame : /home/shjo/warehouse/nifs02/isl_stable/nifs02_ini_5km_v3.nc
 #grdname : /data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc
-grdname : /home/shjo/data/nifs02/apr_may/roms_inputs/roms_grd_fennel_5km_topo_sync.nc
+grdname : /home/shjo/warehouse/nifs02/grd/roms_grd_fennel_5km_smooth_v3.nc
 
-#weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
 weight_file: /home/shjo/tmp.nc
 calc_weight: True
 
@@ -22,7 +19,7 @@ bio_model_type: npzd
 
 flood_method_for_ini: griddata #griddata / edt / linearND
 
-ogcm_name: /home/shjo/data/raw/00utc/HYCOM_20250101_00UTC.nc 
+ogcm_name: /home/shjo/data/nifs02/nov/hycom/hycom_20251101_00utc.nc 
 
 ogcm_var_name:
     longitude       : lon
@@ -35,7 +32,7 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-initdate            : 2025-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+initdate            : 2025-11-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 time_ref            : seconds since 2000-1-1 00:00:00
 
 global_attrs: 

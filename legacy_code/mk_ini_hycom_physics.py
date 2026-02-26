@@ -5,7 +5,7 @@ Created on Thu Nov 14 09:44:00 2022
 @author: shjo
 """
 
-PKG_path = '/home/shjo/ROMS/romsforge/py/dev_individual/' # Location of JNUROMS directory
+PKG_path = '/home/shjo/github/romsforge/' # Location of JNUROMS directory
 import sys 
 sys.path.append(PKG_path)
 import libs.ROMS_utils01 as ru
@@ -19,17 +19,17 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_fennel_15km_smooth_v2.nc' # Initial file name (to create)
+My_Ini='/home/shjo/roms_ini_fennel_15km_smooth_v2.nc' # Initial file name (to create)
 #My_Grd='/data/share/DATA/ROMS_INPUTS/grd/NWP4_grd_3_10m_LP.nc' # Grd name
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
+My_Grd='/home/shjo/data/nifs02/year/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='/data/share/DATA/RAW/00utc/'
-sshNC=ncdir+'HYCOM_20250501_00UTC.nc'
-tempNC=ncdir+'HYCOM_20250501_00UTC.nc'
-saltNC=ncdir+'HYCOM_20250501_00UTC.nc'
-uNC=ncdir+'HYCOM_20250501_00UTC.nc'
-vNC=ncdir+'HYCOM_20250501_00UTC.nc'
+ncdir='/home/shjo/data/hycom/'
+sshNC=ncdir+'hycom_20250701_00utc.nc'
+tempNC=ncdir+'hycom_20250701_00utc.nc'
+saltNC=ncdir+'hycom_20250701_00utc.nc'
+uNC=ncdir+'hycom_20250701_00utc.nc'
+vNC=ncdir+'hycom_20250701_00utc.nc'
 
 #-- Define Parameters ---------------------------------------------------------
 Ini_title='NWP 15km' # title for NC description
@@ -41,7 +41,7 @@ OGCMVar={'lon_rho':'lon','lat_rho':'lat','depth':'depth','time':'time',\
          'temp':'water_temp','salt':'salinity','u':'water_u','v':'water_v','zeta':'surf_el'}
 
 # Define time info
-t_rng=['2025-05-01','2025-05-01'] # Inital time 
+t_rng=['2025-07-01','2025-07-01'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================

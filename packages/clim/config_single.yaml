@@ -17,11 +17,11 @@ output:
 core_num : 3
 
 # === Define file names ===
-ininame : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_ini_npzd.nc
+ininame : /home/shjo/data/nifs02/year/std/test_std_npzd.nc
 #bryname : /home/shjo/applications/nifs02_clm/data/eccov4_clm5km_bry_npzd.nc
 bryname : /home/shjo/data/nifs02/apr_may/roms_inputs/nifs02_eccov4_clm5km_bry_topo_sync.nc
 #grdname : /data/shjo/data/nifs02_5km_clm/roms_grd_fennel_5km_smooth_v3.nc
-grdname : /home/shjo/data/nifs02/apr_may/roms_inputs/roms_grd_fennel_5km_topo_sync.nc
+grdname : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
 
 #weight_file: /mnt/c/USers/shjo9/Bridge/DATA/NWP4_weight_10m_LP.nc
 #weight_file: /home/shjo/applications/nifs02_clm/data/NWP_weight.nc
@@ -33,24 +33,24 @@ force_write: True
 
 bio_model_type: npzd
 
-flood_method_for_ini: griddata #griddata / edt / linearND
+flood_method_for_ini: edt #griddata / edt / linearND
 flood_method_for_bry: edt #griddata / edt / linearND
 
 initdate : 2025-01-01 00:00:00 
-ogcm_name: /home/shjo/data/raw/eccov4/eccov4_clm.nc
+ogcm_name: /home/shjo/data/nifs02/year/std/glorys_21y_Phy_std.nc
 
 time_ref : seconds since 2000-1-1 00:00:00
 
 ogcm_var_name:
     longitude       : longitude
     latitude        : latitude
-    depth           : Z
+    depth           : depth
     time            : time
-    temperature     : THETA
-    salinity        : SALT
-    u               : EVEL
-    v               : NVEL
-    zeta            : SSH
+    temperature     : temp_std
+    salinity        : salt_std
+    u               : u_std
+    v               : v_std
+    zeta            : zeta_std
 
 global_attrs: 
     title           : ROMS bry

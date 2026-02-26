@@ -56,25 +56,26 @@ zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,5,topo_dst,np.zeros_
 # zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,5,topo_dst,field.zeta)
 
 # --- Load fields (example: single time) ---
-# idt=0
+idt=0
 TIME=Dataset(cfg["ininame_src"])["ocean_time"]
-ocean_time=TIME[0]
+
+ocean_time=TIME[idt]
 
 time_ref=TIME.units
 with Dataset(cfg["ininame_src"], maskandscale=True) as nc_raw:
     nc = ut.MaskedNetCDF(nc_raw)
-    zeta = nc.get('zeta',0, slice(None)).squeeze()
-    ubar = nc.get('ubar',0, slice(None)).squeeze()
-    vbar = nc.get('vbar',0, slice(None)).squeeze()
-    temp = nc.get('temp',0, slice(None)).squeeze()
-    salt = nc.get('salt',0, slice(None)).squeeze()
-    u    = nc.get('u',0,    slice(None)).squeeze()
-    v    = nc.get('v',0,    slice(None)).squeeze()
+    zeta = nc.get('zeta',idt, slice(None)).squeeze()
+    ubar = nc.get('ubar',idt, slice(None)).squeeze()
+    vbar = nc.get('vbar',idt, slice(None)).squeeze()
+    temp = nc.get('temp',idt, slice(None)).squeeze()
+    salt = nc.get('salt',idt, slice(None)).squeeze()
+    u    = nc.get('u',idt,    slice(None)).squeeze()
+    v    = nc.get('v',idt,    slice(None)).squeeze()
 
-    NO3 = nc.get('NO3',0, slice(None)).squeeze()
-    phyt = nc.get('phytoplankton',0, slice(None)).squeeze()
-    zoop = nc.get('zooplankton',0, slice(None)).squeeze()
-    detr = nc.get('detritus',0, slice(None)).squeeze()
+    NO3 = nc.get('NO3',idt, slice(None)).squeeze()
+    phyt = nc.get('phytoplankton',idt, slice(None)).squeeze()
+    zoop = nc.get('zooplankton',idt, slice(None)).squeeze()
+    detr = nc.get('detritus',idt, slice(None)).squeeze()
 
 #    phytFe = nc.get('phytoplanktonFe',0, slice(None)).squeeze()
 #    iron = nc.get('iron',0, slice(None)).squeeze()

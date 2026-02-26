@@ -294,7 +294,6 @@ def get_section(ncG,ncD,vname,lon_rng,lat_rng,tindx=0):
                    np.max(np.abs(lon_rho[:,1:L]-lon_rho[:,:L-1])),
                    np.max(np.abs(lat_rho[1:M,:]-lat_rho[:M-1,:])),
                    np.max(np.abs(lat_rho[:,1:L]-lat_rho[:,:L-1])))
-            
     if dl>10:
         dl=1.5        
     # ncG.variables.keys()

@@ -1,0 +1,62 @@
+
+# config_obs.yaml
+# - mk_obs_single_new.py 기준 최소 키들
+# - datum은 unlimited로 append 하니까 Ndatum 같은 건 없음
+
+# ---- I/O ----
+grdname: /home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
+obs_src_glob: /home/shjo/data/nifs02/sep_isl_test/modis/time/*.nc
+obs_out: ./test_obs_phyt_dec_.nc
+
+# ---- NetCDF ----
+ncformat: NETCDF4
+force_write: true
+
+# ---- Time ----
+# collect_time_info_legacy에서 쓰는 기준 날짜(너가 쓰던 cfg.initdate)
+initdate: "2025-08-01"
+
+obs_start_date: 2025-09-01 00:00:00
+obs_end_date: 2025-09-05 00:00:00
+
+
+# ROMS time_ref (compute_relative_time에 그대로 들어감)
+time_ref: "days since 2000-01-01 00:00:00"
+
+# ---- Source variable names (파일 안 변수명) ----
+# NOTE: lon/lat가 2D면 lon, lat 변수를 그대로 쓰면 되고
+#       1D면 build_obs_chunk 쪽에서 meshgrid로 바꾸도록 너 libs에서 처리하거나,
+#       여기서 lon2d/lat2d 같은 이름으로 맞춰야 함.
+src_var_name:
+  time: time
+  chlor_a: chlor_a
+  longitude: lon
+  latitude: lat
+
+# ---- Filtering / thinning ----
+thin_y: 3
+thin_x: 3
+valid_min: 0.01
+valid_max: 100.0
+
+# ---- Unit conversion ----
+# 네가 쓰던: mg/m^3 -> mmol/m^3
+unit_conv: 0.6289308176100629 # 1.0 / (0.02 * 6.625 * 12.0)
+# ---- Observation metadata ----
+Nstate: 11
+obs_flag: 9
+obs_provenance: 14
+obs_depth_const: 36
+
+# ---- Observation error ----
+# obs_error = max((obs_value*err_rel)^2, err_floor)
+err_rel: 0.3
+err_floor: 0.02
+
+# ---- Variance vector (length = Nstate) ----
+obs_variance: [0, 0, 0, 0, 0, 0.09, 0.0025, 0, 0.009, 0, 0]
+
+# ---- Global attributes (create_obs에서 씀) ----
+global_attrs:
+  title: "ROMS 4DVAR observation file"
+  type: "ROMS OBS file"

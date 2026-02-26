@@ -17,13 +17,13 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 #My_Bry='/home/shjo/data/nifs02/apr_may/roms_inputs/nifs02_5km_bry_20250401-20250601.nc' # Initial file name (to create)
-My_Bry='/home/shjo/data/nifs02/nov/roms_inputs/nifs_bry_20251031-20251204.nc' # Initial file name (to create)
+My_Bry='/home/shjo/data/nifs02/dec/roms_inputs/nifs_bry_15km_20251130-20251231.nc' # Initial file name (to create)
 #My_Grd='/home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_5km_topo_sync.nc' # Grd name
-My_Grd='/home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc' # Grd name
+My_Grd='/home/shjo/data/nifs02/nov/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
  
 Parallel=False
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='/home/shjo/data/nifs02/nov/cmems_bio/'
+ncdir='/home/shjo/data/nifs02/dec/cmems_bio/'
 NO3NC=ncdir+'NUT/'
 phytNC=ncdir+'PFT/'
 
@@ -64,7 +64,7 @@ OGCM_TIMES=xr.open_mfdataset(OGCMS,decode_times=False)[OGCMVar['time']]
 #OGCM_TIMES=MFDataset(OGCMS)[OGCMVar['time']] 
 TIME_UNIT=OGCM_TIMES.units
 
-t_rng = ['2025-10-31 00:00', '2025-11-10 23:00']
+t_rng = ['2025-11-30 00:00', '2025-12-31 23:00']
 # t_rng = ['2024-12-31 00:00', '2025-04-01 23:00']
 My_time_ref = 'days since 2000-01-01 00:00:00'
 TIME_UNIT = OGCM_TIMES.units

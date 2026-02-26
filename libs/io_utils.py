@@ -4,6 +4,8 @@ from netCDF4 import Dataset, MFDataset, num2date, date2num
 from datetime import datetime
 from typing import Union
 from dataclasses import dataclass
+import yaml
+import numpy as np
 
 def is_netcdf4(file_path):
     with open(file_path, 'rb') as f:
@@ -120,4 +122,52 @@ def collect_time_info_legacy(input_files, time_var, date_input):
 
     else:
         raise ValueError("Invalid input file type: must be str or list")
+
+
+
+
+def load_bio_yaml(path):
+    with open(path, "r") as f:
+        return yaml.safe_load(f) or {}
+
+def get_bio_vars(bio_db, bio_model, target):
+    model = bio_db["bio_models"][bio_model]
+    return list(model.get(target, {}).keys())
+
+
+def get_bio_rules(bio_db: dict, bio_model, target: str) -> dict:
+    """
+    target: 'ini' or 'bry'
+    """
+    key = str(bio_model).lower()
+    models = (bio_db or {}).get("bio_models", {})
+    if key not in models:
+        raise KeyError(f"bio model not found in bio_vars.yml: {key}")
+
+    rules_key = f"rules_{target}"
+    return models[key].get(rules_key, {}) or {}
+
+
+
+def apply_bio_rules(field_dict, rules):
+    for var, rule in rules.items():
+        if var in field_dict:
+            continue
+
+        rtype = rule["type"]
+
+        if rtype == "scale":
+            src = rule["from"]
+            field_dict[var] = field_dict[src] * rule["factor"]
+
+        elif rtype == "constant_like":
+            like = rule["like"]
+            field_dict[var] = np.ones_like(field_dict[like]) * rule["value"]
+
+        else:
+            raise ValueError(f"Unknown bio rule type: {rtype}")
+
+
+
+
 

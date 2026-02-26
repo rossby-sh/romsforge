@@ -71,7 +71,6 @@ def obs_ijpos(grdname, obs_lon, obs_lat, Correction=True, obc_edge=False, strict
     # from scipy import io
     # bounded_MAT=io.loadmat('D:/shjo/ROMS_inputs/obs/test_bounded.mat')['bounded'].reshape(-1)
     # np.all(bounded==bounded_MAT)
-    
 
     Igrid, Jgrid = np.meshgrid(np.arange(xi), np.arange(eta))
     Igrid = Igrid.astype(float)
@@ -122,7 +121,6 @@ def obs_ijpos(grdname, obs_lon, obs_lat, Correction=True, obc_edge=False, strict
         Xgrid[idx_valid] = interp_I
         Ygrid[idx_valid] = interp_J
     
-
     # --- Final filtering (land mask) ---
     invalid = np.isnan(Xgrid) | np.isnan(Ygrid)
     bounded[invalid] = False

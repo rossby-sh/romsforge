@@ -5,8 +5,9 @@ Created on Wed Apr 23 13:04:04 2025
 @author: ust21
 """
 
-PKG_path = '/home/shjo/ROMS/romsforge/py/dev_individual/' # Location of JNUROMS directory
+PKG_path = '/home/shjo/github/romsforge/' # Location of JNUROMS directory
 import sys 
+import os
 sys.path.append(PKG_path)
 import libs.ROMS_utils01 as ru
 import libs.ROMS_utils02 as ru2
@@ -17,14 +18,14 @@ from scipy.interpolate import griddata
 from netCDF4 import Dataset,date2num,num2date
 
 #== Define Inputs files =======================================================
-My_Ini='/data/share/DATA/ROMS_INPUTS/ini/roms_ini_fennel_15km_v2_feb.nc' # Initial file name (to create)
-My_Grd='/data/share/DATA/ROMS_INPUTS/grd/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
+My_Ini='/home/shjo/github/romsforge/packages/auto/test2.nc' # Initial file name (to create)
+My_Grd='/home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc' # Grd name
 
 #-- Define OGCM path ----------------------------------------------------------
-ncdir='/data/share/DATA/RAW/Bvar/'
-NO3NC=ncdir+'NUT/CMEMS_data_nut_2025-02.nc'
-phytNC=ncdir+'PFT/CMEMS_data_pft_2025-02.nc'
-o2NC=ncdir+'BIO/CMEMS_data_bio_2025-02.nc'
+ncdir='/home/shjo/data/nifs02/tmp/cmems_bio_raw/'
+NO3NC=ncdir+'NUT/CMEMS_nut_20250123-20250206.nc'
+phytNC=ncdir+'PFT/CMEMS_pft_20250123-20250206.nc'
+o2NC=ncdir+'BIO/CMEMS_bio_20250123-20250206.nc'
 
 #-- Define Parameters ---------------------------------------------------------
 
@@ -33,7 +34,7 @@ OGCMVar={'lon_rho':'longitude','lat_rho':'latitude','depth':'depth','time':'time
         'NO3':'no3','PO4':'po4','chlorophyll':'chl','oxygen':'o2','phytoplankton':'phyc'}
 
 # Define time info
-t_rng=['2025-02-01','2025-02-01'] # Inital time 
+t_rng=['2025-01-24','2025-01-24'] # Inital time 
 My_time_ref='seconds since 2000-1-1 00:00:00' # time ref
 
 #== Starts Calc ===============================================================

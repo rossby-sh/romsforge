@@ -1,0 +1,28 @@
+
+paths:
+  outdir: "/home/shjo/warehouse/nifs02_post/jan/"
+  file_list: "avg_use_list.txt"
+
+time:
+  year: 2026
+  month: 1
+  week_start: "SUN"
+
+naming:
+  prefix: "nifs_avg"
+
+options:
+  drop_duplicate_time: true
+  keep_attrs: true
+  write_weekly: true
+  write_monthly: true
+  add_chl: true
+  use_existing_file_list: true   # ★ 추가
+
+select:
+  kind: "avg"
+  src_dir: "/home/shjo/applications/nifs02_5km/storage/nifs_202601/nl/"
+  prefix: "nifs5km"
+  first_use: ["0001","0002","0003","0004","0005","0006","0007","0008"]
+  next_use:  ["0005","0006","0007","0008"]
+  pattern: "{prefix}_avg_{cycle}_{num}.nc"

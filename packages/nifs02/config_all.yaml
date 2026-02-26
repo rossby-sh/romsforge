@@ -2,15 +2,15 @@
 
 # === Download config ===
 time:
-  start: "2025-11-29"
-  end:   "2025-12-22"
+  start: "2025-12-31"
+  end:   "2026-02-01"
 
 region:
   lat: [5, 60]
   lon: [100, 180]
 
 output:
-  base_dir: "/home/shjo/data/nifs02/dec/"
+  base_dir: "/home/shjo/data/nifs02/202601/"
 
 core_num : 3
 
@@ -18,8 +18,8 @@ core_num : 3
 
 # --- Initial & Boundary and Forcing ---
 #grdname : /home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_5km_topo_sync.nc
-grdname : /home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
-#grdname : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc
+#grdname : /home/shjo/data/nifs02/sep_isl_test/roms_inputs/roms_grd_fennel_15km_smooth_v2.nc
+grdname : /home/shjo/data/roms_inputs/grd/mcc/roms_grd_fennel_5km_smooth_v3.nc
 ininame : /home/shjo/applications/nifs02_5km/I4DVAR/nrm_test/nifs_ini_251101_nrmtest.nc
 #bryname : This will set automatically
 #frcname : This will set automatically
@@ -50,8 +50,8 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2025-11-29 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-12-22 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2025-11-30 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-12-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 

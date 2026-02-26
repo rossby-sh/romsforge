@@ -6,8 +6,8 @@
 
 # === Define file names ===
 #ininame : /mnt/c/Users/shjo9/Bridge/DATA/roms_ini.nc
-bryname : /home/shjo/data/roms_inputs/bry/lte/NWP4_bry_subsampled.nc
-grdname : /home/shjo/data/roms_inputs/grd/lte/NWP4_grd_3_10m_LP_subsampled.nc
+bryname : /home/shjo/warehouse/nifs02/isl_stable/nifs02_bry_5km_v3.nc
+grdname : /home/shjo/warehouse/nifs02/grd/roms_grd_fennel_5km_smooth_v3.nc
 
 weight_file: /home/shjo/data/roms_inputs/wght/wght_hycom_nwp4.nc
 calc_weight: True
@@ -15,11 +15,11 @@ calc_weight: True
 ncformat: NETCDF4 # NETCDF3_64BIT
 force_write: True
 
-bio_model_type: Fennel
+bio_model_type: npzd
 
 flood_method_for_bry: edt #griddata / edt / linearND
 
-ogcm_path: /home/shjo/data/raw/00utc/
+ogcm_path: /home/shjo/data/nifs02/nov/hycom/
 
 ogcm_var_name:
     longitude       : lon
@@ -32,10 +32,10 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2022-12-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2025-10-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-12-04 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
-time_ref            : seconds since 1980-1-1 00:00:00
+time_ref            : seconds since 2000-1-1 00:00:00
 
 global_attrs: 
     title           : ROMS bry
@@ -43,12 +43,12 @@ global_attrs:
     type            : ROMS bry
 
 vertical:
-    layer_n         : 20
+    layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7.0
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
 
 
 

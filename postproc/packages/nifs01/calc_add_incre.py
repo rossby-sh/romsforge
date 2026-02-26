@@ -45,6 +45,8 @@ nlayer_dst=cfg["vertical_dst"]["layer_n"]
 zr_src=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_src,1,topo_src,np.zeros_like(topo_src))
 zr_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,1,topo_dst,np.zeros_like(topo_dst))
 zw_dst=ut.zlevs(vtrs,vstr,theta_s,theta_b,tcline,nlayer_dst,5,topo_dst,np.zeros_like(topo_dst))
+print(nlayer_dst)
+print(zr_dst.shape)
 
 # --- Load fields (example: single time) ---
 # idt=0

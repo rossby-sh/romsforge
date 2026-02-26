@@ -1,0 +1,104 @@
+# 
+
+# === Download config ===
+time:
+  start: ${RUN_DATE_START}
+  end:   ${RUN_DATE_END}
+
+region:
+  lat: [5, 60]
+  lon: [100, 180]
+
+output:
+  base_dir: ~/DATA/
+
+# === Preprocess config ===
+
+# --- Initial & Boundary and Forcing ---
+grdname : ./roms_grd_fennel_5km_smooth_v3.nc
+ininame : ${INPUTS_DIR}/roms_nipa_ini_${RUN_DATE}.nc
+bryname : ${INPUTS_DIR}/roms_nipa_bry_${RUN_DATE}.nc
+frcname : ${INPUTS_DIR}/roms_nipa_frc_${RUN_DATE}.nc
+
+weight_file: ./NWP_weight.nc
+bio_weight_file: ./test_wgt.nc
+calc_weight: True
+
+ncformat: NETCDF3_64BIT  # NETCDF4 # NETCDF3_64BIT
+force_write: True
+
+flood_method_for_ini: griddata #griddata / edt / linearND
+flood_method_for_bry: edt      #griddata / edt / linearND
+ 
+initdate            : ${TIME_REF} # 'YYYY-MM-DD HH:MM:SS'
+ogcm_name           : ~/DATA/hycom/hycom_${RUN_DATE}.nc
+ogcm_path_bry       : ~/DATA/hycom/
+
+bio_model_type      : npzd # None, npzd, fennel 
+
+ogcm_var_name:
+    longitude       : lon
+    latitude        : lat
+    depth           : depth
+    time            : time
+    temperature     : water_temp
+    salinity        : salinity
+    u               : water_u
+    v               : water_v
+    zeta            : surf_el
+
+bry_start_date      : 2024-12-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2025-12-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+
+time_ref            : seconds since 1991-1-1 00:00:00
+
+global_attrs: 
+    title           : ROMS ini
+    clm_file        : ROMS ini
+    type            : ROMS ini
+    history         : history
+
+global_attrs_bry: 
+    title           : ROMS bry
+    clm_file        : ROMS bry
+    type            : ROMS bry
+    history         : history
+
+vertical:
+    layer_n         : 36
+    vtransform      : 2
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1
+    tcline          : 400
+
+# === Add bio ===
+bio_ogcm_name : ~/DATA/cmems/
+
+bio_ogcm_var_name:
+    longitude       : longitude
+    latitude        : latitude
+    depth           : depth
+    time            : time
+    phyt            : chl
+    NO3             : no3
+    PO4             : po4
+    oxygen          : o2
+    chl             : chl
+    chlorophyll: chl
+    phytoplankton: chl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
