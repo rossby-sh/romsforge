@@ -6,11 +6,11 @@
 #grdname_src : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_15km_nearest.nc
 grdname_src : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
 #grdname_dst : /home/shjo/data/nifs02/apr_may/roms_inputs/roms_grd_fennel_5km_topo_sync.nc
-grdname_dst : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_15km_nearest.nc
-#grdname_dst : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
+#grdname_dst : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_15km_nearest.nc
+grdname_dst : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
 
-ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs02_dec/nl/nifs5km_avg_9490_0008.nc
-ininame_dst : /home/shjo/data/nifs02/202601/roms_inputs/nifs15km_rst_20260101.nc
+ininame_src : /home/shjo/applications/nifs02_5km/storage/nifs_202601/nl/nifs5km_avg_9521_0008.nc
+ininame_dst : /home/shjo/data/nifs02/202602/roms_inputs/nifs5km_rst_20260201.nc
 
 bio_model_type : npzd
 

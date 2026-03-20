@@ -1,11 +1,11 @@
 
 paths:
-  outdir: "/home/shjo/warehouse/nifs02_post/jan/"
+  outdir: "/home/shjo/warehouse/nifs02_post/feb/"
   file_list: "avg_use_list.txt"
 
 time:
   year: 2026
-  month: 1
+  month: 2
   week_start: "SUN"
 
 naming:
@@ -21,7 +21,7 @@ options:
 
 select:
   kind: "avg"
-  src_dir: "/home/shjo/applications/nifs02_5km/storage/nifs_202601/nl/"
+  src_dir: "/home/shjo/applications/nifs02_5km/storage/nifs_202602_xfixed_west/nl/feb/"
   prefix: "nifs5km"
   first_use: ["0001","0002","0003","0004","0005","0006","0007","0008"]
   next_use:  ["0005","0006","0007","0008"]

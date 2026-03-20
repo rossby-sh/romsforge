@@ -15,6 +15,10 @@ import utils as tl
 from io_utils import collect_time_info
 from log_utils2 import configure, step, capture_warnings, info, note, plus, bar, warn_line, done, ellipsis
 configure(width=80, show_sections=False)  # ruler 끄기
+from pathlib import Path
+
+BASE = Path(__file__).resolve().parent
+cfg_path = BASE / "config.yaml"
 
 # === pretty log helpers =======================================================
 # --- main --------------------------------------------------------------------
@@ -23,10 +27,10 @@ bar("Boundary Build")
 
 # [01] Load configuration and input metadata
 with step("[01] Load configuration and input metadata"):
-    cfg = tl.parse_config("./config.yaml")
+    cfg = tl.parse_config(cfg_path)
     grd = tl.load_roms_grid(cfg.grdname)
-    filelist = sorted(glob.glob(os.path.join(cfg.ogcm_path_bry, "*.nc")))
-    assert len(filelist) > 0, "No OGCM files found in ogcm_path!"
+#    filelist = sorted(glob.glob(os.path.join(cfg.ogcm_path_bry, "*.nc")))
+#    assert len(filelist) > 0, "No OGCM files found in ogcm_path!"
     ogcm = tl.load_ogcm_metadata(cfg.ogcm_name, cfg.ogcm_var_name)
     info(f"src=OGCM grid={os.path.basename(cfg.grdname)}")
     info(f"out={ellipsis(cfg.bryname)} wght={ellipsis(cfg.weight_file)}")
@@ -44,7 +48,7 @@ with step("[02] Time index matching & relative time"):
 # [03] Create initial NetCDF file
 with step("[03] Create initial NetCDF"):
     status = cn.create_bry(
-        cfg, grd, relative_time, bio_model=cfg.bio_model_type, ncFormat=cfg.ncformat
+        cfg, grd, relative_time, bio_model=None, ncFormat=cfg.ncformat
     )
     if status:
         raise RuntimeError("create_bry() returned error")

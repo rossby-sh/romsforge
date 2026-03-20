@@ -1,0 +1,22 @@
+#!/bin/bash
+set -eu
+
+#PBS -q workq
+#PBS -l select=1:ncpus=16:mpiprocs=16
+#PBS -N nipa_20260312
+#PBS -j oe
+#PBS -o /home/shjo/github/romsforge/packages/nipa_auto/roms_outputs/20260312/pbs_20260312.log
+
+module purge
+module load intel21/compiler-21
+module load intel21/mvapich2-2.3.4
+module load intel21/netcdf-4.6.1
+
+export OMP_NUM_THREADS=1
+export HDF5_USE_FILE_LOCKING=FALSE
+export HDF5_COLL_METADATA_WRITE=0
+
+cd /home/shjo/github/romsforge/packages/nipa_auto/roms_application/roms_820_nemuscs_latest
+
+mpirun -np 16   /home/shjo/github/romsforge/packages/nipa_auto/roms_application/roms_820_nemuscs_latest/execM_nl /home/shjo/github/romsforge/packages/nipa_auto/roms_application/roms_820_nemuscs_latest/nl_nipa.in   > /home/shjo/github/romsforge/packages/nipa_auto/roms_outputs/20260312/mdl_log_20260312.md 2>&1
+

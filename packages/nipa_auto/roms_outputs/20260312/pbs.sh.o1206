@@ -1,0 +1,35 @@
+===== DEBUG INFO =====
+HOSTNAME          : nft00
+PWD               : /home/shjo/github/romsforge/packages/nipa_auto/roms_application/roms_820_nemuscs_latest
+PBS_JOBID         : 1206.nft00
+PBS_NODEFILE      : /var/spool/pbs/aux/1206.nft00
+which mpirun      : /usr/local/mpi/intel21/openmpi-5.0.0/bin/mpirun
+mpirun --version  :
+mpirun (Open MPI) 5.0.0
+
+Report bugs to https://www.open-mpi.org/community/help/
+PBS env           :
+PBS_ENVIRONMENT=PBS_BATCH
+PBS_O_LANG=en_US.UTF-8
+PBS_O_HOME=/home/shjo
+PBS_JOBID=1206.nft00
+PBS_JOBNAME=pbs.sh
+PBS_O_PATH=/usr/local/mpi/intel21/openmpi-5.0.0/sbin:/usr/local/mpi/intel21/openmpi-5.0.0/bin:/usr/local/netcdf/4.6.1_intel21/sbin:/usr/local/netcdf/4.6.1_intel21/bin:/usr/local/intel/oneapi/compiler/latest/linux/bin/intel64:/usr/local/intel/oneapi/compiler/latest/linux/bin:/usr/local/miniconda3/envs/romsforge/bin:/home/shjo/.nvm/versions/node/v22.19.0/bin:/usr/local/miniconda3/condabin:/home/shjo/.local/bin:/home/shjo/bin:/usr/share/Modules/bin:/usr/torque/sbin:/usr/torque/bin:/opt/pbs/sbin:/opt/pbs/bin:/usr/local/jspcmds:.:/home/shjo:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/pbs/bin:/opt/dell/srvadmin/bin
+PBS_O_WORKDIR=/home/shjo/github/romsforge/packages/nipa_auto/roms_outputs/20260312
+PBS_NODEFILE=/var/spool/pbs/aux/1206.nft00
+PBS_TASKNUM=1
+PBS_MOMPORT=15003
+PBS_JOBCOOKIE=64D8162948D9B577138FE611029BA215
+PBS_O_SHELL=/bin/bash
+PBS_O_QUEUE=workq
+PBS_O_HOST=nft00
+PBS_O_SYSTEM=Linux
+PBS_O_LOGNAME=shjo
+PBS_NODENUM=0
+PBS=/opt/pbs
+PBS_JOBDIR=/home/shjo
+PBS_QUEUE=workq
+PBS_O_MAIL=/var/spool/mail/shjo
+nodefile content  :
+nft00
+======================

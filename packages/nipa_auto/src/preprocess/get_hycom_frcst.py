@@ -10,7 +10,10 @@ import numpy as np
 import xarray as xr
 from datetime import datetime as dt, timedelta
 from typing import Any, Dict, Tuple, Optional
+from pathlib import Path
 
+BASE = Path(__file__).resolve().parent
+cfg_path = BASE / "config.yaml"
 
 # =========================
 # USER TUNABLE
@@ -230,7 +233,7 @@ def normalize_all_time_coord_units(ds: xr.Dataset) -> xr.Dataset:
 # main
 # =========================
 def main() -> int:
-    with open("config.yaml") as f:
+    with open(cfg_path) as f:
         cfg = yaml.safe_load(f)
 
     t_st = as_dt(cfg["bry_start_date"])

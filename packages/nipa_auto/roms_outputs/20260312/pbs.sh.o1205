@@ -1,0 +1,56 @@
+===== PBS INFO =====
+HOSTNAME: nft00
+PBS_JOBID: 1205.nft00
+PBS_NODEFILE: /var/spool/pbs/aux/1205.nft00
+Working dir: /home/shjo/github/romsforge/packages/nipa_auto/roms_outputs/20260312
+
+===== NODEFILE =====
+nft00
+
+MPI processes: 1
+
+===== START MPI =====
+Fri Mar 13 09:22:00 KST 2026
+
+
+ Model Input Parameters:  ROMS/TOMS version 3.7  
+                          Friday - March 13, 2026 -  9:22:00 AM
+ -----------------------------------------------------------------------------
+
+ NIPA test run (RUN_DATE: 20260312)
+
+ Operating system : Linux
+ CPU/hardware     : x86_64
+ Compiler system  : ifort
+ Compiler command : /usr/local/mpi/intel21/openmpi-5.0.0/bin/mpif90
+ Compiler flags   : -heap-arrays 1024 -fp-model source -mcmodel=large -xHost -no-ip -O2 -free -free
+
+ Input Script  : 
+
+ SVN Root URL  : https:://myroms.org/svn/src
+ SVN Revision  : Unversioned directory
+
+ Local Root    : /home/shjo/roms/roms_820_nemucsc_latest
+ Header Dir    : /home/shjo/github/romsforge/packages/nipa_auto/roms_application/roms_820_nemuscs_latest
+ Header file   : nwp4.h
+ Analytical Dir: /home/shjo/github/romsforge/packages/nipa_auto/roms_application/Functionals
+
+ Resolution, Grid 01: 0187x0164x020,  Parallel Nodes:   1,  Tiling: 004x004
+
+ ROMS/TOMS: Wrong choice of domain 01 partition or number of parallel threads.
+            NtileI * NtileJ  must be equal to the number of parallel nodes.
+            Change -np value to mpirun or
+            change domain partition in input script.
+
+ Elapsed CPU time (seconds):
+
+
+ ROMS/TOMS - Output NetCDF summary for Grid 01:
+
+ ROMS/TOMS - Partition error ......... exit_flag:   6
+
+
+ ERROR: Illegal domain partition.
+
+===== END MPI =====
+Fri Mar 13 09:22:00 KST 2026

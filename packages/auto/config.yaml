@@ -2,15 +2,15 @@
 
 # === Download config ===
 time:
-  start: "2025-01-02"
-  end:   "2025-01-04"
+  start: "2026-03-11"
+  end:   "2026-03-13"
 
 region:
   lat: [5, 60]
   lon: [100, 180]
 
 output:
-  base_dir: "/home/shjo/data/nifs01/test02/"
+  base_dir: "/home/shjo/data/nifs02/nipa_test/"
 
 core_num : 3
 
@@ -20,16 +20,23 @@ core_num : 3
 #grdname : /home/shjo/data/roms_inputs/grd/lte/NWP12_grd_NWP4.nc
 #grdname : /home/shjo/data/roms_inputs/grd/lte/NWP4_grd_3_10m_LP_nrst.nc
 #grdname : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_fennel_5km_smooth_v3.nc
-#grdname : /home/shjo/data/nifs02/year/roms_inputs/roms_grd_15km_nearest.nc
-grdname : /home/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_314_10m.nc
+grdname : /home/shjo/data/nifs02/202602/roms_inputs/roms_grd_15km_nearest.nc
+#grdname : /home/shjo/applications/isl_system_v250925/storage/data/NWP4_grd_314_10m.nc
+#grdname : /home/shjo/data/nifs01/test01/grid_24km_with_h.nc
+#grdname : /home/shjo/applications/isl_system_v250925/storage/data/NWP12_grd_NWP4_topo_modi.nc
 #ininame : /home/shjo/data/nifs02/year/roms_inputs/nifs02_ini_5km_v3_jul_re.nc
+#ininame : /home/shjo/data/nifs02/202602/roms_inputs/nifs02_ini_5km_v3_20260201.nc
+#ininame : /home/shjo/data/nifs02/202602/roms_inputs/nifs02_ini_15km_nrst_20260201.nc
+ininame : /home/shjo/test_ini2.nc
 #ininame : /home/shjo/data/nifs02/202601/roms_inputs/nifs02_ini_5km_v3_jan.nc
 #ininame : /home/shjo/data/nifs01/test01/nifs01_ini_8km_20230101.nc
 #ininame : /home/shjo/data/nifs01/test01/nifs01_ini_24km_nrst_20230101.nc
-ininame : /home/shjo/data/nifs01/test01/nifs01_ini_8km_modi_20230101.nc
+#ininame : /home/shjo/data/nifs01/test01/nifs01_ini_8km_modi_20230101.nc
+#ininame : /home/shjo/data/nifs01/test01/nifs01_ini_24km_nrst_re_20230101.nc
 #ininame : /home/shjo/data/nifs02/202601/roms_inputs/nifs02_ini_15km_nearest_jan.nc
-bryname : /home/shjo/data/nifs01/test01/nifs01_bry_24km_314_2023.nc
-#bryname : /home/shjo/data/nifs02/year/roms_inputs/nifs02_bry_15km_nearest_2024.nc
+#bryname : /home/shjo/data/nifs01/test01/nifs01_bry_24km_nrst_re_2023.nc
+#bryname : /home/shjo/data/nifs02/202602/roms_inputs/nifs02_bry_15km_nrst_202602.nc
+#bryname : /home/shjo/data/nifs02/202602/roms_inputs/nifs02_bry_5km_v3_202602.nc
 #frcname : This will set automatically
 
 weight_file: ./NWP_weight.nc
@@ -42,12 +49,13 @@ force_write: True
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt      #griddata / edt / linearND
  
-initdate            : 2023-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-ogcm_name           : /home/shjo/data/hycom2023_2024/HYCOM_20230101_00UTC.nc
-ogcm_path_bry       : /home/shjo/data/hycom2023_2024/
+initdate            : 2026-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+ogcm_name           : /home/shjo/data/hycom/hycom_20260101_00utc.nc
+#ogcm_path_bry       : /home/shjo/data/hycom2023_2024/
+ogcm_path_bry       : /home/shjo/data/nifs02/202602/hycom/
 ##ogcm_path_bry       : /home/shjo/data/raw/00utc
 
-bio_model_type      : fennel # None, npzd, fennel 
+bio_model_type      : npzd # None, npzd, fennel 
 
 ogcm_var_name:
     longitude       : lon
@@ -60,8 +68,8 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2023-01-01 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-01-04 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2026-01-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2026-03-02 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 
@@ -80,13 +88,14 @@ global_attrs_bry:
 vertical:
     layer_n         : 36
     vtransform      : 2
-    vstretching     : 2
-    theta_s         : 7
-    theta_b         : 0.1
-    tcline          : 200
+    vstretching     : 4
+    theta_s         : 6.5
+    theta_b         : 1.0
+    tcline          : 400
 
 # === Add bio ===
-bio_ogcm_name : /home/shjo/data/nifs01/test01/cmems_bio_daily/
+#bio_ogcm_name : /home/shjo/data/nifs01/test01/cmems_bio_daily/
+bio_ogcm_name : /home/shjo/data/nifs02/202602/cmems_bio_daily/
 
 bio_ogcm_var_name:
     longitude       : longitude

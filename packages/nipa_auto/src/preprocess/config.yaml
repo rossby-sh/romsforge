@@ -11,13 +11,13 @@ output:
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/fixed/roms_grd_15km_nearest.nc
-ininame : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260123/roms_nipa_ini_20260123.nc
-bryname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260123/roms_nipa_bry_20260123.nc
-frcname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260123/roms_nipa_frc_20260123.nc
+grdname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/fixed/NWP4_grd_314_10m.nc
+ininame : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260312/roms_nipa_ini_20260312.nc
+bryname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260312/roms_nipa_bry_20260312.nc
+frcname : /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/20260312/roms_nipa_frc_20260312.nc
 
-weight_file: ./NWP_weight.nc
-bio_weight_file: ./test_wgt.nc
+weight_file: /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/fixed/hycom_wght_24km_314.nc
+bio_weight_file: /home/shjo/github/romsforge/packages/nipa_auto/roms_inputs/fixed/cmems_wght_24km_314.nc
 calc_weight: True
 
 ncformat: NETCDF3_64BIT  # NETCDF4 # NETCDF3_64BIT
@@ -26,8 +26,8 @@ force_write: True
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt      #griddata / edt / linearND
  
-ogcm_name           : /home/shjo/github/romsforge/packages/nipa_auto/data/hycom/hycom_korea_20260123.nc
-ogcm_path_bry       : /home/shjo/github/romsforge/packages/nipa_auto/data/hycom/
+ogcm_name           : /home/shjo/github/romsforge/packages/nipa_auto/data/hycom/hycom_korea_20260312.nc
+ogcm_path_bry       : None
 
 bio_model_type      : npzd # None, npzd, fennel 
 
@@ -42,11 +42,11 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-initdate            : 2026-01-23 00:00:00
-bry_start_date      : 2026-01-22 21:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2026-01-24 03:00:00 # 'YYYY-MM-DD HH:MM:SS'
+initdate            : 2026-03-12 00:00:00
+bry_start_date      : 2026-03-11 21:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2026-03-14 03:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
-time_ref            : days since 2000-1-1
+time_ref            : days since 2000-01-01 00:00:00
 
 global_attrs: 
     title           : ROMS ini
@@ -69,7 +69,7 @@ vertical:
     tcline          : 400
 
 # === Add bio ===
-bio_ogcm_name : /home/shjo/github/romsforge/packages/nipa_auto/data/cmems
+bio_ogcm_name : /home/shjo/github/romsforge/packages/nipa_auto/data/cmems/cmems_bio_20260312.nc
 
 bio_ogcm_var_name:
     longitude       : longitude

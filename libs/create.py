@@ -327,6 +327,73 @@ def create_bry(cfg, grd, bry_time, bio_model=None, ncFormat="NETCDF3_CLASSIC", b
     return 0
 
 
+def create_ini_bio(cfg, bio_model, bio_yaml):
+
+    ncfile = Dataset(cfg.ininame,"a")
+
+    bio_db = load_bio_yaml(bio_yaml)
+    bio_ini = get_bio_defs(bio_db,bio_model,target="ini")
+
+    for name,attrs in bio_ini.items():
+
+        if name in ncfile.variables:
+            continue
+
+        var = ncfile.createVariable(
+            name,
+            "f4",
+            ("ocean_time","s_rho","eta_rho","xi_rho")
+        )
+
+        var.setncatts(attrs)
+        var[:] = 0.0
+
+    ncfile.close()
+
+
+def create_bry_bio(cfg, bio_time, bio_model, bio_yaml="bio_vars.yml"):
+
+    ncfile = Dataset(cfg.bryname, "a")
+    print("OPEN BRY FILE:", cfg.bryname)
+    print("ABS PATH:", os.path.abspath(cfg.bryname))
+
+    # dimension 생성
+    if "bio_time" not in ncfile.dimensions:
+        ncfile.createDimension("bio_time", len(bio_time))
+        # time variable 생성
+        v = ncfile.createVariable("bio_time", "f4", ("bio_time",))
+        v.units = cfg.time_ref
+        v.long_name = "time for biological boundary condition"
+        v[:] = bio_time
+
+    def get_bry_dims(dims, direction):
+        keep_dim = "xi_" if direction in ["north", "south"] else "eta_"
+        return tuple(d for d in dims if not d.startswith(("xi_", "eta_")) or d.startswith(keep_dim))
+
+    # bio 변수 정의
+    bio_db = load_bio_yaml(bio_yaml)
+    bio_bry = get_bio_defs(bio_db, bio_model, target="bry")
+
+    for name, attrs in bio_bry.items():
+
+        dims = ("bio_time", "s_rho", "eta_rho", "xi_rho")
+
+        for d in ["north","south","east","west"]:
+
+            dims_d = get_bry_dims(dims, d)
+            varname = f"{name}_{d}"
+
+            if varname in ncfile.variables:
+                continue
+
+            var = ncfile.createVariable(varname, "f4", dims_d)
+            var.setncatts(attrs)
+
+            var[:] = 0.0
+
+    ncfile.close()
+
+
 def create_std(cfg, grd, stdtime_num, outname, bio_model=None, ncFormat="NETCDF3_CLASSIC", bio_yaml="bio_vars.yml"):
     # NOTE: 구조/스타일은 create_ini 그대로 유지하고, 출력 파일만 outname으로 분리
     vstretching, vtransform = cfg.vertical.vstretching, cfg.vertical.vtransform

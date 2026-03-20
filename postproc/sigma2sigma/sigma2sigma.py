@@ -135,14 +135,14 @@ for name in ["temp","salt","u","v","zooplankton","phytoplankton","NO3",\
             print(name)
             continue
         # MATLAB 경계복제와 유사한 padding 외삽 사용(너가 쓰던 설정 유지)
-        #var_z = pu.vertical_interp_to_ZR(
-        #    zr_src_remapped.astype(np.float64, copy=False),
-        #    var.astype(np.float64, copy=False),
-        #    zr_dst.astype(np.float64, copy=False),
-        #    n_jobs=-1, dedup="mean", extrap_mode="padding",
-        #    zsur=0.0, zbot=6000
-        #)
-        var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,n_jobs=-1, dedup="mean", extrap_mode="leading")
+        var_z = pu.vertical_interp_to_ZR(
+            zr_src_remapped.astype(np.float64, copy=False),
+            var.astype(np.float64, copy=False),
+            zr_dst.astype(np.float64, copy=False),
+            n_jobs=-1, dedup="mean", extrap_mode="padding",
+            zsur=0.0, zbot=10000
+        )
+        #var_z = pu.vertical_interp_to_ZR(zr_src_remapped, var, zr_dst,n_jobs=-1, dedup="mean", extrap_mode="leading")
         setattr(field2, name, var_z.astype(np.float64, copy=False))
 
 # 수직보간 끝난 뒤 Rmask 적용 (스칼라만)

@@ -2,15 +2,15 @@
 
 # === Download config ===
 time:
-  start: "2025-12-31"
-  end:   "2026-02-01"
+  start: "2026-01-31"
+  end:   "2026-03-02"
 
 region:
   lat: [5, 60]
   lon: [100, 180]
 
 output:
-  base_dir: "/home/shjo/data/nifs02/202601/"
+  base_dir: "/home/shjo/data/nifs02/202602/"
 
 core_num : 3
 
@@ -50,8 +50,8 @@ ogcm_var_name:
     v               : water_v
     zeta            : surf_el
 
-bry_start_date      : 2025-11-30 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
-bry_end_date        : 2025-12-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_start_date      : 2026-01-31 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
+bry_end_date        : 2026-03-02 00:00:00 # 'YYYY-MM-DD HH:MM:SS'
 
 time_ref            : seconds since 2000-1-1 00:00:00
 

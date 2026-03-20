@@ -6,19 +6,19 @@ region:
   lon: [100, 176]
 
 output:
-  base_dir: ${BASE}/data
+  base_dir: ${BASE_DIR}
 
 # === Preprocess config ===
 
 # --- Initial & Boundary and Forcing ---
-grdname : ${INPUT_ROOT}/fixed/roms_grd_15km_nearest.nc
-ininame : ${INPUTS_DIR}/roms_nipa_ini_${RUN_DATE}.nc
-bryname : ${INPUTS_DIR}/roms_nipa_bry_${RUN_DATE}.nc
-frcname : ${INPUTS_DIR}/roms_nipa_frc_${RUN_DATE}.nc
+grdname : ${GRDNAME_NL}
+ininame : ${ININAME_NL}
+bryname : ${BRYNAME_NL}
+frcname : ${FRCNAME_NL_01}
 
-weight_file: ./NWP_weight.nc
-bio_weight_file: ./test_wgt.nc
-calc_weight: True
+weight_file: ${WGHTNAME_NL}
+bio_weight_file: ${WGHTNAME_BIO_NL}
+calc_weight: ${CALC_WGHT}
 
 ncformat: NETCDF3_64BIT  # NETCDF4 # NETCDF3_64BIT
 force_write: True
@@ -26,10 +26,10 @@ force_write: True
 flood_method_for_ini: griddata #griddata / edt / linearND
 flood_method_for_bry: edt      #griddata / edt / linearND
  
-ogcm_name           : ${BASE}/data/hycom/hycom_korea_${RUN_DATE}.nc
-ogcm_path_bry       : ${BASE}/data/hycom/
+ogcm_name           : ${OGCM_NAME}
+ogcm_path_bry       : None
 
-bio_model_type      : npzd # None, npzd, fennel 
+bio_model_type      : ${BIO_TYPE} # None, npzd, fennel 
 
 ogcm_var_name:
     longitude       : lon
@@ -69,7 +69,7 @@ vertical:
     tcline          : 400
 
 # === Add bio ===
-bio_ogcm_name : ${BASE}/data/cmems
+bio_ogcm_name : ${OGCM_BIO_NAME}
 
 bio_ogcm_var_name:
     longitude       : longitude
@@ -81,8 +81,8 @@ bio_ogcm_var_name:
     PO4             : po4
     oxygen          : o2
     chl             : chl
-    chlorophyll: chl
-    phytoplankton: chl
+    chlorophyll     : chl
+    phytoplankton   : chl
 
 
 

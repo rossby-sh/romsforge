@@ -1,11 +1,14 @@
 # NetCDF 파일은 전역에서 무시
 *.nc
-
+*.grib
+*.grib2
 # roms_to_zstd 내부 파일 전체 무시 (하위 디렉토리 포함)
 py/roms_to_zstd/**
 !roms_to_zstd/.gitkeep  # 디렉토리 구조 유지
 
 py/matlab_codes/**
+
+packages/nipa_auto/roms_application/**
 
 # dev_individual/libs 내부 파일 무시
 !dev_individual/libs/**

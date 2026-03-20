@@ -146,6 +146,7 @@ with step("[11] z→σ interpolation"):
         flipped = np.flip(padded, axis=0)
         with capture_warnings(tag="z2sigma"):
             remapped = tl.ztosigma_numba(flipped, zgrid, Zf)
+        #    remapped = tl.ztosigma(flipped, zgrid, Zf)
         setattr(field, var, remapped)
 
 # [12] Volume conservation and barotropic velocity correction

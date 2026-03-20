@@ -14,6 +14,11 @@ from io_utils import collect_time_info_legacy
 # logging
 from log_utils2 import configure, step, capture_warnings, info, note, plus, warn_line, done, bar
 configure(width=80, show_sections=False, color_mode='auto')
+from pathlib import Path
+
+BASE = Path(__file__).resolve().parent
+cfg_path = BASE / "config.yaml"
+
 
 # --- main --------------------------------------------------------------------
 start0 = time.time()
@@ -21,7 +26,7 @@ bar("Initial Condition Build (ini)")
 
 # [01] Load configuration and input metadata
 with step("[01] Load configuration and input metadata"):
-    cfg  = tl.parse_config("./config.yaml")
+    cfg  = tl.parse_config(cfg_path)
     grd  = tl.load_roms_grid(cfg.grdname)
     ogcm = tl.load_ogcm_metadata(cfg.ogcm_name, cfg.ogcm_var_name)
     info(f"grid={cfg.grdname}")
@@ -32,12 +37,13 @@ with step("[01] Load configuration and input metadata"):
 # [02] Time index matching & relative time
 with step("[02] Time index matching & relative time"):
     tinfo = collect_time_info_legacy(cfg.ogcm_name, cfg.ogcm_var_name['time'], str(cfg.initdate))
+    print(tinfo)
     _, idt, _, _ = tinfo[0]
     relative_time = tl.compute_relative_time(ogcm.time[idt], ogcm.time_unit, cfg.time_ref)
 
 # [03] Create initial NetCDF file
 with step("[03] Create initial NetCDF"):
-    status = cn.create_ini(cfg, grd, relative_time, ncFormat=cfg.ncformat, bio_model=cfg.bio_model_type)
+    status = cn.create_ini(cfg, grd, relative_time, ncFormat=cfg.ncformat, bio_model=None)
     if status:
         raise RuntimeError(f"Failed creating file {cfg.ininame}")
 

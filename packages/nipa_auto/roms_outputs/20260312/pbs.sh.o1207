@@ -1,0 +1,9 @@
+===== DEBUG INFO =====
+HOSTNAME          : nft00
+PBS_JOBID         : 1207.nft00
+PBS_NODEFILE      : /var/spool/pbs/aux/1207.nft00
+PBS_TASKNUM       : 1
+which mpirun      : /usr/local/mpi/intel21/openmpi-5.0.0/bin/mpirun
+nodefile content  :
+nft00
+======================
